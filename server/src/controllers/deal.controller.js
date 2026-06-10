@@ -72,12 +72,14 @@ exports.createDeal = catchAsync(async (req, res, next) => {
   let business = await Business.findOne({ owner: req.user.id });
   if (!business) {
     const slugify = require('slugify');
-    const name = req.user.firstName + ' ' + req.user.lastName;
+    const defaultCategory = await Category.findOne({ isActive: true }).select('_id').lean();
+    const name = `${req.user.firstName} ${req.user.lastName}`.trim() || req.user.email;
     business = await Business.create({
-      businessName: name,
+      name,
       owner: req.user.id,
-      slug: slugify(name, { lower: true }) + '-' + Date.now(),
+      slug: slugify(name, { lower: true, strict: true }) + '-' + Date.now(),
       city: req.body.city || 'Tiranë',
+      category: req.body.category || defaultCategory?._id,
       commissionRate: parseFloat(process.env.PLATFORM_COMMISSION_RATE) || 0.20,
     });
     await require('../models/User').findByIdAndUpdate(req.user.id, { businessId: business._id });
