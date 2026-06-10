@@ -81,7 +81,58 @@ export default function BusinessProfile() {
   const sInfo = STATUS_INFO[status] || STATUS_INFO.pending;
   const SIcon = sInfo.icon;
 
+  const createMutation = useMutation({
+    mutationFn: (data) => api.post('/businesses', data),
+    onSuccess: () => { qc.invalidateQueries(['business', 'my']); toast.success('Profili i biznesit u krijua!'); },
+    onError: (e) => toast.error(e.response?.data?.message || 'Ndodhi një gabim.'),
+  });
+
   if (isLoading) return <div className="h-64 card skeleton" />;
+
+  if (!business) return (
+    <div className="max-w-xl mx-auto">
+      <div className="card p-8 text-center">
+        <div className="w-16 h-16 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Building size={32} className="text-brand-600" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Krijo Profilin e Biznesit</h2>
+        <p className="text-gray-500 mb-6">Filloni duke plotësuar informacionet bazë të biznesit tuaj.</p>
+        <form onSubmit={handleSubmit((d) => createMutation.mutate(d))} className="text-left space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Emri i Biznesit *</label>
+            <input {...register('businessName', { required: true })} className="input-field" placeholder="p.sh. Restorant Besa" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Përshkrimi *</label>
+            <textarea {...register('description', { required: true })} rows={3} className="input-field resize-none" placeholder="Përshkruani biznesin tuaj..." />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Telefon *</label>
+              <input {...register('phone', { required: true })} className="input-field" placeholder="+355 6X XXX XXXX" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input {...register('email')} type="email" className="input-field" placeholder="info@biznesi.al" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Qyteti *</label>
+            <select {...register('city', { required: true })} className="input-field">
+              {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Adresa</label>
+            <input {...register('address')} className="input-field" placeholder="Rruga, numri..." />
+          </div>
+          <button type="submit" disabled={createMutation.isPending} className="btn-primary w-full">
+            {createMutation.isPending ? 'Duke krijuar...' : 'Krijo Profilin'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 
   return (
     <div>
