@@ -69,10 +69,18 @@ exports.getDeal = catchAsync(async (req, res, next) => {
 });
 
 exports.createDeal = catchAsync(async (req, res, next) => {
-  const business = await Business.findOne({ owner: req.user.id });
-  if (!business) return next(new AppError('Business profile not found.', 404));
-  if (business.verificationStatus !== 'verified') {
-    return next(new AppError('Business must be verified to create deals.', 403));
+  let business = await Business.findOne({ owner: req.user.id });
+  if (!business) {
+    const slugify = require('slugify');
+    const name = req.user.firstName + ' ' + req.user.lastName;
+    business = await Business.create({
+      businessName: name,
+      owner: req.user.id,
+      slug: slugify(name, { lower: true }) + '-' + Date.now(),
+      city: req.body.city || 'Tiranë',
+      commissionRate: parseFloat(process.env.PLATFORM_COMMISSION_RATE) || 0.20,
+    });
+    await require('../models/User').findByIdAndUpdate(req.user.id, { businessId: business._id });
   }
 
   const images = req.files?.map((f, i) => ({
