@@ -26,7 +26,8 @@ const connectDB = async () => {
     return conn;
   } catch (error) {
     logger.error('MongoDB connection failed:', error.message);
-    process.exit(1);
+    if (process.env.NODE_ENV !== 'production') process.exit(1);
+    throw error;
   }
 };
 

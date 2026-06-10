@@ -3,13 +3,20 @@ const mongoose = require('mongoose');
 const app = require('../src/app');
 const { connectDB } = require('../src/config/db');
 
-// Cache DB connection across warm invocations
-let isConnected = false;
+let dbConnected = false;
 
 module.exports = async (req, res) => {
-  if (!isConnected || mongoose.connection.readyState !== 1) {
-    await connectDB();
-    isConnected = true;
+  try {
+    if (!dbConnected || mongoose.connection.readyState !== 1) {
+      await connectDB();
+      dbConnected = true;
+    }
+  } catch (err) {
+    return res.status(503).json({
+      success: false,
+      message: 'Database connection failed',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined,
+    });
   }
   return app(req, res);
 };
