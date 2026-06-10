@@ -1,22 +1,21 @@
-require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
-const mongoose = require('mongoose');
-const app = require('../src/app');
-const { connectDB } = require('../src/config/db');
-
-let dbConnected = false;
-
 module.exports = async (req, res) => {
   try {
-    if (!dbConnected || mongoose.connection.readyState !== 1) {
+    require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+    const mongoose = require('mongoose');
+    const app = require('../src/app');
+    const { connectDB } = require('../src/config/db');
+
+    if (mongoose.connection.readyState !== 1) {
       await connectDB();
-      dbConnected = true;
     }
+
+    return app(req, res);
   } catch (err) {
+    console.error('Handler error:', err.message, err.stack);
     return res.status(503).json({
       success: false,
-      message: 'Database connection failed',
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined,
+      message: 'Service error',
+      error: err.message,
     });
   }
-  return app(req, res);
 };
