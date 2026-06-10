@@ -68,9 +68,9 @@ export default function Navbar() {
               <div className="w-9 h-9 bg-brand-gradient rounded-lg flex items-center justify-center shadow-brand">
                 <span className="text-white font-black text-lg">Z</span>
               </div>
-              <div className="hidden sm:block">
-                <span className="font-black text-xl text-gray-900 font-display">Zbritje</span>
-                <span className="font-black text-xl text-brand-600 font-display">.al</span>
+              <div>
+                <span className="font-black text-lg text-gray-900 font-display">Zbritje</span>
+                <span className="font-black text-lg text-brand-600 font-display">.al</span>
               </div>
             </Link>
 
