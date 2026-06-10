@@ -1,0 +1,124 @@
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
+import { QrCode, Clock, CheckCircle, XCircle, Download, Eye } from 'lucide-react';
+import QRCode from 'react-qr-code';
+import api from '../../api/axios';
+import { formatCurrency, formatDate, formatCountdown } from '../../utils/formatters';
+
+const STATUS_TABS = [
+  { value: '', label: 'Të gjitha' },
+  { value: 'active', label: '✓ Aktivë' },
+  { value: 'redeemed', label: '📤 Përdorur' },
+  { value: 'expired', label: '⏰ Skaduar' },
+];
+
+function VoucherCard({ voucher }) {
+  const [showQR, setShowQR] = useState(false);
+  const countdown = voucher.status === 'active' ? formatCountdown(voucher.expiresAt) : null;
+  const daysLeft = countdown && !countdown.expired ? countdown.days : null;
+  const isExpiringSoon = daysLeft !== null && daysLeft <= 3;
+
+  return (
+    <div className={`card overflow-hidden ${isExpiringSoon ? 'ring-2 ring-orange-400' : ''}`}>
+      <div className="flex">
+        <img
+          src={voucher.deal?.images?.[0]?.url || 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=200'}
+          alt={voucher.deal?.title}
+          className="w-28 h-full object-cover flex-shrink-0"
+        />
+        <div className="flex-1 p-4">
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <h3 className="font-semibold text-gray-900 text-sm leading-snug line-clamp-2">{voucher.deal?.title}</h3>
+            <span className={`badge flex-shrink-0 ${voucher.status === 'active' ? 'badge-green' : voucher.status === 'redeemed' ? 'badge-blue' : 'badge-gray'}`}>
+              {voucher.status === 'active' ? 'Aktiv' : voucher.status === 'redeemed' ? 'Përdorur' : 'Skaduar'}
+            </span>
+          </div>
+          <div className="font-mono text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-lg inline-block mb-2">{voucher.code}</div>
+          <div className="text-xs text-gray-500 space-y-1">
+            <div>Çmim: <span className="font-semibold text-brand-600">{formatCurrency(voucher.paidPrice)}</span></div>
+            <div>Skadon: <span className={`font-medium ${isExpiringSoon ? 'text-orange-600' : ''}`}>{formatDate(voucher.expiresAt)}</span></div>
+            {daysLeft !== null && <div className={`${isExpiringSoon ? 'text-orange-600 font-semibold' : 'text-gray-400'}`}>{isExpiringSoon ? `⚠️ ${daysLeft} ditë mbetur!` : `${daysLeft} ditë mbetur`}</div>}
+          </div>
+          {voucher.status === 'active' && (
+            <button onClick={() => setShowQR(!showQR)}
+              className="mt-3 flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 font-medium">
+              <QrCode size={14} />{showQR ? 'Fshih QR' : 'Shfaq QR Code'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {showQR && voucher.status === 'active' && (
+        <motion.div
+          initial={{ height: 0 }} animate={{ height: 'auto' }}
+          className="border-t border-gray-100 p-6 flex flex-col items-center gap-4"
+        >
+          <div className="p-4 bg-white rounded-2xl shadow-lg">
+            <QRCode value={voucher.qrCodeData || voucher.code} size={160} />
+          </div>
+          <div className="text-center">
+            <p className="font-mono text-lg font-bold tracking-widest text-gray-900">{voucher.code}</p>
+            <p className="text-xs text-gray-400 mt-1">Paraqitni këtë te biznesi</p>
+          </div>
+          <button className="btn-secondary text-xs py-2 px-4 flex items-center gap-1.5">
+            <Download size={14} />Shkarko Voucherin
+          </button>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+export default function CustomerVouchers() {
+  const [activeStatus, setActiveStatus] = useState('');
+  const [page, setPage] = useState(1);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['vouchers', 'my', activeStatus, page],
+    queryFn: () => api.get(`/vouchers/my?status=${activeStatus}&page=${page}&limit=10`).then((r) => r.data),
+  });
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Voucherët e Mi</h1>
+          <p className="text-gray-500 text-sm mt-1">Menaxhoni voucher-ët e blerë</p>
+        </div>
+      </div>
+
+      {/* Status tabs */}
+      <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide">
+        {STATUS_TABS.map(({ value, label }) => (
+          <button key={value} onClick={() => { setActiveStatus(value); setPage(1); }}
+            className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeStatus === value ? 'bg-brand-600 text-white shadow-brand' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-4">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="card h-28 skeleton" />)}</div>
+      ) : data?.data?.length > 0 ? (
+        <div className="space-y-4">
+          {data.data.map((v) => <VoucherCard key={v._id} voucher={v} />)}
+          {data.pagination?.pages > 1 && (
+            <div className="flex justify-center gap-2 mt-6">
+              <button onClick={() => setPage((p) => p - 1)} disabled={!data.pagination.hasPrev} className="px-4 py-2 rounded-xl border text-sm disabled:opacity-40">← Para</button>
+              <span className="px-4 py-2 text-sm text-gray-600">{page} / {data.pagination.pages}</span>
+              <button onClick={() => setPage((p) => p + 1)} disabled={!data.pagination.hasNext} className="px-4 py-2 rounded-xl border text-sm disabled:opacity-40">Pas →</button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="text-center py-20 card">
+          <QrCode size={48} className="text-gray-200 mx-auto mb-4" />
+          <h3 className="text-lg font-bold text-gray-700 mb-2">Nuk keni voucher {activeStatus ? STATUS_TABS.find((t) => t.value === activeStatus)?.label.toLowerCase() : ''}</h3>
+          <p className="text-gray-400 mb-6">Blini voucher-in tuaj të parë dhe kurseni tani!</p>
+          <a href="/search" className="btn-primary">Shfleto Ofertat →</a>
+        </div>
+      )}
+    </div>
+  );
+}

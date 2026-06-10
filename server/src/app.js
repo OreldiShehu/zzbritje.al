@@ -1,0 +1,124 @@
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const compression = require('compression');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
+const cookieParser = require('cookie-parser');
+const path = require('path');
+const passport = require('passport');
+
+const { globalRateLimiter } = require('./middleware/rateLimit.middleware');
+const errorHandler = require('./middleware/errorHandler.middleware');
+const logger = require('./utils/logger');
+
+// Route imports
+const authRoutes = require('./routes/auth.routes');
+const userRoutes = require('./routes/user.routes');
+const businessRoutes = require('./routes/business.routes');
+const dealRoutes = require('./routes/deal.routes');
+const voucherRoutes = require('./routes/voucher.routes');
+const paymentRoutes = require('./routes/payment.routes');
+const reviewRoutes = require('./routes/review.routes');
+const adminRoutes = require('./routes/admin.routes');
+const analyticsRoutes = require('./routes/analytics.routes');
+const notificationRoutes = require('./routes/notification.routes');
+const categoryRoutes = require('./routes/category.routes');
+const uploadRoutes = require('./routes/upload.routes');
+
+// Passport config
+require('./config/passport');
+
+const app = express();
+
+// Trust proxy (for Render/Heroku)
+app.set('trust proxy', 1);
+
+// Security middleware
+app.use(helmet({
+  crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com', 'https://*.googleapis.com'],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+    },
+  },
+}));
+
+// CORS
+app.use(cors({
+  origin: [process.env.CLIENT_URL, process.env.FRONTEND_URL, 'http://localhost:5173'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-refresh-token'],
+}));
+
+// Rate limiting
+app.use('/api', globalRateLimiter);
+
+// Body parsing
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
+
+// Compression
+app.use(compression());
+
+// Data sanitization
+app.use(mongoSanitize());
+app.use(xss());
+app.use(hpp({ whitelist: ['sort', 'fields', 'page', 'limit', 'category', 'city'] }));
+
+// Logging
+if (process.env.NODE_ENV !== 'test') {
+  app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
+}
+
+// Passport
+app.use(passport.initialize());
+
+// Stripe webhook (must come before JSON parser for raw body)
+app.use('/api/v1/payments/webhook', express.raw({ type: 'application/json' }));
+
+// Health check
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    platform: 'Zbritje.al',
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+
+// API Routes
+const API = '/api/v1';
+app.use(`${API}/auth`, authRoutes);
+app.use(`${API}/users`, userRoutes);
+app.use(`${API}/businesses`, businessRoutes);
+app.use(`${API}/deals`, dealRoutes);
+app.use(`${API}/vouchers`, voucherRoutes);
+app.use(`${API}/payments`, paymentRoutes);
+app.use(`${API}/reviews`, reviewRoutes);
+app.use(`${API}/admin`, adminRoutes);
+app.use(`${API}/analytics`, analyticsRoutes);
+app.use(`${API}/notifications`, notificationRoutes);
+app.use(`${API}/categories`, categoryRoutes);
+app.use(`${API}/upload`, uploadRoutes);
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route ${req.originalUrl} not found`,
+  });
+});
+
+// Global error handler
+app.use(errorHandler);
+
+module.exports = app;
