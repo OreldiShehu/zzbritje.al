@@ -27,7 +27,7 @@ export default function BusinessProfile() {
   useEffect(() => {
     if (business) {
       reset({
-        businessName: business.businessName,
+        name: business.name,
         description: business.description,
         phone: business.phone,
         email: business.email,
@@ -100,7 +100,7 @@ export default function BusinessProfile() {
         <form onSubmit={handleSubmit((d) => createMutation.mutate(d))} className="text-left space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Emri i Biznesit *</label>
-            <input {...register('businessName', { required: true })} className="input-field" placeholder="p.sh. Restorant Besa" />
+            <input {...register('name', { required: true })} className="input-field" placeholder="p.sh. Restorant Besa" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Përshkrimi *</label>
@@ -167,7 +167,7 @@ export default function BusinessProfile() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Emri i Biznesit *</label>
-                <input {...register('businessName', { required: true })} className="input-field" />
+                <input {...register('name', { required: true })} className="input-field" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>

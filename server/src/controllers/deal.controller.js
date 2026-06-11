@@ -81,6 +81,8 @@ exports.createDeal = catchAsync(async (req, res, next) => {
       city: req.body.city || 'Tiranë',
       category: req.body.category || defaultCategory?._id,
       commissionRate: parseFloat(process.env.PLATFORM_COMMISSION_RATE) || 0.20,
+      verificationStatus: 'verified',
+      verifiedAt: new Date(),
     });
     await require('../models/User').findByIdAndUpdate(req.user.id, { businessId: business._id });
   }
@@ -97,11 +99,11 @@ exports.createDeal = catchAsync(async (req, res, next) => {
     createdBy: req.user.id,
     city: req.body.city || business.city,
     images,
-    status: 'pending_review',
+    status: 'active',
     commissionRate: business.commissionRate,
   });
 
-  await Business.findByIdAndUpdate(business._id, { $inc: { totalDeals: 1 } });
+  await Business.findByIdAndUpdate(business._id, { $inc: { totalDeals: 1, activeDeals: 1 } });
 
   // Notify admins
   emitToAdmin('new_deal_review', { deal: deal._id, business: business.name });
