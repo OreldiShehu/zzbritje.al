@@ -21,6 +21,9 @@ router.patch('/businesses/:id/reject', adminController.rejectBusiness);
 
 // Deals
 router.get('/deals', adminController.getAllDealsAdmin);
+router.patch('/deals/:id/approve', adminController.approveDeal);
+router.patch('/deals/:id/reject', adminController.rejectDeal);
+router.patch('/deals/:id/featured', adminController.featureDeal);
 
 // Categories
 router.post('/categories', adminController.createCategory);

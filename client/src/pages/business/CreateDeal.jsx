@@ -28,7 +28,7 @@ export default function CreateDeal() {
       dealType: 'percentage_discount',
       currency: 'ALL',
       city: 'Tiranë',
-      maxVouchersPerCustomer: 1,
+      maxPerCustomer: 1,
       totalVouchers: 100,
     },
   });
@@ -202,7 +202,7 @@ export default function CreateDeal() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">Max. per Klient</label>
-                    <input type="number" {...register('maxVouchersPerCustomer', { min: 1, max: 10, valueAsNumber: true })} className="input-field" />
+                    <input type="number" {...register('maxPerCustomer', { min: 1, max: 10, valueAsNumber: true })} className="input-field" />
                   </div>
                 </div>
                 <div>
@@ -271,7 +271,7 @@ export default function CreateDeal() {
                   { label: 'Çmimi Zbritur', value: `${(values.discountedPrice || 0).toLocaleString()} ALL` },
                   { label: 'Zbritja', value: `${savings}%` },
                   { label: 'Total Voucher', value: values.totalVouchers },
-                  { label: 'Max./Klient', value: values.maxVouchersPerCustomer },
+                  { label: 'Max./Klient', value: values.maxPerCustomer },
                   { label: 'Imazhe', value: `${imagePreviews.length} të ngarkuara` },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex justify-between items-center py-2 border-b border-gray-100">

@@ -43,22 +43,22 @@ export default function AdminDashboard() {
 
       {/* KPI Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard icon={Users} label="Total Përdorues" value={(stats?.users?.total || 0).toLocaleString()} sub={`+${stats?.users?.new || 0} sot`} change={stats?.users?.change} color="text-blue-400" bg="bg-blue-900/30" to="/admin/users" />
-        <KpiCard icon={Building} label="Biznese" value={(stats?.businesses?.total || 0).toLocaleString()} sub={`${stats?.businesses?.pending || 0} në pritje`} color="text-purple-400" bg="bg-purple-900/30" to="/admin/businesses" />
-        <KpiCard icon={Tag} label="Deal Aktiv" value={(stats?.deals?.active || 0).toLocaleString()} sub={`${stats?.deals?.pending || 0} shqyrtim`} color="text-amber-400" bg="bg-amber-900/30" to="/admin/deals" />
-        <KpiCard icon={Ticket} label="Voucher Sot" value={(stats?.vouchers?.today || 0).toLocaleString()} sub={`${stats?.vouchers?.total || 0} total`} color="text-brand-400" bg="bg-brand-900/30" />
-        <KpiCard icon={DollarSign} label="Të Ardhura (Muaj)" value={formatCurrency(stats?.revenue?.thisMonth || 0)} change={stats?.revenue?.change} color="text-green-400" bg="bg-green-900/30" />
-        <KpiCard icon={TrendingUp} label="Komisione" value={formatCurrency(stats?.revenue?.commission || 0)} sub="muaji ky" color="text-emerald-400" bg="bg-emerald-900/30" to="/admin/payments" />
-        <KpiCard icon={AlertCircle} label="Tickets Hapur" value={stats?.tickets?.open || 0} sub={`${stats?.tickets?.urgent || 0} urgent`} color="text-red-400" bg="bg-red-900/30" to="/admin/support" />
-        <KpiCard icon={CheckCircle} label="Rate Konvertimi" value={`${(stats?.conversion || 0).toFixed(1)}%`} color="text-cyan-400" bg="bg-cyan-900/30" />
+        <KpiCard icon={Users} label="Total Përdorues" value={(stats?.summary?.totalUsers || 0).toLocaleString()} sub={`+${stats?.summary?.newUsersThisMonth || 0} këtë muaj`} color="text-blue-400" bg="bg-blue-900/30" to="/admin/users" />
+        <KpiCard icon={Building} label="Biznese" value={(stats?.summary?.totalBusinesses || 0).toLocaleString()} sub={`${stats?.summary?.pendingBusinesses || 0} në pritje`} color="text-purple-400" bg="bg-purple-900/30" to="/admin/businesses" />
+        <KpiCard icon={Tag} label="Deal Aktiv" value={(stats?.summary?.activeDeals || 0).toLocaleString()} sub={`${stats?.summary?.totalDeals || 0} total`} color="text-amber-400" bg="bg-amber-900/30" to="/admin/deals" />
+        <KpiCard icon={Ticket} label="Voucher Total" value={(stats?.summary?.totalVouchers || 0).toLocaleString()} color="text-brand-400" bg="bg-brand-900/30" />
+        <KpiCard icon={DollarSign} label="Të Ardhura Platforma" value={formatCurrency(stats?.summary?.platformRevenue || 0)} color="text-green-400" bg="bg-green-900/30" />
+        <KpiCard icon={TrendingUp} label="Komisione" value={formatCurrency(stats?.summary?.platformRevenue || 0)} sub="total" color="text-emerald-400" bg="bg-emerald-900/30" to="/admin/payments" />
+        <KpiCard icon={AlertCircle} label="Tickets Hapur" value={stats?.summary?.openTickets || 0} color="text-red-400" bg="bg-red-900/30" to="/admin/support" />
+        <KpiCard icon={CheckCircle} label="Biznese Verifikuar" value={(stats?.summary?.totalBusinesses || 0) - (stats?.summary?.pendingBusinesses || 0)} color="text-cyan-400" bg="bg-cyan-900/30" />
       </div>
 
       {/* Revenue Chart */}
-      {stats?.chartData?.length > 0 && (
+      {stats?.charts?.dailyRevenue?.length > 0 && (
         <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
           <h3 className="font-bold text-gray-100 mb-5">Të Ardhurat (30 Ditë)</h3>
           <ResponsiveContainer width="100%" height={240}>
-            <AreaChart data={stats.chartData}>
+            <AreaChart data={stats.charts.dailyRevenue}>
               <defs>
                 <linearGradient id="adminRev" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#1a3f8a" stopOpacity={0.4} />
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#6b7280' }} />
+              <XAxis dataKey="_id" tick={{ fontSize: 11, fill: '#6b7280' }} />
               <YAxis tick={{ fontSize: 11, fill: '#6b7280' }} />
               <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '12px', color: '#f3f4f6' }} formatter={(v) => [formatCurrency(v), 'Të Ardhura']} />
               <Area type="monotone" dataKey="revenue" stroke="#1a3f8a" strokeWidth={2} fill="url(#adminRev)" />
@@ -83,16 +83,15 @@ export default function AdminDashboard() {
           </h3>
           <div className="space-y-3">
             {[
-              { icon: Building, label: 'Biznese në pritje verifikimi', count: stats?.businesses?.pending, to: '/admin/businesses', color: 'text-purple-400' },
-              { icon: Tag, label: 'Deal-e në shqyrtim', count: stats?.deals?.pending, to: '/admin/deals', color: 'text-amber-400' },
-              { icon: AlertCircle, label: 'Ticket-e Urgent', count: stats?.tickets?.urgent, to: '/admin/support', color: 'text-red-400' },
+              { icon: Building, label: 'Biznese në pritje verifikimi', count: stats?.summary?.pendingBusinesses, to: '/admin/businesses', color: 'text-purple-400' },
+              { icon: AlertCircle, label: 'Ticket-e Hapur', count: stats?.summary?.openTickets, to: '/admin/support', color: 'text-red-400' },
             ].filter(({ count }) => count > 0).map(({ icon: Icon, label, count, to, color }) => (
               <Link key={to} to={to} className="flex items-center justify-between p-3 bg-gray-700 rounded-xl hover:bg-gray-600 transition-colors">
                 <div className="flex items-center gap-3"><Icon size={16} className={color} /><span className="text-sm text-gray-200">{label}</span></div>
                 <span className={`text-sm font-bold ${color}`}>{count}</span>
               </Link>
             ))}
-            {!stats?.businesses?.pending && !stats?.deals?.pending && !stats?.tickets?.urgent && (
+            {!stats?.summary?.pendingBusinesses && !stats?.summary?.openTickets && (
               <div className="text-center py-6 text-gray-500 text-sm">
                 <CheckCircle size={24} className="mx-auto mb-2 text-green-500" />Asgjë ne pritje!
               </div>
@@ -100,24 +99,29 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Recent Registrations */}
+        {/* Recent Transactions */}
         <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-          <h3 className="font-bold text-gray-100 mb-4">Regjistrime të Fundit</h3>
-          {stats?.recentUsers?.length > 0 ? (
+          <h3 className="font-bold text-gray-100 mb-4">Tranzaksione të Fundit</h3>
+          {stats?.recentTransactions?.length > 0 ? (
             <div className="space-y-3">
-              {stats.recentUsers.slice(0, 5).map((u) => (
-                <div key={u._id} className="flex items-center gap-3">
-                  <img src={u.avatar || `https://ui-avatars.com/api/?name=${u.firstName}&background=1f2937&color=1a3f8a&size=36`} alt="" className="w-9 h-9 rounded-full flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-200 truncate">{u.firstName} {u.lastName}</p>
-                    <p className="text-xs text-gray-500">{formatDate(u.createdAt)}</p>
+              {stats.recentTransactions.slice(0, 5).map((t) => (
+                <div key={t._id} className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-brand-900/40 rounded-full flex items-center justify-center flex-shrink-0">
+                    <DollarSign size={14} className="text-brand-400" />
                   </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${u.role === 'business' ? 'bg-purple-900/50 text-purple-400' : 'bg-gray-700 text-gray-400'}`}>{u.role}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-200 truncate">{t.user?.firstName} {t.user?.lastName}</p>
+                    <p className="text-xs text-gray-500 truncate">{t.deal?.title}</p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-sm font-bold text-green-400">{formatCurrency(t.commissionAmount || 0)}</p>
+                    <p className="text-xs text-gray-500">{formatDate(t.createdAt)}</p>
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500 text-sm">Nuk ka regjistrime sot</div>
+            <div className="text-center py-8 text-gray-500 text-sm">Nuk ka tranzaksione të fundit</div>
           )}
         </div>
       </div>

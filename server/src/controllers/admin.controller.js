@@ -225,6 +225,36 @@ exports.getAuditLogs = catchAsync(async (req, res) => {
   res.status(200).json({ success: true, ...buildPaginatedResponse(logs, total, page, limit) });
 });
 
+exports.approveDeal = catchAsync(async (req, res, next) => {
+  const deal = await Deal.findByIdAndUpdate(
+    req.params.id,
+    { status: 'active', approvedAt: new Date(), approvedBy: req.user.id },
+    { new: true }
+  );
+  if (!deal) return next(new AppError('Deal not found.', 404));
+  await Business.findByIdAndUpdate(deal.business, { $inc: { activeDeals: 1 } });
+  res.status(200).json({ success: true, data: deal });
+});
+
+exports.rejectDeal = catchAsync(async (req, res, next) => {
+  const deal = await Deal.findByIdAndUpdate(
+    req.params.id,
+    { status: 'rejected', rejectionReason: req.body.reason },
+    { new: true }
+  );
+  if (!deal) return next(new AppError('Deal not found.', 404));
+  res.status(200).json({ success: true, data: deal });
+});
+
+exports.featureDeal = catchAsync(async (req, res, next) => {
+  const deal = await Deal.findById(req.params.id);
+  if (!deal) return next(new AppError('Deal not found.', 404));
+  deal.isFeatured = !deal.isFeatured;
+  if (deal.isFeatured) deal.featuredUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  await deal.save();
+  res.status(200).json({ success: true, isFeatured: deal.isFeatured });
+});
+
 // FEATURE DEAL/BUSINESS
 exports.toggleFeatured = catchAsync(async (req, res, next) => {
   const { type, id } = req.params;

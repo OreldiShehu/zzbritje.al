@@ -22,6 +22,12 @@ export default function BusinessProfile() {
     queryFn: () => api.get('/businesses/my').then((r) => r.data.data),
   });
 
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => api.get('/categories').then((r) => r.data.data),
+    staleTime: 10 * 60 * 1000,
+  });
+
   const { register, handleSubmit, reset, watch } = useForm();
 
   useEffect(() => {
@@ -115,6 +121,15 @@ export default function BusinessProfile() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input {...register('email')} type="email" className="input-field" placeholder="info@biznesi.al" />
             </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Kategoria *</label>
+            <select {...register('category', { required: true })} className="input-field">
+              <option value="">Zgjidh kategorinë...</option>
+              {categories?.filter((c) => !c.parent).map((c) => (
+                <option key={c._id} value={c._id}>{c.nameAl || c.name}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Qyteti *</label>
