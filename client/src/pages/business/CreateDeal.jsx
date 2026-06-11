@@ -38,7 +38,7 @@ export default function CreateDeal() {
       const fd = new FormData();
       Object.entries(data).forEach(([k, v]) => { if (v != null && v !== '') fd.append(k, typeof v === 'object' ? JSON.stringify(v) : v); });
       images.forEach((img) => fd.append('images', img));
-      return api.post('/deals', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      return api.post('/deals', fd);
     },
     onSuccess: () => {
       qc.invalidateQueries(['business', 'deals']);
@@ -65,7 +65,7 @@ export default function CreateDeal() {
 
   const nextStep = async () => {
     const fieldsPerStep = [
-      ['title', 'description', 'dealType', 'category', 'city'],
+      ['title', 'description', 'dealType', 'category', 'city', 'startDate', 'endDate'],
       ['originalPrice', 'discountedPrice'],
       [],
     ];

@@ -42,7 +42,7 @@ export default function BusinessProfile() {
   }, [business, reset]);
 
   const updateMutation = useMutation({
-    mutationFn: (fd) => api.patch('/businesses/my', fd, { headers: { 'Content-Type': 'multipart/form-data' } }),
+    mutationFn: (fd) => api.patch('/businesses/my', fd),
     onSuccess: () => { qc.invalidateQueries(['business', 'my']); toast.success('Profili u përditësua!'); },
     onError: () => toast.error('Ndodhi një gabim.'),
   });
