@@ -15,7 +15,9 @@ router.patch('/users/:id/block', adminController.blockUser);
 // Businesses
 router.get('/businesses', adminController.getAllBusinesses);
 router.post('/businesses/:id/verify', adminController.verifyBusiness);
+router.patch('/businesses/:id/verify', adminController.verifyBusiness);
 router.post('/businesses/:id/reject', adminController.rejectBusiness);
+router.patch('/businesses/:id/reject', adminController.rejectBusiness);
 
 // Deals
 router.get('/deals', adminController.getAllDealsAdmin);
