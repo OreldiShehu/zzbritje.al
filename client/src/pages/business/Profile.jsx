@@ -153,7 +153,7 @@ export default function BusinessProfile() {
 
       {/* Tabs */}
       <div className="flex gap-3 mb-6 border-b border-gray-200">
-        {[{ id: 'info', label: 'Informacionet' }, { id: 'images', label: 'Imazhet' }, { id: 'documents', label: 'Dokumentet' }].map(({ id, label }) => (
+        {[{ id: 'info', label: 'Informacionet' }, { id: 'images', label: 'Imazhet' }].map(({ id, label }) => (
           <button key={id} onClick={() => setActiveTab(id)}
             className={`pb-3 px-1 text-sm font-medium border-b-2 transition-all ${activeTab === id ? 'border-brand-600 text-brand-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
             {label}
@@ -234,35 +234,6 @@ export default function BusinessProfile() {
         </div>
       )}
 
-      {activeTab === 'documents' && (
-        <div className="card p-6">
-          <h3 className="font-bold text-gray-900 mb-2">Dokumentet Ligjore</h3>
-          <p className="text-sm text-gray-500 mb-5">Ngarkoni dokumentet e mëposhtme për verifikimin e biznesit</p>
-          <div className="space-y-4">
-            {[{ type: 'business_license', label: 'Licenca e Biznesit', desc: 'NIPT / Ekstrakti tregtar' }, { type: 'id_document', label: 'Dokument Identiteti', desc: 'Kartë ID ose Pasaportë e pronarit' }, { type: 'bank_statement', label: 'Deklaratë Bankare', desc: 'Opsionale: Raporti bankar' }].map(({ type, label, desc }) => {
-              const doc = business?.documents?.find((d) => d.type === type);
-              return (
-                <div key={type} className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <FileText size={20} className={doc ? 'text-brand-600' : 'text-gray-400'} />
-                    <div>
-                      <p className="font-medium text-gray-900 text-sm">{label}</p>
-                      <p className="text-xs text-gray-400">{desc}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {doc ? <span className="flex items-center gap-1 text-xs text-green-600 font-medium"><CheckCircle size={14} />Ngarkuar</span> : <span className="text-xs text-gray-400">Mungon</span>}
-                    <label className="btn-secondary text-xs py-1.5 px-3 cursor-pointer flex items-center gap-1">
-                      <Upload size={13} />{doc ? 'Ridërgoni' : 'Ngarko'}
-                      <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleDocUpload} className="sr-only" />
-                    </label>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
