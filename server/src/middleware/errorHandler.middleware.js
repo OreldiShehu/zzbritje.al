@@ -40,7 +40,8 @@ const sendErrorProd = (err, res) => {
     res.status(500).json({
       success: false,
       status: 'error',
-      message: 'Something went wrong. Please try again later.',
+      message: err.message || 'Something went wrong. Please try again later.',
+      _debug: err.stack?.split('\n').slice(0, 3).join(' | '),
     });
   }
 };
