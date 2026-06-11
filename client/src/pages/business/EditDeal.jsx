@@ -69,7 +69,7 @@ export default function EditDeal() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <Link to="/business/deals" className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-50"><ArrowLeft size={18} /></Link>
+        <Link to="/business-dashboard/deals" className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-50"><ArrowLeft size={18} /></Link>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Edito Deal-in</h1>
           <p className="text-gray-500 text-sm truncate max-w-md">{deal?.title}</p>
@@ -160,7 +160,7 @@ export default function EditDeal() {
         </div>
 
         <div className="flex justify-end gap-3">
-          <Link to="/business/deals" className="btn-secondary">Anulo</Link>
+          <Link to="/business-dashboard/deals" className="btn-secondary">Anulo</Link>
           <button type="submit" disabled={updateMutation.isPending || !isDirty} className="btn-primary flex items-center gap-2">
             {updateMutation.isPending ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save size={16} />Ruaj Ndryshimet</>}
           </button>

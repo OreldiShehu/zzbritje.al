@@ -43,7 +43,7 @@ export default function CreateDeal() {
     onSuccess: () => {
       qc.invalidateQueries(['business', 'deals']);
       toast.success('Deal-i u krijua dhe u dërgua për rishikim!');
-      navigate('/business/deals');
+      navigate('/business-dashboard/deals');
     },
     onError: (err) => toast.error(err.response?.data?.message || 'Ndodhi një gabim.'),
   });

@@ -42,7 +42,7 @@ export default function BusinessDeals() {
           <h1 className="text-2xl font-bold text-gray-900">Deal-et e Mi</h1>
           <p className="text-gray-500 text-sm">{data?.pagination?.total || 0} deal gjithsej</p>
         </div>
-        <Link to="/business/create-deal" className="btn-primary flex items-center gap-2">
+        <Link to="/business-dashboard/deals/create" className="btn-primary flex items-center gap-2">
           <Plus size={18} />Krijo Deal
         </Link>
       </div>
@@ -103,7 +103,7 @@ export default function BusinessDeals() {
           <Tag size={56} className="text-gray-200 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-gray-700 mb-2">Nuk keni deal-e akoma</h3>
           <p className="text-gray-400 mb-6">Krijoni deal-in tuaj të parë dhe filloni të fitoni!</p>
-          <Link to="/business/create-deal" className="btn-primary">+ Krijo Deal-in e Parë</Link>
+          <Link to="/business-dashboard/deals/create" className="btn-primary">+ Krijo Deal-in e Parë</Link>
         </div>
       )}
 

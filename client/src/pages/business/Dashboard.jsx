@@ -59,7 +59,7 @@ export default function BusinessDashboard() {
               {isPending ? 'Ekipi ynë do të shqyrtojë aplikimet tuaja brenda 24-48 orësh.' : 'Plotësoni profilin e biznesit dhe ngarkoni dokumentet e nevojshme.'}
             </p>
           </div>
-          {!isPending && <Link to="/business/profile" className="btn-primary text-xs py-2 px-4 flex-shrink-0">Plotëso Profilin</Link>}
+          {!isPending && <Link to="/business-dashboard/profile" className="btn-primary text-xs py-2 px-4 flex-shrink-0">Plotëso Profilin</Link>}
         </motion.div>
       )}
 
@@ -77,7 +77,7 @@ export default function BusinessDashboard() {
               <h2 className="text-2xl font-black">{business?.businessName}</h2>
               <p className="text-green-100 text-sm capitalize">{business?.subscriptionPlan} Plan</p>
             </div>
-            <Link to="/business/create-deal" className="bg-white text-brand-600 font-bold px-5 py-3 rounded-xl hover:bg-green-50 transition-all flex items-center gap-2 shadow-lg">
+            <Link to="/business-dashboard/deals/create" className="bg-white text-brand-600 font-bold px-5 py-3 rounded-xl hover:bg-green-50 transition-all flex items-center gap-2 shadow-lg">
               <Plus size={18} />Krijo Deal
             </Link>
           </div>
@@ -105,7 +105,7 @@ export default function BusinessDashboard() {
         <div className="card p-6">
           <div className="flex items-center justify-between mb-5">
             <h3 className="font-bold text-gray-900">Të Ardhurat (30 Ditë)</h3>
-            <Link to="/business/analytics" className="text-sm text-brand-600 font-medium flex items-center gap-1">
+            <Link to="/business-dashboard/analytics" className="text-sm text-brand-600 font-medium flex items-center gap-1">
               Shiko Analizat <ArrowRight size={14} />
             </Link>
           </div>
@@ -132,7 +132,7 @@ export default function BusinessDashboard() {
         <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-gray-900">Deal-et Top</h3>
-            <Link to="/business/deals" className="text-sm text-brand-600 font-medium flex items-center gap-1">Të gjitha <ArrowRight size={14} /></Link>
+            <Link to="/business-dashboard/deals" className="text-sm text-brand-600 font-medium flex items-center gap-1">Të gjitha <ArrowRight size={14} /></Link>
           </div>
           <div className="space-y-3">
             {stats.topDeals.map((deal, i) => (
