@@ -57,6 +57,11 @@ export const useAuthStore = create(
       onRehydrateStorage: () => (state) => {
         if (state?.accessToken) {
           api.defaults.headers.common['Authorization'] = `Bearer ${state.accessToken}`;
+          // Silently validate token; clear state if expired/invalid
+          api.get('/auth/me').catch(() => {
+            delete api.defaults.headers.common['Authorization'];
+            useAuthStore.setState({ user: null, accessToken: null, isAuthenticated: false });
+          });
         }
       },
     }
