@@ -39,7 +39,7 @@ export default function TopBusinesses() {
                 <div className="flex flex-col items-center text-center">
                   <div className="relative mb-3">
                     <img
-                      src={biz.logo ? getImageUrl(biz.logo, 100) : `https://ui-avatars.com/api/?name=${biz.name}&background=16a34a&color=fff&size=80`}
+                      src={biz.logo ? getImageUrl(biz.logo, 100) : `https://ui-avatars.com/api/?name=${biz.name}&background=1a3f8a&color=fff&size=80`}
                       alt={biz.name}
                       className="w-16 h-16 rounded-2xl object-cover shadow-card"
                       loading="lazy"

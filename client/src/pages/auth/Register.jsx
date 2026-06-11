@@ -68,7 +68,7 @@ export default function Register() {
             <span className="font-black text-4xl">Z</span>
           </div>
           <h2 className="text-3xl font-black mb-4 font-display">Bashkohuni Falas</h2>
-          <p className="text-green-100 mb-8">Krijoni llogarinë tuaj dhe filloni të kurseni tani</p>
+          <p className="text-blue-100 mb-8">Krijoni llogarinë tuaj dhe filloni të kurseni tani</p>
           <div className="space-y-3 text-left max-w-xs mx-auto">
             {['200 L bonus në portofol pas verifikimit', 'Qasje në mijëra oferta ekskluzive', 'QR Code voucher në çast', 'Program besnikërie me pikë dhe shpërblime'].map((f) => (
               <div key={f} className="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-3">

@@ -72,12 +72,12 @@ export default function BusinessDashboard() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle size={18} className="text-emerald-300" />
-                <span className="text-green-100 text-sm font-medium">Biznes i Verifikuar</span>
+                <span className="text-blue-100 text-sm font-medium">Biznes i Verifikuar</span>
               </div>
               <h2 className="text-2xl font-black">{business?.businessName}</h2>
-              <p className="text-green-100 text-sm capitalize">{business?.subscriptionPlan} Plan</p>
+              <p className="text-blue-100 text-sm capitalize">{business?.subscriptionPlan} Plan</p>
             </div>
-            <Link to="/business-dashboard/deals/create" className="bg-white text-brand-600 font-bold px-5 py-3 rounded-xl hover:bg-green-50 transition-all flex items-center gap-2 shadow-lg">
+            <Link to="/business-dashboard/deals/create" className="bg-white text-brand-600 font-bold px-5 py-3 rounded-xl hover:bg-brand-50 transition-all flex items-center gap-2 shadow-lg">
               <Plus size={18} />Krijo Deal
             </Link>
           </div>
@@ -85,7 +85,7 @@ export default function BusinessDashboard() {
             {[{ label: 'Të Ardhura', value: formatCurrency(stats?.revenue?.total || 0) }, { label: 'Voucher', value: stats?.vouchers?.total || 0 }, { label: 'Shikime', value: (stats?.views || 0).toLocaleString() }, { label: 'Vlerësim', value: `${(business?.averageRating || 0).toFixed(1)} ⭐` }].map(({ label, value }) => (
               <div key={label} className="bg-white/15 rounded-xl p-3 text-center">
                 <p className="font-black text-lg">{value}</p>
-                <p className="text-green-100 text-xs">{label}</p>
+                <p className="text-blue-100 text-xs">{label}</p>
               </div>
             ))}
           </div>
@@ -113,15 +113,15 @@ export default function BusinessDashboard() {
             <AreaChart data={stats.chartData}>
               <defs>
                 <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#16a34a" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#1a3f8a" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#1a3f8a" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="date" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip formatter={(v) => [formatCurrency(v), 'Të Ardhura']} />
-              <Area type="monotone" dataKey="revenue" stroke="#16a34a" strokeWidth={2} fill="url(#revGrad)" />
+              <Area type="monotone" dataKey="revenue" stroke="#1a3f8a" strokeWidth={2} fill="url(#revGrad)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>

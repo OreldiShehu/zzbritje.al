@@ -58,7 +58,7 @@ function TicketModal({ ticket, onClose }) {
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {ticket.messages?.map((msg, i) => (
             <div key={i} className={`flex gap-3 ${msg.sender?.role === 'admin' || msg.sender?.role === 'superadmin' ? 'flex-row-reverse' : ''}`}>
-              <img src={msg.sender?.avatar || `https://ui-avatars.com/api/?name=${msg.sender?.firstName}&size=32&background=1f2937&color=16a34a`}
+              <img src={msg.sender?.avatar || `https://ui-avatars.com/api/?name=${msg.sender?.firstName}&size=32&background=1f2937&color=1a3f8a`}
                 alt="" className="w-8 h-8 rounded-full flex-shrink-0" />
               <div className={`max-w-sm ${msg.sender?.role === 'admin' || msg.sender?.role === 'superadmin' ? 'items-end' : ''} flex flex-col`}>
                 <div className={`rounded-2xl px-4 py-3 text-sm ${msg.sender?.role === 'admin' || msg.sender?.role === 'superadmin' ? 'bg-brand-600 text-white rounded-tr-sm' : 'bg-gray-700 text-gray-200 rounded-tl-sm'}`}>

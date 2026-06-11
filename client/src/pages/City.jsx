@@ -29,7 +29,7 @@ export default function City() {
         <div className="container-custom text-center">
           <MapPin size={36} className="mx-auto mb-3 text-green-200" />
           <h1 className="text-3xl font-black mb-2">Oferta në {cityName}</h1>
-          <p className="text-green-100">{data?.pagination?.total || 0} oferta ekskluzive</p>
+          <p className="text-blue-100">{data?.pagination?.total || 0} oferta ekskluzive</p>
         </div>
       </div>
 

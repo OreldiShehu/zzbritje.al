@@ -40,7 +40,7 @@ export default function Newsletter() {
           <h2 className="text-3xl md:text-4xl font-black text-white font-display mb-4">
             Merr Ofertat Çdo Ditë
           </h2>
-          <p className="text-green-100 text-lg mb-8">
+          <p className="text-blue-100 text-lg mb-8">
             Abonohu falas dhe mos humb asnjë ofertë ekskluzive.
             Plus, merr 500 L bonus në portofol për abonimin tuaj!
           </p>
@@ -69,14 +69,14 @@ export default function Newsletter() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center justify-center gap-2 px-8 py-4 bg-white text-brand-700 font-bold rounded-2xl hover:bg-green-50 transition-colors whitespace-nowrap shadow-lg disabled:opacity-70"
+                className="flex items-center justify-center gap-2 px-8 py-4 bg-white text-brand-700 font-bold rounded-2xl hover:bg-brand-50 transition-colors whitespace-nowrap shadow-lg disabled:opacity-70"
               >
                 {loading ? <span className="w-5 h-5 border-2 border-brand-300 border-t-brand-700 rounded-full animate-spin" /> : <><Gift size={20} /> Abonohu Falas</>}
               </button>
             </form>
           )}
 
-          <p className="text-green-100/70 text-sm mt-4">
+          <p className="text-blue-100/70 text-sm mt-4">
             Nuk ka spam. Mund të çabonoheni çdo kohë. 🔒 GDPR compliant.
           </p>
         </div>

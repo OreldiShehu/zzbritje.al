@@ -22,7 +22,7 @@ function BusinessCard({ business }) {
       </div>
       <div className="p-4">
         <div className="flex items-center gap-3 mb-3 -mt-8 relative">
-          <img src={business.logo || `https://ui-avatars.com/api/?name=${business.businessName}&background=e9fce8&color=16a34a&size=52`}
+          <img src={business.logo || `https://ui-avatars.com/api/?name=${business.businessName}&background=e9fce8&color=1a3f8a&size=52`}
             alt="" className="w-14 h-14 rounded-xl border-3 border-white shadow-md object-cover flex-shrink-0" />
           <div className="mt-8 flex-1 min-w-0">
             <h3 className="font-bold text-gray-900 truncate">{business.businessName}</h3>

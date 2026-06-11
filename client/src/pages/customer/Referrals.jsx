@@ -52,19 +52,19 @@ export default function CustomerReferrals() {
             <Gift size={36} className="text-white" />
           </div>
           <h2 className="text-2xl font-black mb-2">Ftoni & Fitoni 200 ALL</h2>
-          <p className="text-green-100 mb-6">Për çdo mik që regjistrohet me kodin tuaj, ju dhe ai merrni 200 ALL bonus në portofol!</p>
+          <p className="text-blue-100 mb-6">Për çdo mik që regjistrohet me kodin tuaj, ju dhe ai merrni 200 ALL bonus në portofol!</p>
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bg-white/15 rounded-xl p-3">
               <p className="font-black text-2xl">{stats.totalReferrals || 0}</p>
-              <p className="text-green-100 text-xs">Referime</p>
+              <p className="text-blue-100 text-xs">Referime</p>
             </div>
             <div className="bg-white/15 rounded-xl p-3">
               <p className="font-black text-2xl">{stats.qualified || 0}</p>
-              <p className="text-green-100 text-xs">Aktive</p>
+              <p className="text-blue-100 text-xs">Aktive</p>
             </div>
             <div className="bg-white/15 rounded-xl p-3">
               <p className="font-black text-2xl">{formatCurrency(stats.totalEarned || 0)}</p>
-              <p className="text-green-100 text-xs">Fituar</p>
+              <p className="text-blue-100 text-xs">Fituar</p>
             </div>
           </div>
         </div>
@@ -124,7 +124,7 @@ export default function CustomerReferrals() {
           <div className="space-y-3">
             {referrals.map((r) => (
               <div key={r._id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                <img src={r.referredUser?.avatar || `https://ui-avatars.com/api/?name=${r.referredUser?.firstName}&background=e9fce8&color=16a34a&size=36`}
+                <img src={r.referredUser?.avatar || `https://ui-avatars.com/api/?name=${r.referredUser?.firstName}&background=e9fce8&color=1a3f8a&size=36`}
                   alt="" className="w-9 h-9 rounded-full flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-gray-900">{r.referredUser?.firstName} {r.referredUser?.lastName}</p>

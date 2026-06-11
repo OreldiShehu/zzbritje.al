@@ -38,7 +38,7 @@ export default function Stats() {
       <div className="container-custom relative">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-black text-white font-display">Numrat flasin</h2>
-          <p className="text-green-100 mt-3">Platforma Nr.1 e zbritjeve në Shqipëri</p>
+          <p className="text-blue-100 mt-3">Platforma Nr.1 e zbritjeve në Shqipëri</p>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map(({ icon: Icon, value, suffix, label, color, bg }, i) => (

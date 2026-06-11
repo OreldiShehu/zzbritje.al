@@ -22,7 +22,7 @@ export default function Contact() {
     <div className="bg-gray-50 min-h-screen">
       <div className="bg-brand-gradient text-white py-16 text-center">
         <h1 className="text-4xl font-black mb-2">Na Kontaktoni</h1>
-        <p className="text-green-100">Jemi këtu për t'ju ndihmuar çdo ditë</p>
+        <p className="text-blue-100">Jemi këtu për t'ju ndihmuar çdo ditë</p>
       </div>
 
       <div className="container-custom py-12 max-w-5xl">

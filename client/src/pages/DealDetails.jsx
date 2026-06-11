@@ -181,7 +181,7 @@ export default function DealDetails() {
               <h3 className="font-bold text-gray-900 text-lg mb-4">Rreth Biznesit</h3>
               <div className="flex items-start gap-4">
                 <img
-                  src={deal.business?.logo ? getImageUrl(deal.business.logo, 80) : `https://ui-avatars.com/api/?name=${deal.business?.name}&background=16a34a&color=fff&size=60`}
+                  src={deal.business?.logo ? getImageUrl(deal.business.logo, 80) : `https://ui-avatars.com/api/?name=${deal.business?.name}&background=1a3f8a&color=fff&size=60`}
                   alt={deal.business?.name}
                   className="w-16 h-16 rounded-2xl object-cover"
                 />
@@ -232,7 +232,7 @@ export default function DealDetails() {
                   {reviews.data.map((review) => (
                     <div key={review._id} className="p-4 bg-gray-50 rounded-xl">
                       <div className="flex items-center gap-3 mb-2">
-                        <img src={review.user?.avatar || `https://ui-avatars.com/api/?name=${review.user?.firstName}&size=36&background=16a34a&color=fff`}
+                        <img src={review.user?.avatar || `https://ui-avatars.com/api/?name=${review.user?.firstName}&size=36&background=1a3f8a&color=fff`}
                           alt={review.user?.firstName} className="w-9 h-9 rounded-full" />
                         <div>
                           <p className="font-medium text-gray-900 text-sm">{review.user?.firstName} {review.user?.lastName}</p>
@@ -332,7 +332,7 @@ export default function DealDetails() {
               <div className="card p-4">
                 <div className="flex items-center gap-3">
                   <img
-                    src={deal.business?.logo ? getImageUrl(deal.business.logo, 60) : `https://ui-avatars.com/api/?name=${deal.business?.name}&size=48&background=dcfce7&color=16a34a`}
+                    src={deal.business?.logo ? getImageUrl(deal.business.logo, 60) : `https://ui-avatars.com/api/?name=${deal.business?.name}&size=48&background=dcfce7&color=1a3f8a`}
                     className="w-12 h-12 rounded-xl object-cover"
                     alt={deal.business?.name}
                   />

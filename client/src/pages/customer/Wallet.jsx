@@ -51,17 +51,17 @@ export default function CustomerWallet() {
               <WalletIcon size={24} className="text-white" />
             </div>
             <div>
-              <p className="text-green-100 text-sm">Balanca Aktuale</p>
+              <p className="text-blue-100 text-sm">Balanca Aktuale</p>
               <p className="font-bold text-3xl">{formatCurrency(user?.walletBalance || 0)}</p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/15 rounded-xl p-4">
-              <p className="text-green-100 text-xs mb-1">Kursime Totale</p>
+              <p className="text-blue-100 text-xs mb-1">Kursime Totale</p>
               <p className="font-bold text-xl">{formatCurrency(user?.totalSaved || 0)}</p>
             </div>
             <div className="bg-white/15 rounded-xl p-4">
-              <p className="text-green-100 text-xs mb-1">Blerje Totale</p>
+              <p className="text-blue-100 text-xs mb-1">Blerje Totale</p>
               <p className="font-bold text-xl">{formatCurrency(user?.totalSpent || 0)}</p>
             </div>
           </div>

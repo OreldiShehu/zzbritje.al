@@ -35,7 +35,7 @@ export default function CategorySection({ categories = [] }) {
           >
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl transition-transform group-hover:scale-110 duration-200 shadow-sm"
-              style={{ backgroundColor: `${cat.color || '#16a34a'}20` }}
+              style={{ backgroundColor: `${cat.color || '#1a3f8a'}20` }}
             >
               {cat.icon || '🎯'}
             </div>

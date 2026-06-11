@@ -90,7 +90,7 @@ export default function CreateDeal() {
           <div key={i} className="flex items-center flex-1 last:flex-none">
             <button onClick={() => i < step && setStep(i)}
               className={`flex items-center gap-2 text-sm font-medium transition-all ${i === step ? 'text-brand-600' : i < step ? 'text-green-600' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${i === step ? 'border-brand-600 bg-brand-600 text-white' : i < step ? 'border-green-500 bg-green-500 text-white' : 'border-gray-300 text-gray-400'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${i === step ? 'border-brand-600 bg-brand-600 text-white' : i < step ? 'border-brand-600 bg-brand-600 text-white' : 'border-gray-300 text-gray-400'}`}>
                 {i < step ? '✓' : i + 1}
               </div>
               <span className="hidden md:block">{s}</span>

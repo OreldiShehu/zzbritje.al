@@ -147,7 +147,7 @@ export default function Navbar() {
                     <button onClick={() => setProfileOpen(!profileOpen)}
                       className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl hover:bg-gray-100 transition-colors">
                       <img
-                        src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=16a34a&color=fff&size=32`}
+                        src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=1a3f8a&color=fff&size=32`}
                         alt={user?.firstName}
                         className="w-8 h-8 rounded-full object-cover"
                       />

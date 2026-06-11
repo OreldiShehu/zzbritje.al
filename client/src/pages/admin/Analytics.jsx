@@ -6,7 +6,7 @@ import api from '../../api/axios';
 import { formatCurrency } from '../../utils/formatters';
 
 const PERIODS = [{ v: '7d', l: '7 Ditë' }, { v: '30d', l: '30 Ditë' }, { v: '90d', l: '3 Muaj' }, { v: '1y', l: '1 Vit' }];
-const PIE_COLORS = ['#16a34a', '#10b981', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+const PIE_COLORS = ['#1a3f8a', '#10b981', '#6ee7b7', '#a7f3d0', '#d1fae5'];
 
 export default function AdminAnalytics() {
   const [period, setPeriod] = useState('30d');
@@ -59,7 +59,7 @@ export default function AdminAnalytics() {
         <ResponsiveContainer width="100%" height={260}>
           <AreaChart data={chartData}>
             <defs>
-              <linearGradient id="gr1" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#16a34a" stopOpacity={0.3} /><stop offset="95%" stopColor="#16a34a" stopOpacity={0} /></linearGradient>
+              <linearGradient id="gr1" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#1a3f8a" stopOpacity={0.3} /><stop offset="95%" stopColor="#1a3f8a" stopOpacity={0} /></linearGradient>
               <linearGradient id="gr2" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} /><stop offset="95%" stopColor="#3b82f6" stopOpacity={0} /></linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -68,7 +68,7 @@ export default function AdminAnalytics() {
             <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11, fill: '#6b7280' }} />
             <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '12px', color: '#f3f4f6' }} />
             <Legend wrapperStyle={{ color: '#9ca3af' }} />
-            <Area yAxisId="left" type="monotone" dataKey="revenue" name="Të Ardhura" stroke="#16a34a" strokeWidth={2} fill="url(#gr1)" />
+            <Area yAxisId="left" type="monotone" dataKey="revenue" name="Të Ardhura" stroke="#1a3f8a" strokeWidth={2} fill="url(#gr1)" />
             <Area yAxisId="right" type="monotone" dataKey="registrations" name="Regjistrime" stroke="#3b82f6" strokeWidth={2} fill="url(#gr2)" />
           </AreaChart>
         </ResponsiveContainer>
@@ -85,7 +85,7 @@ export default function AdminAnalytics() {
                 <XAxis dataKey="city" tick={{ fontSize: 11, fill: '#6b7280' }} />
                 <YAxis tick={{ fontSize: 11, fill: '#6b7280' }} />
                 <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '12px', color: '#f3f4f6' }} />
-                <Bar dataKey="revenue" name="Të Ardhura" fill="#16a34a" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="revenue" name="Të Ardhura" fill="#1a3f8a" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

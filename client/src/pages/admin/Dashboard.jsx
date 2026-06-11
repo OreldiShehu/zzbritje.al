@@ -61,15 +61,15 @@ export default function AdminDashboard() {
             <AreaChart data={stats.chartData}>
               <defs>
                 <linearGradient id="adminRev" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#16a34a" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#1a3f8a" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#1a3f8a" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#6b7280' }} />
               <YAxis tick={{ fontSize: 11, fill: '#6b7280' }} />
               <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '12px', color: '#f3f4f6' }} formatter={(v) => [formatCurrency(v), 'Të Ardhura']} />
-              <Area type="monotone" dataKey="revenue" stroke="#16a34a" strokeWidth={2} fill="url(#adminRev)" />
+              <Area type="monotone" dataKey="revenue" stroke="#1a3f8a" strokeWidth={2} fill="url(#adminRev)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -107,7 +107,7 @@ export default function AdminDashboard() {
             <div className="space-y-3">
               {stats.recentUsers.slice(0, 5).map((u) => (
                 <div key={u._id} className="flex items-center gap-3">
-                  <img src={u.avatar || `https://ui-avatars.com/api/?name=${u.firstName}&background=1f2937&color=16a34a&size=36`} alt="" className="w-9 h-9 rounded-full flex-shrink-0" />
+                  <img src={u.avatar || `https://ui-avatars.com/api/?name=${u.firstName}&background=1f2937&color=1a3f8a&size=36`} alt="" className="w-9 h-9 rounded-full flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-200 truncate">{u.firstName} {u.lastName}</p>
                     <p className="text-xs text-gray-500">{formatDate(u.createdAt)}</p>

@@ -35,7 +35,7 @@ const heroSlides = [
 ];
 
 const badges = [
-  { icon: TrendingUp, label: '50,000+ Voucher të Shitur', color: 'text-green-400' },
+  { icon: TrendingUp, label: '50,000+ Voucher të Shitur', color: 'text-brand-300' },
   { icon: Shield, label: 'Platforma e Besuar', color: 'text-blue-400' },
   { icon: Star, label: '4.9 ⭐ Vlerësim', color: 'text-amber-400' },
 ];

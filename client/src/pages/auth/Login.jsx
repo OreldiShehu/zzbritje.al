@@ -54,7 +54,7 @@ export default function Login() {
             <span className="text-white font-black text-4xl">Z</span>
           </div>
           <h1 className="text-4xl font-black text-white font-display mb-4">Zbritje.al</h1>
-          <p className="text-green-100 text-lg mb-8 max-w-sm">Albania's #1 Discount & Voucher Marketplace</p>
+          <p className="text-blue-100 text-lg mb-8 max-w-sm">Albania's #1 Discount & Voucher Marketplace</p>
           <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto">
             {[['80%', 'Kursim Max'], ['50K+', 'Klientë'], ['1200+', 'Biznese'], ['4.9⭐', 'Vlerësim']].map(([val, lab]) => (
               <div key={lab} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/10">

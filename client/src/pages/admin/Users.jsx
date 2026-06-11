@@ -68,7 +68,7 @@ export default function AdminUsers() {
                 <tr key={u._id} className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <img src={u.avatar || `https://ui-avatars.com/api/?name=${u.firstName}&background=1f2937&color=16a34a&size=32`} alt="" className="w-8 h-8 rounded-full flex-shrink-0" />
+                      <img src={u.avatar || `https://ui-avatars.com/api/?name=${u.firstName}&background=1f2937&color=1a3f8a&size=32`} alt="" className="w-8 h-8 rounded-full flex-shrink-0" />
                       <div>
                         <p className="text-sm font-medium text-gray-200">{u.firstName} {u.lastName}</p>
                         <p className="text-xs text-gray-500 capitalize">{u.loyaltyLevel}</p>

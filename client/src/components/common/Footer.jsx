@@ -35,7 +35,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <h3 className="text-2xl font-bold text-white font-display">Mos Humbet Asnjë Ofertë!</h3>
-              <p className="text-green-100 mt-1">Regjistrohu dhe merr ofertat më të mira çdo ditë.</p>
+              <p className="text-blue-100 mt-1">Regjistrohu dhe merr ofertat më të mira çdo ditë.</p>
             </div>
             <form className="flex gap-2 w-full md:w-auto">
               <input
@@ -43,7 +43,7 @@ export default function Footer() {
                 placeholder="Email-i juaj..."
                 className="flex-1 md:w-72 px-4 py-3 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-green-100 focus:outline-none focus:bg-white/30 focus:ring-2 focus:ring-white/50 transition-all"
               />
-              <button className="px-6 py-3 bg-white text-brand-700 font-bold rounded-xl hover:bg-green-50 transition-colors whitespace-nowrap">
+              <button className="px-6 py-3 bg-white text-brand-700 font-bold rounded-xl hover:bg-brand-50 transition-colors whitespace-nowrap">
                 Abonohu
               </button>
             </form>

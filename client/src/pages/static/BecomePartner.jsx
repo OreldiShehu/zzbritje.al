@@ -20,8 +20,8 @@ export default function BecomePartner() {
             <Star size={16} className="text-amber-300" />Bashkohuni me 1000+ biznese partnere
           </div>
           <h1 className="text-4xl md:text-5xl font-black mb-4">Rriti Biznesin Tuaj me Zbritje.al</h1>
-          <p className="text-xl text-green-100 mb-8">Arrini mijëra klientë të rinj, rritni shitjet, dhe menaxhoni ofertat tuaja lehtë nga dashboardi ynë intuitiv.</p>
-          <Link to="/register?role=business" className="bg-white text-brand-600 font-black px-8 py-4 rounded-2xl hover:bg-green-50 transition-all shadow-xl text-lg inline-block">
+          <p className="text-xl text-blue-100 mb-8">Arrini mijëra klientë të rinj, rritni shitjet, dhe menaxhoni ofertat tuaja lehtë nga dashboardi ynë intuitiv.</p>
+          <Link to="/register?role=business" className="bg-white text-brand-600 font-black px-8 py-4 rounded-2xl hover:bg-brand-50 transition-all shadow-xl text-lg inline-block">
             Filloni Falas Sot →
           </Link>
         </div>
@@ -84,8 +84,8 @@ export default function BecomePartner() {
       {/* CTA */}
       <div className="bg-brand-gradient py-16 text-center text-white">
         <h2 className="text-3xl font-black mb-4">Gati të Filloni?</h2>
-        <p className="text-green-100 mb-6 max-w-xl mx-auto">Regjistrohu falas sot dhe postoni ofertën tuaj të parë. Nuk nevojitet karta krediti.</p>
-        <Link to="/register?role=business" className="bg-white text-brand-600 font-black px-8 py-3.5 rounded-2xl hover:bg-green-50 transition-all shadow-xl inline-block">
+        <p className="text-blue-100 mb-6 max-w-xl mx-auto">Regjistrohu falas sot dhe postoni ofertën tuaj të parë. Nuk nevojitet karta krediti.</p>
+        <Link to="/register?role=business" className="bg-white text-brand-600 font-black px-8 py-3.5 rounded-2xl hover:bg-brand-50 transition-all shadow-xl inline-block">
           Regjistrohu Falas →
         </Link>
       </div>

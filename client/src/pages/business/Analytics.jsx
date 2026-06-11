@@ -7,7 +7,7 @@ import api from '../../api/axios';
 import { formatCurrency } from '../../utils/formatters';
 
 const PERIODS = [{ v: '7d', l: '7 Ditë' }, { v: '30d', l: '30 Ditë' }, { v: '90d', l: '3 Muaj' }, { v: '1y', l: '1 Vit' }];
-const COLORS = ['#16a34a', '#10b981', '#6ee7b7', '#d1fae5'];
+const COLORS = ['#1a3f8a', '#10b981', '#6ee7b7', '#d1fae5'];
 
 export default function BusinessAnalytics() {
   const [period, setPeriod] = useState('30d');
@@ -74,8 +74,8 @@ export default function BusinessAnalytics() {
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#16a34a" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
+                <stop offset="5%" stopColor="#1a3f8a" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#1a3f8a" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="vchr" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
@@ -88,7 +88,7 @@ export default function BusinessAnalytics() {
             <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} />
             <Tooltip formatter={(v, n) => [n === 'revenue' ? formatCurrency(v) : v, n === 'revenue' ? 'Të Ardhura' : 'Voucher']} />
             <Legend />
-            <Area yAxisId="left" type="monotone" dataKey="revenue" name="Të Ardhura" stroke="#16a34a" strokeWidth={2} fill="url(#rev)" />
+            <Area yAxisId="left" type="monotone" dataKey="revenue" name="Të Ardhura" stroke="#1a3f8a" strokeWidth={2} fill="url(#rev)" />
             <Area yAxisId="right" type="monotone" dataKey="vouchers" name="Voucher" stroke="#10b981" strokeWidth={2} fill="url(#vchr)" />
           </AreaChart>
         </ResponsiveContainer>
@@ -105,7 +105,7 @@ export default function BusinessAnalytics() {
                 <XAxis type="number" tick={{ fontSize: 11 }} />
                 <YAxis type="category" dataKey="title" width={120} tick={{ fontSize: 10 }} />
                 <Tooltip />
-                <Bar dataKey="sold" name="Voucher" fill="#16a34a" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="sold" name="Voucher" fill="#1a3f8a" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

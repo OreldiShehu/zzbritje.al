@@ -56,25 +56,25 @@ export default function CustomerDashboard() {
         <div className="absolute right-0 top-0 w-40 h-40 bg-white/10 rounded-full -translate-y-10 translate-x-10" />
         <div className="relative">
           <div className="flex items-center gap-3 mb-2">
-            <img src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}&background=fff&color=16a34a&size=48`}
+            <img src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}&background=fff&color=1a3f8a&size=48`}
               alt="" className="w-12 h-12 rounded-full border-2 border-white/30" />
             <div>
               <p className="font-bold text-lg">Mirëdita, {user?.firstName}! 👋</p>
-              <p className="text-green-100 text-sm">{loyalty.icon} {loyalty.label} Member</p>
+              <p className="text-blue-100 text-sm">{loyalty.icon} {loyalty.label} Member</p>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4 mt-4">
             <div className="bg-white/15 rounded-xl p-3 text-center">
               <p className="text-xl font-black">{formatCurrency(user?.walletBalance || 0)}</p>
-              <p className="text-green-100 text-xs">Portofol</p>
+              <p className="text-blue-100 text-xs">Portofol</p>
             </div>
             <div className="bg-white/15 rounded-xl p-3 text-center">
               <p className="text-xl font-black">{(user?.loyaltyPoints || 0).toLocaleString()}</p>
-              <p className="text-green-100 text-xs">Pikë Besnikërie</p>
+              <p className="text-blue-100 text-xs">Pikë Besnikërie</p>
             </div>
             <div className="bg-white/15 rounded-xl p-3 text-center">
               <p className="text-xl font-black">{formatCurrency(user?.totalSaved || 0)}</p>
-              <p className="text-green-100 text-xs">Total Kursim</p>
+              <p className="text-blue-100 text-xs">Total Kursim</p>
             </div>
           </div>
         </div>

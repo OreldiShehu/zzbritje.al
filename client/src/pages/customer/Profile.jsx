@@ -76,7 +76,7 @@ export default function CustomerProfile() {
           <div className="card p-6 flex flex-col items-center text-center">
             <div className="relative mb-4">
               <img
-                src={avatarPreview || user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&size=120&background=16a34a&color=fff`}
+                src={avatarPreview || user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&size=120&background=1a3f8a&color=fff`}
                 alt={user?.firstName}
                 className="w-28 h-28 rounded-full object-cover border-4 border-brand-100"
               />

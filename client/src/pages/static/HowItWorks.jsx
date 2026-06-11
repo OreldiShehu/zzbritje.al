@@ -21,7 +21,7 @@ export default function HowItWorks() {
     <div className="bg-white">
       <div className="bg-brand-gradient text-white py-16 text-center">
         <h1 className="text-4xl font-black mb-3">Si Funksionon Zbritje.al</h1>
-        <p className="text-green-100 text-lg max-w-2xl mx-auto">Procesi i thjeshtë dhe i shpejtë — si për klientët ashtu edhe për bizneset</p>
+        <p className="text-blue-100 text-lg max-w-2xl mx-auto">Procesi i thjeshtë dhe i shpejtë — si për klientët ashtu edhe për bizneset</p>
       </div>
 
       {/* For Customers */}

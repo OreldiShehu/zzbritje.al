@@ -37,7 +37,7 @@ export default function DashboardLayout() {
         <div className="flex items-center gap-3">
           <div className="relative">
             <img
-              src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=16a34a&color=fff&size=48`}
+              src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=1a3f8a&color=fff&size=48`}
               alt={user?.firstName}
               className="w-12 h-12 rounded-full object-cover"
             />

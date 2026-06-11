@@ -81,7 +81,7 @@ export default function CustomerNotifications() {
               <div className="flex items-center gap-1 flex-shrink-0">
                 {!n.isRead && (
                   <button onClick={() => markMutation.mutate(n._id)}
-                    className="w-8 h-8 rounded-lg hover:bg-green-50 text-gray-400 hover:text-brand-600 flex items-center justify-center transition-colors" title="Shëno si lexuar">
+                    className="w-8 h-8 rounded-lg hover:bg-brand-50 text-gray-400 hover:text-brand-600 flex items-center justify-center transition-colors" title="Shëno si lexuar">
                     <Check size={16} />
                   </button>
                 )}

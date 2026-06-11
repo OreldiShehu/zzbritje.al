@@ -9,7 +9,7 @@ export default function About() {
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
         <div className="container-custom text-center relative">
           <h1 className="text-4xl md:text-5xl font-black mb-4">Rreth Zbritje.al</h1>
-          <p className="text-xl text-green-100 max-w-2xl mx-auto">Platforma nr. 1 e zbritjeve dhe voucherëve në Shqipëri</p>
+          <p className="text-xl text-blue-100 max-w-2xl mx-auto">Platforma nr. 1 e zbritjeve dhe voucherëve në Shqipëri</p>
         </div>
       </div>
 
@@ -41,7 +41,7 @@ export default function About() {
             <div key={label}>
               <Icon size={28} className="mx-auto mb-2 text-green-200" />
               <p className="text-3xl font-black">{value}</p>
-              <p className="text-green-100">{label}</p>
+              <p className="text-blue-100">{label}</p>
             </div>
           ))}
         </div>

@@ -59,7 +59,7 @@ export default function BusinessProfile() {
         {/* Business Info Card */}
         <div className="card p-6 -mt-10 relative mb-6">
           <div className="flex flex-col sm:flex-row items-start gap-5">
-            <img src={business.logo || `https://ui-avatars.com/api/?name=${business.businessName}&background=e9fce8&color=16a34a&size=80`}
+            <img src={business.logo || `https://ui-avatars.com/api/?name=${business.businessName}&background=e9fce8&color=1a3f8a&size=80`}
               alt="" className="w-20 h-20 rounded-2xl object-cover border-4 border-white shadow-lg flex-shrink-0" />
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -123,7 +123,7 @@ export default function BusinessProfile() {
             {reviewsData?.data?.map((review) => (
               <div key={review._id} className="card p-5">
                 <div className="flex items-start gap-4">
-                  <img src={review.user?.avatar || `https://ui-avatars.com/api/?name=${review.user?.firstName}&background=e9fce8&color=16a34a&size=40`}
+                  <img src={review.user?.avatar || `https://ui-avatars.com/api/?name=${review.user?.firstName}&background=e9fce8&color=1a3f8a&size=40`}
                     alt="" className="w-10 h-10 rounded-full flex-shrink-0" />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
