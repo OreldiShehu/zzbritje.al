@@ -1,22 +1,24 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const defaultCategories = [
-  { name: 'Restorante', nameAl: 'Restorante', icon: '🍽️', slug: 'restorante', color: '#ff6b6b', deals: '240+' },
-  { name: 'Bukuri & Spa', nameAl: 'Bukuri & Spa', icon: '💅', slug: 'bukuri', color: '#f7a8d8', deals: '180+' },
-  { name: 'Hotele', nameAl: 'Hotele & Resorte', icon: '🏨', slug: 'hotele', color: '#4ecdc4', deals: '95+' },
-  { name: 'Aktivitete', nameAl: 'Aktivitete', icon: '🎭', slug: 'aktivitete', color: '#45b7d1', deals: '120+' },
-  { name: 'Shëndet', nameAl: 'Shëndet & Dental', icon: '🦷', slug: 'shendet', color: '#96ceb4', deals: '85+' },
-  { name: 'Kafene', nameAl: 'Kafene', icon: '☕', slug: 'kafene', color: '#dda15e', deals: '160+' },
-  { name: 'Sport', nameAl: 'Palestër & Sport', icon: '💪', slug: 'sport', color: '#52b69a', deals: '70+' },
-  { name: 'Jetë Nate', nameAl: 'Jetë Nate', icon: '🌙', slug: 'jete-nate', color: '#7209b7', deals: '45+' },
-  { name: 'Udhëtime', nameAl: 'Udhëtime', icon: '✈️', slug: 'udhetim', color: '#3a86ff', deals: '55+' },
-  { name: 'Makina', nameAl: 'Qira Makinash', icon: '🚗', slug: 'makinat', color: '#fb5607', deals: '30+' },
-  { name: 'Fëmijë', nameAl: 'Fëmijë & Familje', icon: '👶', slug: 'femije', color: '#ffbe0b', deals: '40+' },
-  { name: 'Arsim', nameAl: 'Arsim & Trajnim', icon: '📚', slug: 'arsim', color: '#8338ec', deals: '25+' },
+  { icon: '🍽️', slug: 'restorante', color: '#ff6b6b', deals: '240+' },
+  { icon: '💅', slug: 'bukuri', color: '#f7a8d8', deals: '180+' },
+  { icon: '🏨', slug: 'hotele', color: '#4ecdc4', deals: '95+' },
+  { icon: '🎭', slug: 'aktivitete', color: '#45b7d1', deals: '120+' },
+  { icon: '🦷', slug: 'shendet', color: '#96ceb4', deals: '85+' },
+  { icon: '☕', slug: 'kafene', color: '#dda15e', deals: '160+' },
+  { icon: '💪', slug: 'sport', color: '#52b69a', deals: '70+' },
+  { icon: '🌙', slug: 'jete-nate', color: '#7209b7', deals: '45+' },
+  { icon: '✈️', slug: 'udhetim', color: '#3a86ff', deals: '55+' },
+  { icon: '🚗', slug: 'makinat', color: '#fb5607', deals: '30+' },
+  { icon: '👶', slug: 'femije', color: '#ffbe0b', deals: '40+' },
+  { icon: '📚', slug: 'arsim', color: '#8338ec', deals: '25+' },
 ];
 
 export default function CategorySection({ categories = [] }) {
+  const { t } = useTranslation();
   const displayCategories = categories.length > 0 ? categories : defaultCategories;
 
   return (
@@ -40,8 +42,10 @@ export default function CategorySection({ categories = [] }) {
               {cat.icon || '🎯'}
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-800 leading-tight">{cat.nameAl || cat.name}</p>
-              {cat.deals && <p className="text-xs text-gray-400 mt-0.5">{cat.deals} oferta</p>}
+              <p className="text-xs font-semibold text-gray-800 leading-tight">
+                {t(`nav.categories_list.${cat.slug}`, cat.nameAl || cat.name || cat.slug)}
+              </p>
+              {cat.deals && <p className="text-xs text-gray-400 mt-0.5">{cat.deals} {t('home.city_deals')}</p>}
             </div>
           </Link>
         </motion.div>

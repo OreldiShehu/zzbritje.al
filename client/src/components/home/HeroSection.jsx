@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Search, MapPin, ArrowRight, Play, TrendingUp, Shield, Star } from 'lucide-react';
 import { CITIES } from '../../utils/constants';
 
@@ -34,13 +35,15 @@ const heroSlides = [
   },
 ];
 
-const badges = [
-  { icon: TrendingUp, label: '50,000+ Voucher të Shitur', color: 'text-brand-300' },
-  { icon: Shield, label: 'Platforma e Besuar', color: 'text-blue-400' },
-  { icon: Star, label: '4.9 ⭐ Vlerësim', color: 'text-amber-400' },
+const getBadges = (t) => [
+  { icon: TrendingUp, label: t('hero.badges.vouchers'), color: 'text-brand-300' },
+  { icon: Shield, label: t('hero.badges.trusted'), color: 'text-blue-400' },
+  { icon: Star, label: t('hero.badges.rating'), color: 'text-amber-400' },
 ];
 
 export default function HeroSection() {
+  const { t } = useTranslation();
+  const badges = getBadges(t);
   const [activeSlide, setActiveSlide] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('Tiranë');
@@ -59,7 +62,8 @@ export default function HeroSection() {
     navigate(`/search?${params.toString()}`);
   };
 
-  const slide = heroSlides[activeSlide];
+  const slides = t('hero.slides', { returnObjects: true });
+  const slide = { ...heroSlides[activeSlide], ...slides[activeSlide] };
 
   return (
     <section className="relative min-h-[88vh] flex items-center overflow-hidden bg-dark">
@@ -100,7 +104,7 @@ export default function HeroSection() {
             transition={{ delay: 0.1 }}
             className="text-4xl md:text-5xl lg:text-6xl font-black text-white font-display leading-tight mb-4"
           >
-            {slide.titleAl}
+            {slide.title}
           </motion.h1>
 
           <motion.p
@@ -110,7 +114,7 @@ export default function HeroSection() {
             transition={{ delay: 0.2 }}
             className="text-lg md:text-xl text-gray-300 mb-8 max-w-xl leading-relaxed"
           >
-            {slide.subtitleAl}
+            {slide.subtitle}
           </motion.p>
 
           {/* Search bar */}
@@ -127,9 +131,8 @@ export default function HeroSection() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Kërko oferta, restorante, spa..."
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/95 backdrop-blur-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-xl text-base"
-              />
+                placeholder={t('hero.search_placeholder')}
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/95 backdrop-blur-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-xl text-base" />
             </div>
             <div className="relative sm:w-44">
               <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10" />
@@ -138,12 +141,12 @@ export default function HeroSection() {
                 onChange={(e) => setSelectedCity(e.target.value)}
                 className="w-full h-full pl-9 pr-4 py-4 rounded-2xl bg-white/95 backdrop-blur-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-xl text-base appearance-none cursor-pointer"
               >
-                <option value="">Të gjitha</option>
+                <option value="">{t('hero.all_cities')}</option>
                 {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <button type="submit" className="flex items-center justify-center gap-2 px-8 py-4 bg-brand-gradient text-white font-bold rounded-2xl shadow-brand-lg hover:shadow-brand hover:-translate-y-0.5 transition-all text-base">
-              <Search size={20} /> Kërko
+              <Search size={20} /> {t('hero.search_btn')}
             </button>
           </motion.form>
 
@@ -154,7 +157,7 @@ export default function HeroSection() {
             transition={{ delay: 0.4 }}
             className="flex flex-wrap gap-3 mb-10"
           >
-            <span className="text-gray-400 text-sm">Popullorë:</span>
+            <span className="text-gray-400 text-sm">{t('hero.popular')}</span>
             {['Restorante', 'Spa & Bukuri', 'Hotele', 'Dentisti', 'Palestër'].map((tag) => (
               <button
                 key={tag}
@@ -173,14 +176,14 @@ export default function HeroSection() {
               className="btn-primary text-base px-8 py-3.5"
               whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
             >
-              Eksploro Deal-et <ArrowRight size={18} />
+              {t('hero.explore_btn')} <ArrowRight size={18} />
             </motion.button>
             <motion.a
               href="/become-partner"
               className="flex items-center gap-2 px-8 py-3.5 rounded-xl border-2 border-white/30 text-white font-semibold hover:bg-white/10 transition-all backdrop-blur-sm"
               whileHover={{ scale: 1.02 }}
             >
-              <Play size={18} /> Bëhu Partner
+              <Play size={18} /> {t('hero.partner_btn')}
             </motion.a>
           </div>
         </div>

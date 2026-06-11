@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Ticket, Heart, Wallet, Star, TrendingUp, Gift, Bell, ArrowRight, ShoppingBag } from 'lucide-react';
+import { Ticket, Heart, Wallet, TrendingUp, Gift, Bell, ArrowRight, ShoppingBag } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../api/axios';
 import { formatCurrency, formatDate } from '../../utils/formatters';
@@ -24,6 +25,7 @@ function StatCard({ icon: Icon, label, value, sub, color, bg, to }) {
 }
 
 export default function CustomerDashboard() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
 
   const { data: stats } = useQuery({
@@ -45,6 +47,12 @@ export default function CustomerDashboard() {
   const nextLevel = Object.entries(LOYALTY_LEVELS).find(([, v]) => v.min > (user?.loyaltyPoints || 0));
   const progressToNext = nextLevel ? Math.min(100, ((user?.loyaltyPoints || 0) - loyalty.min) / (nextLevel[1].min - loyalty.min) * 100) : 100;
 
+  const voucherStatusLabel = (status) => {
+    if (status === 'active') return t('dashboard.voucher_valid');
+    if (status === 'redeemed') return t('dashboard.voucher_used');
+    return t('dashboard.voucher_expired');
+  };
+
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
@@ -59,22 +67,22 @@ export default function CustomerDashboard() {
             <img src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}&background=fff&color=1a3f8a&size=48`}
               alt="" className="w-12 h-12 rounded-full border-2 border-white/30" />
             <div>
-              <p className="font-bold text-lg">Mirëdita, {user?.firstName}! 👋</p>
+              <p className="font-bold text-lg">{t('dashboard.greeting', { name: user?.firstName })}</p>
               <p className="text-blue-100 text-sm">{loyalty.icon} {loyalty.label} Member</p>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4 mt-4">
             <div className="bg-white/15 rounded-xl p-3 text-center">
               <p className="text-xl font-black">{formatCurrency(user?.walletBalance || 0)}</p>
-              <p className="text-blue-100 text-xs">Portofol</p>
+              <p className="text-blue-100 text-xs">{t('dashboard.wallet_label')}</p>
             </div>
             <div className="bg-white/15 rounded-xl p-3 text-center">
               <p className="text-xl font-black">{(user?.loyaltyPoints || 0).toLocaleString()}</p>
-              <p className="text-blue-100 text-xs">Pikë Besnikërie</p>
+              <p className="text-blue-100 text-xs">{t('dashboard.loyalty_points')}</p>
             </div>
             <div className="bg-white/15 rounded-xl p-3 text-center">
               <p className="text-xl font-black">{formatCurrency(user?.totalSaved || 0)}</p>
-              <p className="text-blue-100 text-xs">Total Kursim</p>
+              <p className="text-blue-100 text-xs">{t('dashboard.total_saved')}</p>
             </div>
           </div>
         </div>
@@ -82,16 +90,16 @@ export default function CustomerDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard icon={Ticket} label="Voucher Aktiv" value={stats?.vouchers?.active || 0} color="text-brand-600" bg="bg-brand-50" to="/dashboard/vouchers" />
-        <StatCard icon={ShoppingBag} label="Voucher Blerë" value={stats?.vouchers?.redeemed || 0} sub="total" color="text-blue-600" bg="bg-blue-50" to="/dashboard/vouchers" />
-        <StatCard icon={Heart} label="Të Preferuarat" value={stats?.favorites || 0} color="text-red-500" bg="bg-red-50" to="/dashboard/favorites" />
-        <StatCard icon={Gift} label="Referime" value={stats?.referrals?.count || 0} sub={`${formatCurrency(stats?.referrals?.earnings || 0)} fituar`} color="text-purple-600" bg="bg-purple-50" to="/dashboard/referrals" />
+        <StatCard icon={Ticket} label={t('dashboard.active_vouchers_label')} value={stats?.vouchers?.active || 0} color="text-brand-600" bg="bg-brand-50" to="/dashboard/vouchers" />
+        <StatCard icon={ShoppingBag} label={t('dashboard.used_vouchers_label')} value={stats?.vouchers?.redeemed || 0} sub="total" color="text-blue-600" bg="bg-blue-50" to="/dashboard/vouchers" />
+        <StatCard icon={Heart} label={t('dashboard.favorites_label')} value={stats?.favorites || 0} color="text-red-500" bg="bg-red-50" to="/dashboard/favorites" />
+        <StatCard icon={Gift} label={t('dashboard.referrals_label')} value={stats?.referrals?.count || 0} sub={`${formatCurrency(stats?.referrals?.earnings || 0)} ${t('dashboard.earned')}`} color="text-purple-600" bg="bg-purple-50" to="/dashboard/referrals" />
       </div>
 
       {/* Loyalty Progress */}
       <div className="card p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-gray-900">Progresi i Besnikërisë</h3>
+          <h3 className="font-bold text-gray-900">{t('dashboard.loyalty_progress')}</h3>
           <span className="badge badge-green">{loyalty.icon} {loyalty.label}</span>
         </div>
         <div className="h-3 bg-gray-100 rounded-full overflow-hidden mb-2">
@@ -103,8 +111,8 @@ export default function CustomerDashboard() {
           />
         </div>
         <div className="flex justify-between text-xs text-gray-500">
-          <span>{user?.loyaltyPoints?.toLocaleString() || 0} pikë</span>
-          {nextLevel && <span>{nextLevel[1].min.toLocaleString()} pikë → {nextLevel[1].label} {nextLevel[1].icon}</span>}
+          <span>{user?.loyaltyPoints?.toLocaleString() || 0} {t('dashboard.loyalty_points').toLowerCase()}</span>
+          {nextLevel && <span>{nextLevel[1].min.toLocaleString()} → {nextLevel[1].label} {nextLevel[1].icon}</span>}
         </div>
       </div>
 
@@ -112,9 +120,9 @@ export default function CustomerDashboard() {
         {/* Recent Vouchers */}
         <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-gray-900">Voucherët e Fundit</h3>
+            <h3 className="font-bold text-gray-900">{t('dashboard.recent_vouchers')}</h3>
             <Link to="/dashboard/vouchers" className="text-sm text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
-              Të gjitha <ArrowRight size={14} />
+              {t('dashboard.see_all')} <ArrowRight size={14} />
             </Link>
           </div>
           {recentVouchers?.length > 0 ? (
@@ -127,7 +135,7 @@ export default function CustomerDashboard() {
                     <p className="text-xs text-gray-400">{formatDate(v.purchasedAt)}</p>
                   </div>
                   <span className={`badge text-xs ${v.status === 'active' ? 'badge-green' : v.status === 'redeemed' ? 'badge-blue' : 'badge-gray'}`}>
-                    {v.status === 'active' ? 'Aktiv' : v.status === 'redeemed' ? 'Përdorur' : 'Skaduar'}
+                    {voucherStatusLabel(v.status)}
                   </span>
                 </div>
               ))}
@@ -135,8 +143,8 @@ export default function CustomerDashboard() {
           ) : (
             <div className="text-center py-8 text-gray-400">
               <Ticket size={32} className="mx-auto mb-2 opacity-40" />
-              <p className="text-sm">Nuk keni voucher akoma</p>
-              <Link to="/search" className="btn-primary text-xs py-2 px-4 mt-3 inline-flex">Shfleto Oferta</Link>
+              <p className="text-sm">{t('dashboard.no_vouchers_yet')}</p>
+              <Link to="/search" className="btn-primary text-xs py-2 px-4 mt-3 inline-flex">{t('dashboard.browse_offers')}</Link>
             </div>
           )}
         </div>
@@ -144,8 +152,8 @@ export default function CustomerDashboard() {
         {/* Recent Notifications */}
         <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-gray-900">Njoftimet e Fundit</h3>
-            <Link to="/dashboard/notifications" className="text-sm text-brand-600 font-medium flex items-center gap-1">Të gjitha <ArrowRight size={14} /></Link>
+            <h3 className="font-bold text-gray-900">{t('dashboard.recent_notifications')}</h3>
+            <Link to="/dashboard/notifications" className="text-sm text-brand-600 font-medium flex items-center gap-1">{t('dashboard.see_all')} <ArrowRight size={14} /></Link>
           </div>
           {notifications?.data?.length > 0 ? (
             <div className="space-y-3">
@@ -166,7 +174,7 @@ export default function CustomerDashboard() {
           ) : (
             <div className="text-center py-8 text-gray-400">
               <Bell size={32} className="mx-auto mb-2 opacity-40" />
-              <p className="text-sm">Nuk ka njoftime</p>
+              <p className="text-sm">{t('dashboard.no_notifications')}</p>
             </div>
           )}
         </div>

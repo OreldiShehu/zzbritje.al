@@ -23,6 +23,7 @@ const AuthCallback = lazy(() => import('./pages/auth/AuthCallback'));
 const VerifyEmail = lazy(() => import('./pages/auth/VerifyEmail'));
 
 const DealDetails = lazy(() => import('./pages/DealDetails'));
+const Checkout = lazy(() => import('./pages/Checkout'));
 const Search = lazy(() => import('./pages/Search'));
 const CategoryPage = lazy(() => import('./pages/Category'));
 const CityPage = lazy(() => import('./pages/City'));
@@ -103,6 +104,7 @@ export default function App() {
           <Route path="/city/:city" element={<SuspenseWrapper><CityPage /></SuspenseWrapper>} />
           <Route path="/businesses" element={<SuspenseWrapper><Businesses /></SuspenseWrapper>} />
           <Route path="/business/:slug" element={<SuspenseWrapper><BusinessProfile /></SuspenseWrapper>} />
+          <Route path="/checkout/:dealId" element={<ProtectedRoute allowedRoles={['customer', 'business', 'admin', 'superadmin']}><SuspenseWrapper><Checkout /></SuspenseWrapper></ProtectedRoute>} />
           <Route path="/about" element={<SuspenseWrapper><About /></SuspenseWrapper>} />
           <Route path="/how-it-works" element={<SuspenseWrapper><HowItWorks /></SuspenseWrapper>} />
           <Route path="/privacy" element={<SuspenseWrapper><Privacy /></SuspenseWrapper>} />

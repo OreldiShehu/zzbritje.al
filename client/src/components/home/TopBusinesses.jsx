@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Star, MapPin, CheckCircle } from 'lucide-react';
 import api from '../../api/axios';
 import { getImageUrl } from '../../utils/formatters';
 
 export default function TopBusinesses() {
+  const { t } = useTranslation();
   const { data: businesses } = useQuery({
     queryKey: ['businesses', 'top'],
     queryFn: () => api.get('/businesses?verified=true&limit=8').then((r) => r.data.data),
@@ -19,11 +21,11 @@ export default function TopBusinesses() {
       <div className="container-custom">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <span className="text-brand-600 font-semibold text-sm uppercase tracking-wider">🏆 Partneret Tanë</span>
-            <h2 className="section-title mt-1">Bizneset Kryesore</h2>
-            <p className="text-gray-500 mt-2">Bizneset me vlerësimin dhe besueshmërinë më të lartë</p>
+            <span className="text-brand-600 font-semibold text-sm uppercase tracking-wider">{t('home.top_partners')}</span>
+            <h2 className="section-title mt-1">{t('home.top_businesses')}</h2>
+            <p className="text-gray-500 mt-2">{t('home.top_businesses_subtitle')}</p>
           </div>
-          <Link to="/businesses" className="hidden md:flex btn-secondary text-sm py-2">Shiko të gjitha →</Link>
+          <Link to="/businesses" className="hidden md:flex btn-secondary text-sm py-2">{t('home.see_all')}</Link>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

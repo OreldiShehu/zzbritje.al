@@ -2,12 +2,14 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, Star, MapPin, Clock, ShoppingCart, Flame, Zap } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { formatCurrency, formatCountdown, getImageUrl } from '../../utils/formatters';
 import api from '../../api/axios';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 
 export default function DealCard({ deal, featured = false }) {
+  const { t } = useTranslation();
   const [isWishlisted, setIsWishlisted] = useState(deal.isWishlisted || false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const { isAuthenticated } = useAuthStore();
@@ -18,7 +20,7 @@ export default function DealCard({ deal, featured = false }) {
 
   const handleWishlist = async (e) => {
     e.preventDefault();
-    if (!isAuthenticated) { toast.error('Kyçu për të shtuar në listë!'); return; }
+    if (!isAuthenticated) { toast.error(t('deal.login_to_buy')); return; }
     setWishlistLoading(true);
     try {
       const res = await api.post(`/deals/${deal._id}/wishlist`);
@@ -37,12 +39,19 @@ export default function DealCard({ deal, featured = false }) {
       <Link to={`/deals/${deal.slug}`} className="block">
         {/* Image */}
         <div className="relative overflow-hidden h-48 bg-gray-100">
-          <img
-            src={getImageUrl(deal.images?.[0]?.url, 600)}
-            alt={deal.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-          />
+          {deal.images?.[0]?.url ? (
+            <img
+              src={getImageUrl(deal.images[0].url, 600)}
+              alt={deal.title}
+              className="w-full h-full object-cover transition-transform duration-500"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-brand-50 via-blue-50 to-purple-50">
+              <p className="text-5xl font-black text-brand-200 leading-none">-{Math.round(deal.discountPercentage)}%</p>
+              <p className="text-brand-400 text-xs font-semibold mt-2 uppercase tracking-wide">{deal.category?.name || deal.city || 'Ofertë'}</p>
+            </div>
+          )}
 
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
@@ -50,13 +59,13 @@ export default function DealCard({ deal, featured = false }) {
               -{Math.round(deal.discountPercentage)}%
             </span>
             {deal.dealType === 'flash' && (
-              <span className="badge bg-orange-500 text-white flex items-center gap-1"><Zap size={10} /> Flash</span>
+              <span className="badge bg-orange-500 text-white flex items-center gap-1"><Zap size={10} /> {t('deal.flash')}</span>
             )}
             {deal.isNew && (
-              <span className="badge bg-blue-500 text-white">Nënë</span>
+              <span className="badge bg-blue-500 text-white">{t('deal.new')}</span>
             )}
             {featured && (
-              <span className="badge bg-brand-600 text-white flex items-center gap-1"><Flame size={10} /> Featured</span>
+              <span className="badge bg-brand-600 text-white flex items-center gap-1"><Flame size={10} /> {t('deal.featured')}</span>
             )}
           </div>
 
@@ -73,14 +82,14 @@ export default function DealCard({ deal, featured = false }) {
           {timeLeft && (
             <div className={`absolute bottom-3 left-3 flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-sm ${isEndingSoon ? 'bg-orange-500 animate-pulse' : 'bg-black/70 backdrop-blur-sm'}`}>
               <Clock size={12} />
-              {isEndingSoon ? `Mbaron sot: ${timeLeft}` : `Skadon: ${timeLeft}`}
+              {isEndingSoon ? `${t('deal.expires_today')} ${timeLeft}` : `${t('deal.expires')} ${timeLeft}`}
             </div>
           )}
 
           {/* Sold out overlay */}
           {deal.status === 'sold_out' && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">SHITUAR</span>
+              <span className="text-white font-bold text-lg">{t('deal.sold_out')}</span>
             </div>
           )}
         </div>
@@ -121,8 +130,8 @@ export default function DealCard({ deal, featured = false }) {
           {deal.totalVouchers > 0 && (
             <div className="mb-3">
               <div className="flex justify-between text-xs text-gray-400 mb-1">
-                <span>{deal.soldVouchers} blerë</span>
-                <span>{deal.remainingVouchers} mbetur</span>
+                <span>{deal.soldVouchers} {t('deal.bought')}</span>
+                <span>{deal.remainingVouchers} {t('deal.remaining')}</span>
               </div>
               <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                 <div
@@ -138,11 +147,11 @@ export default function DealCard({ deal, featured = false }) {
             <div>
               <p className="text-xs text-gray-400 line-through">{formatCurrency(deal.originalPrice)}</p>
               <p className="text-xl font-black text-brand-700">{formatCurrency(deal.discountedPrice)}</p>
-              <p className="text-xs text-green-600 font-medium">Kursen {formatCurrency(deal.savingsAmount)}</p>
+              <p className="text-xs text-green-600 font-medium">{t('deal.save')} {formatCurrency(deal.savingsAmount)}</p>
             </div>
             <div className="flex items-center gap-1 text-xs text-gray-400">
               <ShoppingCart size={12} />
-              <span>{deal.soldVouchers} blerë</span>
+              <span>{deal.soldVouchers} {t('deal.bought')}</span>
             </div>
           </div>
         </div>

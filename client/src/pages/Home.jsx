@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Suspense, lazy } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/axios';
 import HeroSection from '../components/home/HeroSection';
 import CategorySection from '../components/home/CategorySection';
@@ -15,6 +16,7 @@ const TopBusinesses = lazy(() => import('../components/home/TopBusinesses'));
 const CitySection = lazy(() => import('../components/home/CitySection'));
 
 export default function Home() {
+  const { t } = useTranslation();
   const { data: featuredDeals, isLoading: featuredLoading } = useQuery({
     queryKey: ['deals', 'featured'],
     queryFn: () => api.get('/deals/featured').then((r) => r.data.data),
@@ -54,10 +56,8 @@ export default function Home() {
       <section className="py-16 bg-white">
         <div className="container-custom">
           <div className="text-center mb-10">
-            <h2 className="section-title">Shfleto sipas Kategorisë</h2>
-            <p className="section-subtitle mx-auto mt-3">
-              Gjeni ofertat perfekte për çdo rast
-            </p>
+            <h2 className="section-title">{t('home.browse_category')}</h2>
+            <p className="section-subtitle mx-auto mt-3">{t('home.browse_subtitle')}</p>
           </div>
           <CategorySection categories={categories || []} />
         </div>
@@ -75,11 +75,11 @@ export default function Home() {
         <div className="container-custom">
           <div className="flex items-end justify-between mb-10">
             <div>
-              <span className="text-brand-600 font-semibold text-sm uppercase tracking-wider">🔥 Rekomanduara</span>
-              <h2 className="section-title mt-1">Deal-et e Ditës</h2>
-              <p className="text-gray-500 mt-2">Ofertat më të mira të zgjedhura me kujdes</p>
+              <span className="text-brand-600 font-semibold text-sm uppercase tracking-wider">{t('home.featured_label')}</span>
+              <h2 className="section-title mt-1">{t('home.featured_title')}</h2>
+              <p className="text-gray-500 mt-2">{t('home.featured_subtitle')}</p>
             </div>
-            <a href="/search" className="hidden md:flex btn-secondary text-sm py-2">Shiko të gjitha →</a>
+            <a href="/search" className="hidden md:flex btn-secondary text-sm py-2">{t('home.see_all')}</a>
           </div>
           <Suspense fallback={<DealGridSkeleton count={8} />}>
             <FeaturedDeals deals={featuredDeals || []} isLoading={featuredLoading} />
@@ -98,10 +98,10 @@ export default function Home() {
           <div className="container-custom">
             <div className="flex items-end justify-between mb-10">
               <div>
-                <span className="text-brand-600 font-semibold text-sm uppercase tracking-wider">✨ Të Reja</span>
-                <h2 className="section-title mt-1">Sapo Janë Shtuar</h2>
+                <span className="text-brand-600 font-semibold text-sm uppercase tracking-wider">{t('home.newest_label')}</span>
+                <h2 className="section-title mt-1">{t('home.newest_title')}</h2>
               </div>
-              <a href="/search?sort=newest" className="hidden md:flex btn-secondary text-sm py-2">Shiko të gjitha →</a>
+              <a href="/search?sort=newest" className="hidden md:flex btn-secondary text-sm py-2">{t('home.see_all')}</a>
             </div>
             <Suspense fallback={<DealGridSkeleton count={8} />}>
               <FeaturedDeals deals={newDeals} isLoading={false} />
@@ -116,10 +116,10 @@ export default function Home() {
           <div className="container-custom">
             <div className="flex items-end justify-between mb-10">
               <div>
-                <span className="text-amber-500 font-semibold text-sm uppercase tracking-wider">⭐ Vlerësimet</span>
-                <h2 className="section-title mt-1">Më të Vlerësuarat</h2>
+                <span className="text-amber-500 font-semibold text-sm uppercase tracking-wider">{t('home.top_rated_label')}</span>
+                <h2 className="section-title mt-1">{t('home.top_rated_title')}</h2>
               </div>
-              <a href="/search?sort=best_rated" className="hidden md:flex btn-secondary text-sm py-2">Shiko të gjitha →</a>
+              <a href="/search?sort=best_rated" className="hidden md:flex btn-secondary text-sm py-2">{t('home.see_all')}</a>
             </div>
             <Suspense fallback={<DealGridSkeleton count={4} />}>
               <FeaturedDeals deals={topRated} isLoading={false} />

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Star, Quote } from 'lucide-react';
 
 const testimonials = [
@@ -11,19 +12,20 @@ const testimonials = [
 ];
 
 export default function Testimonials() {
+  const { t } = useTranslation();
   return (
     <section className="py-20 bg-gray-50">
       <div className="container-custom">
         <div className="text-center mb-12">
-          <span className="text-brand-600 font-semibold text-sm uppercase tracking-wider">Çfarë Thonë Klientët</span>
-          <h2 className="section-title mt-2">Mijëra Klientë të Kënaqur</h2>
-          <p className="section-subtitle mx-auto mt-3">Lexoni eksperiencat reale të njerëzve që kursyen me Zbritje.al</p>
+          <span className="text-brand-600 font-semibold text-sm uppercase tracking-wider">{t('home.testimonials_label')}</span>
+          <h2 className="section-title mt-2">{t('home.testimonials_title')}</h2>
+          <p className="section-subtitle mx-auto mt-3">{t('home.testimonials_subtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {testimonials.map((t, i) => (
+          {testimonials.map((item, i) => (
             <motion.div
-              key={t.name}
+              key={item.name}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -32,26 +34,26 @@ export default function Testimonials() {
             >
               <Quote size={32} className="text-brand-100 absolute top-4 right-4" />
               <div className="flex items-center gap-1 mb-3">
-                {Array.from({ length: t.rating }).map((_, j) => (
+                {Array.from({ length: item.rating }).map((_, j) => (
                   <Star key={j} size={16} className="text-amber-400" fill="currentColor" />
                 ))}
               </div>
-              <p className="text-gray-700 text-sm leading-relaxed mb-4">"{t.comment}"</p>
+              <p className="text-gray-700 text-sm leading-relaxed mb-4">"{item.comment}"</p>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full object-cover" loading="lazy" />
+                  <img src={item.avatar} alt={item.name} className="w-10 h-10 rounded-full object-cover" loading="lazy" />
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm">{t.name}</p>
-                    <p className="text-gray-400 text-xs">{t.city}</p>
+                    <p className="font-semibold text-gray-900 text-sm">{item.name}</p>
+                    <p className="text-gray-400 text-xs">{item.city}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-brand-600 font-bold text-sm">{t.saved}</p>
-                  <p className="text-gray-400 text-xs">kursim</p>
+                  <p className="text-brand-600 font-bold text-sm">{item.saved}</p>
+                  <p className="text-gray-400 text-xs">{t('home.testimonials_saved')}</p>
                 </div>
               </div>
               <div className="mt-3 pt-3 border-t border-gray-100">
-                <span className="badge badge-green text-xs">{t.deal}</span>
+                <span className="badge badge-green text-xs">{item.deal}</span>
               </div>
             </motion.div>
           ))}

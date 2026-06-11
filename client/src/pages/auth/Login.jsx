@@ -5,22 +5,24 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, LogIn, Mail, Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../api/axios';
 import toast from 'react-hot-toast';
 
-const schema = z.object({
-  email: z.string().email('Email-i nuk është valid'),
-  password: z.string().min(1, 'Fjalëkalimi është i detyrueshëm'),
-});
-
 export default function Login() {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const redirect = params.get('redirect') || '/dashboard';
+
+  const schema = z.object({
+    email: z.string().email(t('common.error')),
+    password: z.string().min(1, t('common.error')),
+  });
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(schema),
@@ -31,10 +33,10 @@ export default function Login() {
     try {
       const res = await api.post('/auth/login', data);
       setAuth(res.data.user, res.data.accessToken);
-      toast.success(`Mirë se erdhe, ${res.data.user.firstName}!`);
+      toast.success(t('auth.welcome_user', { name: res.data.user.firstName }));
       navigate(redirect, { replace: true });
     } catch (err) {
-      const msg = err.response?.data?.message || 'Ndodhi një gabim. Provo përsëri.';
+      const msg = err.response?.data?.message || t('common.error');
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -56,7 +58,7 @@ export default function Login() {
           <h1 className="text-4xl font-black text-white font-display mb-4">Zbritje.al</h1>
           <p className="text-blue-100 text-lg mb-8 max-w-sm">Albania's #1 Discount & Voucher Marketplace</p>
           <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto">
-            {[['80%', 'Kursim Max'], ['50K+', 'Klientë'], ['1200+', 'Biznese'], ['4.9⭐', 'Vlerësim']].map(([val, lab]) => (
+            {[['80%', t('auth.stat_max_savings', 'Max Savings')], ['50K+', t('auth.stat_customers', 'Customers')], ['1200+', t('auth.stat_businesses', 'Businesses')], ['4.9⭐', t('auth.stat_rating', 'Rating')]].map(([val, lab]) => (
               <div key={lab} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/10">
                 <p className="text-xl font-black text-white">{val}</p>
                 <p className="text-green-200 text-xs mt-1">{lab}</p>
@@ -80,8 +82,8 @@ export default function Login() {
             <span className="font-black text-2xl text-gray-900">Zbritje<span className="text-brand-600">.al</span></span>
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-1">Mirë se u kthyet!</h2>
-          <p className="text-gray-500 mb-8">Kyçuni në llogarinë tuaj</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">{t('auth.login_title')}</h2>
+          <p className="text-gray-500 mb-8">{t('auth.login_subtitle')}</p>
 
           {/* Social login */}
           <div className="grid grid-cols-2 gap-3 mb-6">
@@ -99,13 +101,13 @@ export default function Login() {
 
           <div className="flex items-center gap-3 mb-6">
             <div className="h-px flex-1 bg-gray-200" />
-            <span className="text-gray-400 text-sm">ose me email</span>
+            <span className="text-gray-400 text-sm">{t('auth.or_email')}</span>
             <div className="h-px flex-1 bg-gray-200" />
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('auth.email')}</label>
               <div className="relative">
                 <Mail size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input {...register('email')} type="email" placeholder="ju@shembull.com" autoComplete="email"
@@ -116,8 +118,8 @@ export default function Login() {
 
             <div>
               <div className="flex justify-between items-center mb-1.5">
-                <label className="text-sm font-medium text-gray-700">Fjalëkalimi</label>
-                <Link to="/forgot-password" className="text-xs text-brand-600 hover:text-brand-700">Harruat fjalëkalimin?</Link>
+                <label className="text-sm font-medium text-gray-700">{t('auth.password')}</label>
+                <Link to="/forgot-password" className="text-xs text-brand-600 hover:text-brand-700">{t('auth.forgot_password')}</Link>
               </div>
               <div className="relative">
                 <Lock size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -131,13 +133,13 @@ export default function Login() {
             </div>
 
             <button type="submit" disabled={loading} className="btn-primary w-full py-3.5 text-base">
-              {loading ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><LogIn size={20} /> Kyçu</>}
+              {loading ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><LogIn size={20} /> {t('auth.login_btn')}</>}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            Nuk keni llogari?{' '}
-            <Link to="/register" className="text-brand-600 font-semibold hover:text-brand-700">Regjistrohu falas →</Link>
+            {t('auth.no_account')}{' '}
+            <Link to="/register" className="text-brand-600 font-semibold hover:text-brand-700">{t('auth.register_link_label')}</Link>
           </p>
         </motion.div>
       </div>

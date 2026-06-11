@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Tag, CheckCircle, XCircle, Eye, Star } from 'lucide-react';
+import { Search, Tag, CheckCircle, XCircle, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import api from '../../api/axios';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import toast from 'react-hot-toast';
 
 export default function AdminDeals() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('pending_review');
   const [page, setPage] = useState(1);
@@ -17,20 +19,20 @@ export default function AdminDeals() {
   });
 
   const approveMutation = useMutation({
-    mutationFn: (id) => api.patch(`/deals/${id}/approve`),
-    onSuccess: () => { qc.invalidateQueries(['admin', 'deals']); toast.success('Deal-i u aprovua!'); },
-    onError: () => toast.error('Ndodhi një gabim.'),
+    mutationFn: (id) => api.patch(`/admin/deals/${id}/approve`),
+    onSuccess: () => { qc.invalidateQueries(['admin', 'deals']); toast.success(t('admin_ui.status_changed')); },
+    onError: () => toast.error(t('common.error')),
   });
 
   const rejectMutation = useMutation({
-    mutationFn: ({ id, reason }) => api.patch(`/deals/${id}/reject`, { reason }),
-    onSuccess: () => { qc.invalidateQueries(['admin', 'deals']); toast.success('Deal-i u refuzua.'); },
-    onError: () => toast.error('Ndodhi një gabim.'),
+    mutationFn: ({ id, reason }) => api.patch(`/admin/deals/${id}/reject`, { reason }),
+    onSuccess: () => { qc.invalidateQueries(['admin', 'deals']); toast.success(t('admin_ui.business_rejected')); },
+    onError: () => toast.error(t('common.error')),
   });
 
   const featuredMutation = useMutation({
     mutationFn: (id) => api.patch(`/admin/deals/${id}/featured`),
-    onSuccess: () => { qc.invalidateQueries(['admin', 'deals']); toast.success('Statusi i featured u ndryshua!'); },
+    onSuccess: () => { qc.invalidateQueries(['admin', 'deals']); toast.success(t('admin_ui.status_changed')); },
   });
 
   const deals = data?.data || [];
@@ -43,12 +45,20 @@ export default function AdminDeals() {
     sold_out: 'bg-purple-900/50 text-purple-400',
   };
 
+  const STATUS_FILTERS = [
+    { v: '', l: t('admin_ui.all_statuses') },
+    { v: 'pending_review', l: t('admin_ui.status_review') },
+    { v: 'active', l: t('admin_ui.status_verified') },
+    { v: 'rejected', l: t('admin_ui.status_rejected') },
+    { v: 'expired', l: t('deal.status_expired') },
+  ];
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-100">Menaxhimi i Deal-eve</h1>
-          <p className="text-gray-500 text-sm">{data?.pagination?.total || 0} deal gjithsej</p>
+          <h1 className="text-2xl font-bold text-gray-100">{t('admin.deals')}</h1>
+          <p className="text-gray-500 text-sm">{t('admin_ui.deals_total', { count: data?.pagination?.total || 0 })}</p>
         </div>
       </div>
 
@@ -56,11 +66,11 @@ export default function AdminDeals() {
       <div className="bg-gray-800 rounded-2xl p-4 mb-5 border border-gray-700 flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Kërko deal..."
+          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('common.search')}
             className="w-full bg-gray-700 border border-gray-600 rounded-xl pl-9 pr-3 py-2.5 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-brand-500" />
         </div>
         <div className="flex gap-2 flex-wrap">
-          {[{ v: '', l: 'Të gjitha' }, { v: 'pending_review', l: 'Shqyrtim' }, { v: 'active', l: 'Aktiv' }, { v: 'rejected', l: 'Refuzuar' }, { v: 'expired', l: 'Skaduar' }].map(({ v, l }) => (
+          {STATUS_FILTERS.map(({ v, l }) => (
             <button key={v} onClick={() => { setStatus(v); setPage(1); }}
               className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${status === v ? 'bg-brand-600 text-white' : 'border border-gray-600 text-gray-300 hover:bg-gray-700'}`}>{l}</button>
           ))}
@@ -96,11 +106,11 @@ export default function AdminDeals() {
                     <>
                       <button onClick={() => approveMutation.mutate(deal._id)}
                         className="flex items-center gap-1.5 text-xs bg-green-900/40 text-green-400 hover:bg-green-900/60 px-3 py-2 rounded-xl transition-all">
-                        <CheckCircle size={14} />Aprovo
+                        <CheckCircle size={14} />{t('common.approve')}
                       </button>
-                      <button onClick={() => { const r = prompt('Arsyeja e refuzimit:'); if (r) rejectMutation.mutate({ id: deal._id, reason: r }); }}
+                      <button onClick={() => { const r = window.prompt(t('admin_ui.rejection_reason')); if (r) rejectMutation.mutate({ id: deal._id, reason: r }); }}
                         className="flex items-center gap-1.5 text-xs bg-red-900/30 text-red-400 hover:bg-red-900/50 px-3 py-2 rounded-xl transition-all">
-                        <XCircle size={14} />Refuzo
+                        <XCircle size={14} />{t('common.reject')}
                       </button>
                     </>
                   )}
@@ -110,16 +120,16 @@ export default function AdminDeals() {
           ))}
           {data?.pagination?.pages > 1 && (
             <div className="flex justify-center gap-2 pt-4">
-              <button onClick={() => setPage((p) => p - 1)} disabled={!data.pagination.hasPrev} className="px-4 py-2 rounded-xl border border-gray-600 text-sm text-gray-300 disabled:opacity-40">← Para</button>
+              <button onClick={() => setPage((p) => p - 1)} disabled={!data.pagination.hasPrev} className="px-4 py-2 rounded-xl border border-gray-600 text-sm text-gray-300 disabled:opacity-40">{t('search.prev')}</button>
               <span className="px-3 py-2 text-sm text-gray-500">{page} / {data.pagination.pages}</span>
-              <button onClick={() => setPage((p) => p + 1)} disabled={!data.pagination.hasNext} className="px-4 py-2 rounded-xl border border-gray-600 text-sm text-gray-300 disabled:opacity-40">Pas →</button>
+              <button onClick={() => setPage((p) => p + 1)} disabled={!data.pagination.hasNext} className="px-4 py-2 rounded-xl border border-gray-600 text-sm text-gray-300 disabled:opacity-40">{t('search.next')}</button>
             </div>
           )}
         </div>
       ) : (
         <div className="text-center py-20 bg-gray-800 rounded-2xl border border-gray-700">
           <Tag size={40} className="text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400">Nuk ka deal-e me këtë status</p>
+          <p className="text-gray-400">{t('admin_ui.no_deals')}</p>
         </div>
       )}
     </div>

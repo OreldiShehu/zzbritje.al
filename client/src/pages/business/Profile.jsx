@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Upload, Save, Building, MapPin, Clock, Camera, FileText, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, Save, Building, MapPin, Clock, Camera, CheckCircle, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import api from '../../api/axios';
 import { CITIES } from '../../utils/constants';
 import toast from 'react-hot-toast';
 
-const DAYS = ['E Hënë', 'E Martë', 'E Mërkurë', 'E Enjte', 'E Premte', 'E Shtunë', 'E Diel'];
-
 export default function BusinessProfile() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [activeTab, setActiveTab] = useState('info');
   const [logoFile, setLogoFile] = useState(null);
@@ -28,7 +28,7 @@ export default function BusinessProfile() {
     staleTime: 10 * 60 * 1000,
   });
 
-  const { register, handleSubmit, reset, watch } = useForm();
+  const { register, handleSubmit, reset } = useForm();
 
   useEffect(() => {
     if (business) {
@@ -49,14 +49,14 @@ export default function BusinessProfile() {
 
   const updateMutation = useMutation({
     mutationFn: (fd) => api.patch('/businesses/my', fd),
-    onSuccess: () => { qc.invalidateQueries(['business', 'my']); toast.success('Profili u përditësua!'); },
-    onError: () => toast.error('Ndodhi një gabim.'),
+    onSuccess: () => { qc.invalidateQueries(['business', 'my']); toast.success(t('business.profile_updated')); },
+    onError: () => toast.error(t('common.error')),
   });
 
   const docMutation = useMutation({
     mutationFn: (fd) => api.post('/businesses/my/documents', fd, { headers: { 'Content-Type': 'multipart/form-data' } }),
     onSuccess: () => { toast.success('Dokumenti u ngarkua!'); qc.invalidateQueries(['business', 'my']); },
-    onError: () => toast.error('Ndodhi një gabim gjatë ngarkimit.'),
+    onError: () => toast.error(t('common.error')),
   });
 
   const onSubmit = (data) => {
@@ -67,19 +67,10 @@ export default function BusinessProfile() {
     updateMutation.mutate(fd);
   };
 
-  const handleDocUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const fd = new FormData();
-    fd.append('document', file);
-    fd.append('type', 'business_license');
-    docMutation.mutate(fd);
-  };
-
   const STATUS_INFO = {
-    pending: { icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200', label: 'Në pritje të verifikimit' },
+    pending: { icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200', label: t('business.pending') },
     under_review: { icon: Clock, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200', label: 'Nën shqyrtim nga ekipi ynë' },
-    verified: { icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50 border-green-200', label: 'Biznes i Verifikuar ✓' },
+    verified: { icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50 border-green-200', label: `${t('business.verified')} ✓` },
     rejected: { icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-50 border-red-200', label: 'Aplikimi u refuzua' },
   };
 
@@ -89,8 +80,8 @@ export default function BusinessProfile() {
 
   const createMutation = useMutation({
     mutationFn: (data) => api.post('/businesses', data),
-    onSuccess: () => { qc.invalidateQueries(['business', 'my']); toast.success('Profili i biznesit u krijua!'); },
-    onError: (e) => toast.error(e.response?.data?.message || 'Ndodhi një gabim.'),
+    onSuccess: () => { qc.invalidateQueries(['business', 'my']); toast.success(t('business.profile_created')); },
+    onError: (e) => toast.error(e.response?.data?.message || t('common.error')),
   });
 
   if (isLoading) return <div className="h-64 card skeleton" />;
@@ -101,48 +92,48 @@ export default function BusinessProfile() {
         <div className="w-16 h-16 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <Building size={32} className="text-brand-600" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Krijo Profilin e Biznesit</h2>
-        <p className="text-gray-500 mb-6">Filloni duke plotësuar informacionet bazë të biznesit tuaj.</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('business.create_profile')}</h2>
+        <p className="text-gray-500 mb-6">{t('business.create_profile_subtitle')}</p>
         <form onSubmit={handleSubmit((d) => createMutation.mutate(d))} className="text-left space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Emri i Biznesit *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('business.name')} *</label>
             <input {...register('name', { required: true })} className="input-field" placeholder="p.sh. Restorant Besa" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Përshkrimi *</label>
-            <textarea {...register('description', { required: true })} rows={3} className="input-field resize-none" placeholder="Përshkruani biznesin tuaj..." />
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('business.description')} *</label>
+            <textarea {...register('description', { required: true })} rows={3} className="input-field resize-none" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Telefon *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('business.phone')} *</label>
               <input {...register('phone', { required: true })} className="input-field" placeholder="+355 6X XXX XXXX" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input {...register('email')} type="email" className="input-field" placeholder="info@biznesi.al" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('business.email')}</label>
+              <input {...register('email')} type="email" className="input-field" />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Kategoria *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('business.category')} *</label>
             <select {...register('category', { required: true })} className="input-field">
-              <option value="">Zgjidh kategorinë...</option>
+              <option value="">{t('business.select_category')}</option>
               {categories?.filter((c) => !c.parent).map((c) => (
                 <option key={c._id} value={c._id}>{c.nameAl || c.name}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Qyteti *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('business.city')} *</label>
             <select {...register('city', { required: true })} className="input-field">
               {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Adresa</label>
-            <input {...register('address')} className="input-field" placeholder="Rruga, numri..." />
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('business.address')}</label>
+            <input {...register('address')} className="input-field" />
           </div>
           <button type="submit" disabled={createMutation.isPending} className="btn-primary w-full">
-            {createMutation.isPending ? 'Duke krijuar...' : 'Krijo Profilin'}
+            {createMutation.isPending ? t('business.creating') : t('business.create_btn')}
           </button>
         </form>
       </div>
@@ -152,23 +143,23 @@ export default function BusinessProfile() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Profili i Biznesit</h1>
-        <p className="text-gray-500 text-sm">Menaxhoni informacionet dhe dokumentet e biznesit</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t('business.profile')}</h1>
+        <p className="text-gray-500 text-sm">{t('business.create_profile_subtitle')}</p>
       </div>
 
       {/* Status Banner */}
       <div className={`rounded-2xl p-4 mb-6 border flex items-center gap-3 ${sInfo.bg}`}>
         <SIcon size={20} className={`${sInfo.color} flex-shrink-0`} />
         <div className="flex-1">
-          <p className={`font-semibold text-sm ${sInfo.color}`}>Statusi: {sInfo.label}</p>
+          <p className={`font-semibold text-sm ${sInfo.color}`}>{t('business.status_label')}: {sInfo.label}</p>
           {status === 'rejected' && business?.rejectionReason && <p className="text-xs text-red-500 mt-0.5">{business.rejectionReason}</p>}
         </div>
-        {status !== 'verified' && <span className="text-xs text-gray-500">Ngarkoni dokumentet e kërkuara për verifikim</span>}
+        {status !== 'verified' && <span className="text-xs text-gray-500">{t('business.upload_docs_note')}</span>}
       </div>
 
       {/* Tabs */}
       <div className="flex gap-3 mb-6 border-b border-gray-200">
-        {[{ id: 'info', label: 'Informacionet' }, { id: 'images', label: 'Imazhet' }].map(({ id, label }) => (
+        {[{ id: 'info', label: t('business.info_tab') }, { id: 'images', label: t('business.images_tab') }].map(({ id, label }) => (
           <button key={id} onClick={() => setActiveTab(id)}
             className={`pb-3 px-1 text-sm font-medium border-b-2 transition-all ${activeTab === id ? 'border-brand-600 text-brand-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
             {label}
@@ -181,38 +172,38 @@ export default function BusinessProfile() {
           <div className="card p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Emri i Biznesit *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('business.name')} *</label>
                 <input {...register('name', { required: true })} className="input-field" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('business.email')}</label>
                 <input type="email" {...register('email')} className="input-field" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Telefon</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('business.phone')}</label>
                 <input {...register('phone')} className="input-field" placeholder="+355 69 000 0000" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Website</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('business.website')}</label>
                 <input {...register('website')} className="input-field" placeholder="https://biznesijuaj.al" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Qyteti</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('business.city')}</label>
                 <select {...register('city')} className="input-field">
                   {CITIES.map((c) => <option key={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Adresa</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('business.address')}</label>
                 <input {...register('address')} className="input-field" />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Përshkrimi i Biznesit</label>
-              <textarea {...register('description')} rows={4} className="input-field resize-none" placeholder="Tregoni rreth biznesit tuaj, shërbimeve dhe ofertave..." />
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('business.description')}</label>
+              <textarea {...register('description')} rows={4} className="input-field resize-none" />
             </div>
             <button type="submit" disabled={updateMutation.isPending} className="btn-primary flex items-center gap-2">
-              {updateMutation.isPending ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save size={16} />Ruaj Ndryshimet</>}
+              {updateMutation.isPending ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('business.saving')}</> : <><Save size={16} />{t('business.save_btn')}</>}
             </button>
           </div>
         </form>
@@ -222,18 +213,22 @@ export default function BusinessProfile() {
         <div className="space-y-5">
           {/* Cover Image */}
           <div className="card p-6">
-            <h3 className="font-bold text-gray-900 mb-4">Imazhi Kryesor (Cover)</h3>
+            <h3 className="font-bold text-gray-900 mb-4">{t('business.cover_image')}</h3>
             <div className="relative h-44 bg-gray-100 rounded-2xl overflow-hidden group cursor-pointer">
-              {coverPreview ? <img src={coverPreview} alt="" className="w-full h-full object-cover" /> : <div className="flex flex-col items-center justify-center h-full text-gray-400"><Upload size={32} /><p className="mt-2 text-sm">Ngarko imazhin kryesor</p></div>}
+              {coverPreview ? <img src={coverPreview} alt="" className="w-full h-full object-cover" /> : (
+                <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                  <Upload size={32} /><p className="mt-2 text-sm">{t('business.upload_cover')}</p>
+                </div>
+              )}
               <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                <div className="bg-white rounded-xl px-4 py-2 text-sm font-medium text-gray-900 flex items-center gap-2"><Camera size={16} />Ndrysho</div>
+                <div className="bg-white rounded-xl px-4 py-2 text-sm font-medium text-gray-900 flex items-center gap-2"><Camera size={16} />{t('common.edit')}</div>
                 <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files[0]; if (f) { setCoverFile(f); setCoverPreview(URL.createObjectURL(f)); } }} className="sr-only" />
               </label>
             </div>
           </div>
           {/* Logo */}
           <div className="card p-6">
-            <h3 className="font-bold text-gray-900 mb-4">Logo e Biznesit</h3>
+            <h3 className="font-bold text-gray-900 mb-4">{t('business.logo_title')}</h3>
             <div className="flex items-center gap-6">
               <div className="relative w-28 h-28 bg-gray-100 rounded-2xl overflow-hidden group cursor-pointer flex-shrink-0">
                 {logoPreview ? <img src={logoPreview} alt="" className="w-full h-full object-cover" /> : <div className="flex flex-col items-center justify-center h-full text-gray-400"><Building size={24} /></div>}
@@ -242,13 +237,22 @@ export default function BusinessProfile() {
                   <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files[0]; if (f) { setLogoFile(f); setLogoPreview(URL.createObjectURL(f)); } }} className="sr-only" />
                 </label>
               </div>
-              <div className="text-sm text-gray-500"><p className="font-medium text-gray-900 mb-1">Kërkesat e logos</p><ul className="space-y-0.5 list-disc pl-4"><li>Formati: PNG, JPG, SVG</li><li>Madhësia minimale: 200×200px</li><li>Sfond transparent rekomandohet</li></ul></div>
+              <div className="text-sm text-gray-500">
+                <p className="font-medium text-gray-900 mb-1">{t('business.logo_requirements')}</p>
+                <ul className="space-y-0.5 list-disc pl-4">
+                  <li>PNG, JPG, SVG</li>
+                  <li>Min 200×200px</li>
+                </ul>
+              </div>
             </div>
-            {(logoFile || coverFile) && <button onClick={handleSubmit(onSubmit)} className="mt-4 btn-primary text-sm py-2 px-4 flex items-center gap-2"><Save size={14} />Ruaj Imazhet</button>}
+            {(logoFile || coverFile) && (
+              <button onClick={handleSubmit(onSubmit)} className="mt-4 btn-primary text-sm py-2 px-4 flex items-center gap-2">
+                <Save size={14} />{t('business.save_btn')}
+              </button>
+            )}
           </div>
         </div>
       )}
-
     </div>
   );
 }

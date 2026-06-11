@@ -1,23 +1,24 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { QrCode, Clock, CheckCircle, XCircle, Download, Eye } from 'lucide-react';
+import { QrCode, Download } from 'lucide-react';
 import QRCode from 'react-qr-code';
+import { useTranslation } from 'react-i18next';
 import api from '../../api/axios';
 import { formatCurrency, formatDate, formatCountdown } from '../../utils/formatters';
 
-const STATUS_TABS = [
-  { value: '', label: 'Të gjitha' },
-  { value: 'active', label: '✓ Aktivë' },
-  { value: 'redeemed', label: '📤 Përdorur' },
-  { value: 'expired', label: '⏰ Skaduar' },
-];
-
 function VoucherCard({ voucher }) {
+  const { t } = useTranslation();
   const [showQR, setShowQR] = useState(false);
   const countdown = voucher.status === 'active' ? formatCountdown(voucher.expiresAt) : null;
   const daysLeft = countdown && !countdown.expired ? countdown.days : null;
   const isExpiringSoon = daysLeft !== null && daysLeft <= 3;
+
+  const statusLabel = voucher.status === 'active'
+    ? t('dashboard.voucher_valid')
+    : voucher.status === 'redeemed'
+      ? t('dashboard.voucher_used')
+      : t('dashboard.voucher_expired');
 
   return (
     <div className={`card overflow-hidden ${isExpiringSoon ? 'ring-2 ring-orange-400' : ''}`}>
@@ -31,19 +32,23 @@ function VoucherCard({ voucher }) {
           <div className="flex items-start justify-between gap-2 mb-2">
             <h3 className="font-semibold text-gray-900 text-sm leading-snug line-clamp-2">{voucher.deal?.title}</h3>
             <span className={`badge flex-shrink-0 ${voucher.status === 'active' ? 'badge-green' : voucher.status === 'redeemed' ? 'badge-blue' : 'badge-gray'}`}>
-              {voucher.status === 'active' ? 'Aktiv' : voucher.status === 'redeemed' ? 'Përdorur' : 'Skaduar'}
+              {statusLabel}
             </span>
           </div>
           <div className="font-mono text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-lg inline-block mb-2">{voucher.code}</div>
           <div className="text-xs text-gray-500 space-y-1">
-            <div>Çmim: <span className="font-semibold text-brand-600">{formatCurrency(voucher.paidPrice)}</span></div>
-            <div>Skadon: <span className={`font-medium ${isExpiringSoon ? 'text-orange-600' : ''}`}>{formatDate(voucher.expiresAt)}</span></div>
-            {daysLeft !== null && <div className={`${isExpiringSoon ? 'text-orange-600 font-semibold' : 'text-gray-400'}`}>{isExpiringSoon ? `⚠️ ${daysLeft} ditë mbetur!` : `${daysLeft} ditë mbetur`}</div>}
+            <div>{t('dashboard.price_label')}: <span className="font-semibold text-brand-600">{formatCurrency(voucher.paidPrice)}</span></div>
+            <div>{t('dashboard.expires_label')}: <span className={`font-medium ${isExpiringSoon ? 'text-orange-600' : ''}`}>{formatDate(voucher.expiresAt)}</span></div>
+            {daysLeft !== null && (
+              <div className={`${isExpiringSoon ? 'text-orange-600 font-semibold' : 'text-gray-400'}`}>
+                {isExpiringSoon ? `⚠️ ${daysLeft} ${t('dashboard.days_left_urgent')}` : `${daysLeft} ${t('dashboard.days_left')}`}
+              </div>
+            )}
           </div>
           {voucher.status === 'active' && (
             <button onClick={() => setShowQR(!showQR)}
               className="mt-3 flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 font-medium">
-              <QrCode size={14} />{showQR ? 'Fshih QR' : 'Shfaq QR Code'}
+              <QrCode size={14} />{showQR ? t('dashboard.hide_qr') : t('dashboard.show_qr')}
             </button>
           )}
         </div>
@@ -59,10 +64,10 @@ function VoucherCard({ voucher }) {
           </div>
           <div className="text-center">
             <p className="font-mono text-lg font-bold tracking-widest text-gray-900">{voucher.code}</p>
-            <p className="text-xs text-gray-400 mt-1">Paraqitni këtë te biznesi</p>
+            <p className="text-xs text-gray-400 mt-1">{t('dashboard.show_to_business')}</p>
           </div>
           <button className="btn-secondary text-xs py-2 px-4 flex items-center gap-1.5">
-            <Download size={14} />Shkarko Voucherin
+            <Download size={14} />{t('dashboard.download_voucher')}
           </button>
         </motion.div>
       )}
@@ -71,8 +76,16 @@ function VoucherCard({ voucher }) {
 }
 
 export default function CustomerVouchers() {
+  const { t } = useTranslation();
   const [activeStatus, setActiveStatus] = useState('');
   const [page, setPage] = useState(1);
+
+  const STATUS_TABS = [
+    { value: '', label: t('dashboard.all_tab') },
+    { value: 'active', label: `✓ ${t('dashboard.active_tab')}` },
+    { value: 'redeemed', label: `📤 ${t('dashboard.used_tab')}` },
+    { value: 'expired', label: `⏰ ${t('dashboard.expired_tab')}` },
+  ];
 
   const { data, isLoading } = useQuery({
     queryKey: ['vouchers', 'my', activeStatus, page],
@@ -83,12 +96,11 @@ export default function CustomerVouchers() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Voucherët e Mi</h1>
-          <p className="text-gray-500 text-sm mt-1">Menaxhoni voucher-ët e blerë</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.vouchers_title')}</h1>
+          <p className="text-gray-500 text-sm mt-1">{t('dashboard.vouchers_subtitle')}</p>
         </div>
       </div>
 
-      {/* Status tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide">
         {STATUS_TABS.map(({ value, label }) => (
           <button key={value} onClick={() => { setActiveStatus(value); setPage(1); }}
@@ -105,18 +117,18 @@ export default function CustomerVouchers() {
           {data.data.map((v) => <VoucherCard key={v._id} voucher={v} />)}
           {data.pagination?.pages > 1 && (
             <div className="flex justify-center gap-2 mt-6">
-              <button onClick={() => setPage((p) => p - 1)} disabled={!data.pagination.hasPrev} className="px-4 py-2 rounded-xl border text-sm disabled:opacity-40">← Para</button>
+              <button onClick={() => setPage((p) => p - 1)} disabled={!data.pagination.hasPrev} className="px-4 py-2 rounded-xl border text-sm disabled:opacity-40">{t('search.prev')}</button>
               <span className="px-4 py-2 text-sm text-gray-600">{page} / {data.pagination.pages}</span>
-              <button onClick={() => setPage((p) => p + 1)} disabled={!data.pagination.hasNext} className="px-4 py-2 rounded-xl border text-sm disabled:opacity-40">Pas →</button>
+              <button onClick={() => setPage((p) => p + 1)} disabled={!data.pagination.hasNext} className="px-4 py-2 rounded-xl border text-sm disabled:opacity-40">{t('search.next')}</button>
             </div>
           )}
         </div>
       ) : (
         <div className="text-center py-20 card">
           <QrCode size={48} className="text-gray-200 mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-gray-700 mb-2">Nuk keni voucher {activeStatus ? STATUS_TABS.find((t) => t.value === activeStatus)?.label.toLowerCase() : ''}</h3>
-          <p className="text-gray-400 mb-6">Blini voucher-in tuaj të parë dhe kurseni tani!</p>
-          <a href="/search" className="btn-primary">Shfleto Ofertat →</a>
+          <h3 className="text-lg font-bold text-gray-700 mb-2">{t('dashboard.no_vouchers_type')}</h3>
+          <p className="text-gray-400 mb-6">{t('dashboard.buy_first_cta')}</p>
+          <a href="/search" className="btn-primary">{t('dashboard.browse_offers')} →</a>
         </div>
       )}
     </div>

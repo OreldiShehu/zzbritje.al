@@ -6,6 +6,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'react-hot-toast';
 import App from './App.jsx';
 import './index.css';
+import './i18n';
 
 const queryClient = new QueryClient({
   defaultOptions: {

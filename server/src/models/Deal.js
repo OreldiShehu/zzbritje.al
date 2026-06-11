@@ -49,8 +49,8 @@ const dealSchema = new mongoose.Schema({
   // Location
   city: { type: String, required: true },
   location: {
-    type: { type: String, enum: ['Point'], default: 'Point' },
-    coordinates: [Number],
+    type: { type: String, enum: ['Point'] },
+    coordinates: { type: [Number], default: undefined },
   },
 
   // Terms
@@ -108,7 +108,7 @@ const dealSchema = new mongoose.Schema({
 });
 
 // Indexes
-dealSchema.index({ location: '2dsphere' });
+dealSchema.index({ location: '2dsphere' }, { sparse: true });
 dealSchema.index({ slug: 1 });
 dealSchema.index({ business: 1, status: 1 });
 dealSchema.index({ category: 1, city: 1, status: 1 });

@@ -1,19 +1,15 @@
 import { useInView } from 'react-intersection-observer';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Users, Store, Ticket, TrendingUp } from 'lucide-react';
-
-const stats = [
-  { icon: Users, value: 50000, suffix: '+', label: 'Klientë Aktivë', color: 'text-blue-600', bg: 'bg-blue-50' },
-  { icon: Store, value: 1200, suffix: '+', label: 'Biznese Partnere', color: 'text-brand-600', bg: 'bg-brand-50' },
-  { icon: Ticket, value: 80000, suffix: '+', label: 'Voucher të Shitur', color: 'text-purple-600', bg: 'bg-purple-50' },
-  { icon: TrendingUp, value: 80, suffix: '%', label: 'Kursim Maksimal', color: 'text-orange-600', bg: 'bg-orange-50' },
-];
+import api from '../../api/axios';
 
 function CountUp({ target, suffix, inView }) {
   const [count, setCount] = useState(0);
   useEffect(() => {
-    if (!inView) return;
+    if (!inView || !target) { setCount(target); return; }
     let start = 0;
     const step = target / 60;
     const timer = setInterval(() => {
@@ -27,7 +23,21 @@ function CountUp({ target, suffix, inView }) {
 }
 
 export default function Stats() {
+  const { t } = useTranslation();
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.2 });
+
+  const { data } = useQuery({
+    queryKey: ['platform-stats'],
+    queryFn: () => api.get('/stats').then((r) => r.data.data),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const stats = [
+    { icon: Users, value: data?.users || 0, suffix: '+', label: t('home.stats_users'), color: 'text-blue-600', bg: 'bg-blue-50' },
+    { icon: Store, value: data?.businesses || 0, suffix: '+', label: t('home.stats_businesses'), color: 'text-brand-600', bg: 'bg-brand-50' },
+    { icon: Ticket, value: data?.vouchers || 0, suffix: '+', label: t('home.stats_vouchers'), color: 'text-purple-600', bg: 'bg-purple-50' },
+    { icon: TrendingUp, value: 80, suffix: '%', label: t('home.stats_savings'), color: 'text-orange-600', bg: 'bg-orange-50' },
+  ];
 
   return (
     <section ref={ref} className="py-20 bg-brand-gradient relative overflow-hidden">
@@ -37,8 +47,8 @@ export default function Stats() {
       </div>
       <div className="container-custom relative">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-black text-white font-display">Numrat flasin</h2>
-          <p className="text-blue-100 mt-3">Platforma Nr.1 e zbritjeve në Shqipëri</p>
+          <h2 className="text-3xl md:text-4xl font-black text-white font-display">{t('home.stats_title')}</h2>
+          <p className="text-blue-100 mt-3">{t('home.stats_subtitle')}</p>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map(({ icon: Icon, value, suffix, label, color, bg }, i) => (

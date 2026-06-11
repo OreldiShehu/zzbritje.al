@@ -4,33 +4,35 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, UserPlus, Mail, Lock, User, Phone, Gift } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, Mail, Lock, User, Gift } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../api/axios';
 import toast from 'react-hot-toast';
 
-const schema = z.object({
-  firstName: z.string().min(2, 'Emri duhet të ketë të paktën 2 karaktere').max(50),
-  lastName: z.string().min(2, 'Mbiemri duhet të ketë të paktën 2 karaktere').max(50),
-  email: z.string().email('Email-i nuk është valid'),
-  phone: z.string().optional(),
-  password: z.string().min(8, 'Fjalëkalimi duhet të ketë të paktën 8 karaktere'),
-  confirmPassword: z.string(),
-  role: z.enum(['customer', 'business']),
-  referralCode: z.string().optional(),
-  terms: z.boolean().refine((v) => v === true, 'Duhet të pranoni kushtet'),
-}).refine((d) => d.password === d.confirmPassword, {
-  message: 'Fjalëkalimet nuk përputhen',
-  path: ['confirmPassword'],
-});
-
 export default function Register() {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const ref = params.get('ref') || '';
+
+  const schema = z.object({
+    firstName: z.string().min(2, t('common.error')).max(50),
+    lastName: z.string().min(2, t('common.error')).max(50),
+    email: z.string().email(t('common.error')),
+    phone: z.string().optional(),
+    password: z.string().min(8, t('common.error')),
+    confirmPassword: z.string(),
+    role: z.enum(['customer', 'business']),
+    referralCode: z.string().optional(),
+    terms: z.boolean().refine((v) => v === true, t('common.error')),
+  }).refine((d) => d.password === d.confirmPassword, {
+    message: t('common.error'),
+    path: ['confirmPassword'],
+  });
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm({
     resolver: zodResolver(schema),
@@ -45,10 +47,10 @@ export default function Register() {
       const { confirmPassword, terms, ...submitData } = data;
       const res = await api.post('/auth/register', submitData);
       setAuth(res.data.user, res.data.accessToken);
-      toast.success(`Mirë se erdhe, ${res.data.user.firstName}! 🎉`);
+      toast.success(t('auth.welcome_user', { name: res.data.user.firstName }) + ' 🎉');
       navigate(role === 'business' ? '/business-dashboard/profile' : '/dashboard');
     } catch (err) {
-      const msg = err.response?.data?.message || 'Ndodhi një gabim. Provo përsëri.';
+      const msg = err.response?.data?.message || t('common.error');
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -67,10 +69,15 @@ export default function Register() {
           <div className="w-20 h-20 bg-brand-gradient rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-brand-lg">
             <span className="font-black text-4xl">Z</span>
           </div>
-          <h2 className="text-3xl font-black mb-4 font-display">Bashkohuni Falas</h2>
-          <p className="text-blue-100 mb-8">Krijoni llogarinë tuaj dhe filloni të kurseni tani</p>
+          <h2 className="text-3xl font-black mb-4 font-display">{t('auth.register_title')}</h2>
+          <p className="text-blue-100 mb-8">{t('auth.register_subtitle')}</p>
           <div className="space-y-3 text-left max-w-xs mx-auto">
-            {['200 L bonus në portofol pas verifikimit', 'Qasje në mijëra oferta ekskluzive', 'QR Code voucher në çast', 'Program besnikërie me pikë dhe shpërblime'].map((f) => (
+            {[
+              t('auth.feature_bonus', '200 L bonus in wallet after verification'),
+              t('auth.feature_deals', 'Access to thousands of exclusive deals'),
+              t('auth.feature_qr', 'Instant QR Code voucher'),
+              t('auth.feature_loyalty', 'Loyalty program with points and rewards'),
+            ].map((f) => (
               <div key={f} className="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-3">
                 <span className="text-brand-300">✓</span>
                 <span className="text-sm text-white">{f}</span>
@@ -92,15 +99,18 @@ export default function Register() {
             <span className="font-black text-2xl">Zbritje<span className="text-brand-600">.al</span></span>
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-1">Krijoni Llogarinë</h2>
-          <p className="text-gray-500 mb-6">Regjistrohu falas dhe filloni të kurseni</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">{t('auth.register_title')}</h2>
+          <p className="text-gray-500 mb-6">{t('auth.register_subtitle')}</p>
 
           {/* Role selector */}
           <div className="grid grid-cols-2 gap-3 mb-6">
-            {[{ value: 'customer', label: '🛍️ Klient', desc: 'Blejë voucher' }, { value: 'business', label: '🏢 Biznes', desc: 'Krijo oferta' }].map(({ value, label, desc }) => (
+            {[
+              { value: 'customer', emoji: '🛍️', label: t('auth.role_customer'), desc: t('auth.customer_desc') },
+              { value: 'business', emoji: '🏢', label: t('auth.role_business'), desc: t('auth.business_desc') },
+            ].map(({ value, emoji, label, desc }) => (
               <label key={value} className={`cursor-pointer flex flex-col items-center gap-1 p-4 rounded-xl border-2 transition-all ${role === value ? 'border-brand-500 bg-brand-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}>
                 <input type="radio" value={value} {...register('role')} className="sr-only" />
-                <span className="text-lg">{label}</span>
+                <span className="text-lg">{emoji} {label}</span>
                 <span className="text-xs text-gray-500">{desc}</span>
               </label>
             ))}
@@ -121,12 +131,15 @@ export default function Register() {
           </div>
 
           <div className="flex items-center gap-3 mb-5">
-            <div className="h-px flex-1 bg-gray-200" /><span className="text-gray-400 text-sm">ose me email</span><div className="h-px flex-1 bg-gray-200" />
+            <div className="h-px flex-1 bg-gray-200" /><span className="text-gray-400 text-sm">{t('auth.or_email')}</span><div className="h-px flex-1 bg-gray-200" />
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              {[{ name: 'firstName', label: 'Emri', icon: User, placeholder: 'Arta' }, { name: 'lastName', label: 'Mbiemri', icon: User, placeholder: 'Gashi' }].map(({ name, label, icon: Icon, placeholder }) => (
+              {[
+                { name: 'firstName', label: t('auth.first_name'), icon: User, placeholder: 'Arta' },
+                { name: 'lastName', label: t('auth.last_name'), icon: User, placeholder: 'Gashi' },
+              ].map(({ name, label, icon: Icon, placeholder }) => (
                 <div key={name}>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
                   <div className="relative">
@@ -139,7 +152,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('auth.email')}</label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input {...register('email')} type="email" placeholder="ju@shembull.com" className={`input-field pl-9 ${errors.email ? 'input-error' : ''}`} />
@@ -148,10 +161,10 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Fjalëkalimi</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('auth.password')}</label>
               <div className="relative">
                 <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input {...register('password')} type={showPassword ? 'text' : 'password'} placeholder="Min. 8 karaktere" className={`input-field pl-9 pr-10 ${errors.password ? 'input-error' : ''}`} />
+                <input {...register('password')} type={showPassword ? 'text' : 'password'} placeholder="Min. 8" className={`input-field pl-9 pr-10 ${errors.password ? 'input-error' : ''}`} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -160,17 +173,17 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Konfirmo Fjalëkalimin</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('auth.confirm_password')}</label>
               <div className="relative">
                 <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input {...register('confirmPassword')} type="password" placeholder="Rivendosni fjalëkalimin" className={`input-field pl-9 ${errors.confirmPassword ? 'input-error' : ''}`} />
+                <input {...register('confirmPassword')} type="password" placeholder="••••••••" className={`input-field pl-9 ${errors.confirmPassword ? 'input-error' : ''}`} />
               </div>
               {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                <Gift size={14} className="inline mr-1 text-brand-500" />Kodi i Referimit (opsional)
+                <Gift size={14} className="inline mr-1 text-brand-500" />{t('auth.referral_code')}
               </label>
               <input {...register('referralCode')} placeholder="ABCD1234" className="input-field" />
             </div>
@@ -178,20 +191,20 @@ export default function Register() {
             <label className="flex items-start gap-3 cursor-pointer">
               <input type="checkbox" {...register('terms')} className="mt-1 w-4 h-4 rounded text-brand-600 border-gray-300 focus:ring-brand-500" />
               <span className="text-sm text-gray-600">
-                Pranoj <Link to="/terms" className="text-brand-600 hover:underline">Kushtet e Shërbimit</Link> dhe{' '}
-                <Link to="/privacy" className="text-brand-600 hover:underline">Politikën e Privatësisë</Link>
+                {t('auth.terms_agree')} <Link to="/terms" className="text-brand-600 hover:underline">{t('auth.terms')}</Link> {t('auth.and')}{' '}
+                <Link to="/privacy" className="text-brand-600 hover:underline">{t('auth.privacy')}</Link>
               </span>
             </label>
             {errors.terms && <p className="text-red-500 text-xs">{errors.terms.message}</p>}
 
             <button type="submit" disabled={loading} className="btn-primary w-full py-3.5 text-base">
-              {loading ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><UserPlus size={20} /> Regjistrohu Falas</>}
+              {loading ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><UserPlus size={20} /> {t('auth.register_free_btn')}</>}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            Keni llogari?{' '}
-            <Link to="/login" className="text-brand-600 font-semibold hover:text-brand-700">Kyçuni →</Link>
+            {t('auth.have_account')}{' '}
+            <Link to="/login" className="text-brand-600 font-semibold hover:text-brand-700">{t('auth.login_link_label')}</Link>
           </p>
         </motion.div>
       </div>

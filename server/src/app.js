@@ -95,6 +95,23 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Public platform stats
+app.get('/api/v1/stats', async (req, res) => {
+  try {
+    const User = require('./models/User');
+    const Business = require('./models/Business');
+    const Voucher = require('./models/Voucher');
+    const [users, businesses, vouchers] = await Promise.all([
+      User.countDocuments(),
+      Business.countDocuments({ verificationStatus: 'verified' }),
+      Voucher.countDocuments(),
+    ]);
+    res.json({ success: true, data: { users, businesses, vouchers } });
+  } catch {
+    res.json({ success: true, data: { users: 0, businesses: 0, vouchers: 0 } });
+  }
+});
+
 // API Routes
 const API = '/api/v1';
 app.use(`${API}/auth`, authRoutes);

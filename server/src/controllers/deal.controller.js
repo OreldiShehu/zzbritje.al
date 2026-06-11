@@ -37,7 +37,11 @@ exports.getAllDeals = catchAsync(async (req, res) => {
 });
 
 exports.getDeal = catchAsync(async (req, res, next) => {
-  const deal = await Deal.findOne({ slug: req.params.slug, status: { $in: ['active', 'sold_out', 'expired'] } })
+  const isId = /^[0-9a-fA-F]{24}$/.test(req.params.slug);
+  const query = isId
+    ? { _id: req.params.slug }
+    : { slug: req.params.slug, status: { $in: ['active', 'sold_out', 'expired'] } };
+  const deal = await Deal.findOne(query)
     .populate('business', 'name slug logo city address phone website socialLinks businessHours averageRating totalReviews verificationStatus isFeatured')
     .populate('category', 'name slug icon')
     .populate('createdBy', 'firstName lastName avatar');
@@ -171,12 +175,21 @@ exports.getMyBusinessDeals = catchAsync(async (req, res, next) => {
 });
 
 exports.getFeaturedDeals = catchAsync(async (req, res) => {
-  const deals = await Deal.find({
+  let deals = await Deal.find({
     status: 'active', isFeatured: true, endDate: { $gt: new Date() },
   }).sort({ featuredOrder: 1, views: -1 }).limit(8)
-    .populate('business', 'name slug logo city averageRating')
-    .populate('category', 'name slug icon')
+    .populate('business', 'name slug logo city averageRating verificationStatus')
+    .populate('category', 'name slug icon color')
     .lean();
+
+  if (!deals.length) {
+    deals = await Deal.find({
+      status: 'active', endDate: { $gt: new Date() },
+    }).sort({ createdAt: -1 }).limit(8)
+      .populate('business', 'name slug logo city averageRating verificationStatus')
+      .populate('category', 'name slug icon color')
+      .lean();
+  }
 
   res.status(200).json({ success: true, data: deals });
 });

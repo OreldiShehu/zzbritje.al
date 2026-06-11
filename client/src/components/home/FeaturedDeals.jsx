@@ -1,17 +1,19 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import DealCard from '../common/DealCard';
 import { DealGridSkeleton } from '../common/LoadingSpinner';
 import { Link } from 'react-router-dom';
 import { SearchX } from 'lucide-react';
 
 export default function FeaturedDeals({ deals = [], isLoading = false }) {
+  const { t } = useTranslation();
   if (isLoading) return <DealGridSkeleton count={8} />;
 
   if (!deals.length) {
     return (
       <div className="text-center py-20">
         <SearchX size={48} className="text-gray-300 mx-auto mb-4" />
-        <p className="text-gray-500">Nuk ka oferta aktive momentalisht.</p>
+        <p className="text-gray-500">{t('home.no_deals')}</p>
       </div>
     );
   }

@@ -39,7 +39,7 @@ export default function EditDeal() {
         originalPrice: deal.originalPrice,
         discountedPrice: deal.discountedPrice,
         totalVouchers: deal.totalVouchers,
-        maxVouchersPerCustomer: deal.maxVouchersPerCustomer,
+        maxPerCustomer: deal.maxPerCustomer,
         startDate: deal.startDate ? deal.startDate.slice(0, 16) : '',
         endDate: deal.endDate ? deal.endDate.slice(0, 16) : '',
       });
@@ -52,7 +52,7 @@ export default function EditDeal() {
       qc.invalidateQueries(['business', 'deals']);
       qc.invalidateQueries(['deal', id]);
       toast.success('Deal-i u përditësua!');
-      navigate('/business/deals');
+      navigate('/business-dashboard/deals');
     },
     onError: (err) => toast.error(err.response?.data?.message || 'Ndodhi një gabim.'),
   });
@@ -140,7 +140,7 @@ export default function EditDeal() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Max./Klient</label>
-              <input type="number" {...register('maxVouchersPerCustomer', { min: 1, max: 10, valueAsNumber: true })} className="input-field" />
+              <input type="number" {...register('maxPerCustomer', { min: 1, max: 10, valueAsNumber: true })} className="input-field" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
