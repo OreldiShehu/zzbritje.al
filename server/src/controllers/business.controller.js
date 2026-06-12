@@ -1,9 +1,11 @@
 const Business = require('../models/Business');
 const User = require('../models/User');
 const Deal = require('../models/Deal');
+const Notification = require('../models/Notification');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const { paginate, buildPaginatedResponse, createAuditLog } = require('../utils/helpers');
+const { emitToUser } = require('../config/socket');
 
 exports.createBusiness = catchAsync(async (req, res, next) => {
   if (req.user.role !== 'business') {
@@ -24,7 +26,32 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(req.user.id, { businessId: business._id });
   await createAuditLog({ actor: req.user, action: 'create_business', resource: 'Business', resourceId: business._id, req });
 
-  res.status(201).json({ success: true, data: business, message: 'Business profile created. Pending verification.' });
+  // Welcome notification with onboarding info
+  try {
+    const notification = await Notification.create({
+      user: req.user.id,
+      type: 'system',
+      title: `Mirë se vini, ${business.name}! 🎉`,
+      message: `Profili juaj u krijua me sukses. Ja çfarë duhet të dini:\n\n` +
+        `📌 Si funksionon platforma:\n` +
+        `• Ju krijoni deal-e me çmimin tuaj bazë\n` +
+        `• Klientët blejnë voucher-in online dhe vijnë fizikisht tek ju\n` +
+        `• Klienti paguan direkt tek ju kur paraqet voucher-in\n\n` +
+        `💰 Komisioni:\n` +
+        `• Platforma mban një komision të vogël nga çmimi juaj bazë\n` +
+        `• Komisioni faturohet mujor — vetëm nga voucher-et e shitura\n` +
+        `• Nuk ka kosto fikse apo abonime mujore\n\n` +
+        `✅ Hapat e ardhshëm:\n` +
+        `1. Plotësoni profilin e biznesit tuaj (logo, adresë, telefon)\n` +
+        `2. Krijoni dealin tuaj të parë nga seksioni "Deal-et"\n` +
+        `3. Ndani linkun me klientët tuaj\n\n` +
+        `Për çdo pyetje, ekipi ynë është gjithmonë në dispozicion. Suksese! 🚀`,
+      isRead: false,
+    });
+    try { emitToUser(req.user.id.toString(), 'notification', notification); } catch {}
+  } catch {}
+
+  res.status(201).json({ success: true, data: business, message: 'Business profile created successfully.' });
 });
 
 exports.getMyBusiness = catchAsync(async (req, res, next) => {

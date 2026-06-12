@@ -1,39 +1,39 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle, TrendingUp, Users, Zap, Star, Shield, BarChart2, ArrowRight, ChevronDown } from 'lucide-react';
+import { CheckCircle, TrendingUp, Users, Zap, Star, Shield, BarChart2, ArrowRight, ChevronDown, Banknote, MapPin, QrCode } from 'lucide-react';
 import { useState } from 'react';
 
 const STEPS = [
   { num: '1', title: 'Regjistrohu Falas', desc: 'Krijo llogarinë tënde si biznes. Nuk nevojitet karta krediti dhe nuk ka kosto fillestare.' },
-  { num: '2', title: 'Krijo Ofertën', desc: 'Vendos çmimin tënd bazë dhe publikoni dealin tuaj. Setup i shpejtë në pak minuta.' },
+  { num: '2', title: 'Krijo Ofertën', desc: 'Vendos çmimin tënd dhe publiko dealin. Setup i shpejtë brenda pak minutave.' },
   { num: '3', title: 'Merr Klientë', desc: 'Klientët blejnë voucher-in online dhe vijnë fizikisht tek biznesi juaj.' },
-  { num: '4', title: 'Mblidh të Ardhurat', desc: 'Klienti paguan direkt tek ju. Komisioni faturohet mujor — thjeshtë dhe transparent.' },
+  { num: '4', title: 'Mblidh të Ardhurat', desc: 'Klienti paguan direkt tek ju kur paraqet voucher-in. Thjeshtë dhe pa ndërmjetës.' },
 ];
 
 const FAQS = [
   {
     q: 'Sa kushton listimi i biznesit?',
-    a: 'Regjistrimi dhe listimi janë plotësisht falas. Nuk ka abonime mujore. Paguani vetëm komisionin 10% bazuar në voucher-et e shitura.',
+    a: 'Regjistrimi dhe listimi janë plotësisht falas. Nuk ka abonime mujore apo kosto fillestare. Detajet e komisionit do t\'i merrni pas regjistrimit.',
   },
   {
-    q: 'Si funksionon komisioni?',
-    a: 'Platforma shton 7% mbi çmimin tuaj bazë — këtë e paguan klienti, jo ju. Nga çmimi juaj bazë, platforma mban 10% si komision, i cili faturohel mujor.',
+    q: 'Kur marr paratë nga voucher-et?',
+    a: 'Klienti paguan direkt tek ju kur vjen të përdorë voucher-in fizikisht. Nuk ka pritje dhe nuk ka para që kalojnë nëpër platformë.',
   },
   {
-    q: 'Kur marr paratë?',
-    a: 'Klienti paguan direkt tek ju kur vjen të përdorë voucher-in. Nuk ka pritje — cash direkt në biznesin tuaj.',
+    q: 'Mund të vendos çmimin dhe kushtet që dua?',
+    a: 'Po, ju keni kontroll të plotë mbi çmimin bazë, numrin e voucher-eve, datat e vlefshmërisë dhe kushtet e veçanta të dealit.',
   },
   {
-    q: 'Mund të vendos çmimin që dua?',
-    a: 'Po, ju vendosni çmimin bazë. Platforma shton automatikisht 7% dhe klienti e sheh çmimin final përpara blerjes.',
+    q: 'Si e verifikoj voucher-in e klientit?',
+    a: 'Platforma ju ofron një skaner QR të integruar në dashboard. Skanoni kodin e klientit dhe sistemi konfirmon menjëherë nëse voucher-i është i vlefshëm.',
   },
   {
     q: 'Sa kohë duhet për t\'u verifikuar?',
-    a: 'Ekipi ynë shqyrton çdo biznes brenda 24-48 orësh. Do të merrni njoftim sapo llogaria juaj të verifikohet.',
+    a: 'Pasi të krijoni profilin, llogaria juaj verifikohet nga ekipi ynë. Do të merrni një njoftim me të gjitha informacionet e nevojshme sapo të verifikohet.',
   },
   {
-    q: 'Mund të vendos rregulla si "1 voucher për tavolinë"?',
-    a: 'Po. Gjatë krijimit të dealit mund të aktivizoni opsionin "1 voucher për tavolinë" dhe klientët e shohin këtë kufizim para blerjes.',
+    q: 'Mund të vendos "1 voucher për tavolinë"?',
+    a: 'Po. Gjatë krijimit të dealit mund të aktivizoni opsionin "1 voucher për tavolinë" dhe klientët e shohin këtë kufizim para blerjes. Ju e kontrolloni gjatë skanimit.',
   },
 ];
 
@@ -45,23 +45,15 @@ function FAQ({ q, a }) {
         <span className="font-semibold text-gray-900 text-sm">{q}</span>
         <ChevronDown size={18} className={`text-gray-400 flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
-      <AnimateHeight open={open}>
+      <motion.div
+        initial={false}
+        animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.2 }}
+        className="overflow-hidden"
+      >
         <p className="px-5 pb-5 text-sm text-gray-600 leading-relaxed">{a}</p>
-      </AnimateHeight>
+      </motion.div>
     </div>
-  );
-}
-
-function AnimateHeight({ open, children }) {
-  return (
-    <motion.div
-      initial={false}
-      animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }}
-      transition={{ duration: 0.2 }}
-      className="overflow-hidden"
-    >
-      {children}
-    </motion.div>
   );
 }
 
@@ -89,26 +81,31 @@ export default function BecomePartner() {
         </div>
       </div>
 
-      {/* Commission info — clean, no fake numbers */}
+      {/* 3 value props */}
       <div className="container-custom py-16 max-w-4xl">
-        <h2 className="text-3xl font-black text-gray-900 text-center mb-2">Model Transparent & i Thjeshtë</h2>
-        <p className="text-gray-500 text-center mb-10">Pa surpriza. Pa abonime. Paguani vetëm kur shisni.</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <h2 className="text-3xl font-black text-gray-900 text-center mb-2">Pa Rrezik. Pa Abonime.</h2>
+        <p className="text-gray-500 text-center mb-10">Ju fokusoheni te biznesi — ne kujdesemi për pjesën tjetër</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="rounded-2xl border border-gray-200 p-7 text-center">
-            <div className="text-4xl font-black text-gray-900 mb-2">0 L</div>
-            <p className="font-bold text-gray-700 mb-1">Kosto Fillestare</p>
-            <p className="text-sm text-gray-400">Regjistrim falas, pa abonime, pa dokumentacion.</p>
+            <div className="w-14 h-14 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Banknote size={28} className="text-brand-600" />
+            </div>
+            <h3 className="font-bold text-gray-900 text-lg mb-2">Zero Kosto Fillestare</h3>
+            <p className="text-gray-500 text-sm leading-relaxed">Regjistrohuni falas dhe filloni të shisni. Paguani vetëm kur fitoni.</p>
           </div>
-          <div className="rounded-2xl border-2 border-brand-500 bg-brand-50 p-7 text-center relative">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-xs font-bold px-3 py-1 rounded-full">Nga Klienti</div>
-            <div className="text-4xl font-black text-brand-700 mb-2">+7%</div>
-            <p className="font-bold text-gray-700 mb-1">Markup Platformës</p>
-            <p className="text-sm text-gray-500">Platforma shton 7% mbi çmimin tuaj bazë. Këtë e paguan klienti, jo ju.</p>
+          <div className="rounded-2xl border-2 border-brand-400 bg-brand-50 p-7 text-center">
+            <div className="w-14 h-14 bg-brand-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <MapPin size={28} className="text-brand-600" />
+            </div>
+            <h3 className="font-bold text-gray-900 text-lg mb-2">Cash Direkt Tek Ju</h3>
+            <p className="text-gray-500 text-sm leading-relaxed">Klienti paguan fizikisht kur vjen. Nuk ka para që presin apo transferohen.</p>
           </div>
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-7 text-center">
-            <div className="text-4xl font-black text-amber-700 mb-2">10%</div>
-            <p className="font-bold text-gray-700 mb-1">Komision Mujor</p>
-            <p className="text-sm text-gray-500">10% e çmimit tuaj bazë, faturuar mujor vetëm nga voucher-et e shitura.</p>
+          <div className="rounded-2xl border border-gray-200 p-7 text-center">
+            <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <QrCode size={28} className="text-green-600" />
+            </div>
+            <h3 className="font-bold text-gray-900 text-lg mb-2">Kontroll i Plotë</h3>
+            <p className="text-gray-500 text-sm leading-relaxed">Vendosni çmimin, kufizimet dhe datat. Skanoni voucher-et me QR scanner.</p>
           </div>
         </div>
       </div>
@@ -139,7 +136,7 @@ export default function BecomePartner() {
             { icon: TrendingUp, title: 'Rritja e Vizitorëve', desc: 'Bizneset partnere shënojnë rritje të dukshme të klientëve të rinj pas listimit.' },
             { icon: BarChart2, title: 'Dashboard i Plotë', desc: 'Statistika të detajuara: voucher të shitura, të ardhura, vlerësime klientësh.' },
             { icon: Zap, title: 'Setup i Shpejtë', desc: 'Postoni dealin e parë brenda 10 minutave. Pa dokumentacion kompleks.' },
-            { icon: Shield, title: 'Pa Rrezik Financiar', desc: 'Zero kosto fillestare. Komisioni vlen vetëm kur ju fitoni — asnjë kosto tjetër.' },
+            { icon: Shield, title: 'Pa Rrezik Financiar', desc: 'Zero kosto fillestare. Paguani vetëm kur fitoni — asnjë kosto tjetër.' },
             { icon: Star, title: 'Mbështetje e Dedikuar', desc: 'Ekipi ynë është gjithmonë gati për t\'ju ndihmuar të maksimizoni ofertat.' },
           ].map(({ icon: Icon, title, desc }) => (
             <motion.div key={title} whileHover={{ y: -3 }} className="card p-6">
@@ -153,7 +150,7 @@ export default function BecomePartner() {
         </div>
       </div>
 
-      {/* What's included checklist */}
+      {/* What's included */}
       <div className="bg-brand-50 py-16">
         <div className="container-custom max-w-3xl">
           <h2 className="text-3xl font-black text-gray-900 text-center mb-10">Çfarë Përfshihet</h2>
@@ -162,10 +159,10 @@ export default function BecomePartner() {
               'Dashboard i dedikuar për biznesin tuaj',
               'Skaner QR për verifikim të shpejtë',
               'Statistika dhe analitika në kohë reale',
-              'Fotografi dhe galeri imazhesh për dealin',
+              'Galeri imazhesh për dealin tuaj',
               'Opsion "1 voucher për tavolinë"',
               'Sistemi i vlerësimeve nga klientët',
-              'Njoftimet kur shiten voucher-et',
+              'Njoftime kur shiten voucher-et',
               'Mbështetje teknike nga ekipi ynë',
             ].map((item) => (
               <div key={item} className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-brand-100">
