@@ -128,11 +128,6 @@ export default function Home() {
         </section>
       )}
 
-      {/* Top Businesses */}
-      <Suspense fallback={null}>
-        <TopBusinesses />
-      </Suspense>
-
       {/* Cities */}
       <Suspense fallback={null}>
         <CitySection />

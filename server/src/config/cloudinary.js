@@ -48,8 +48,12 @@ const uploadAvatar = multer({
 
 const uploadBusinessImages = multer({
   storage: businessStorage,
-  limits: { fileSize: 5 * 1024 * 1024, files: 5 },
-}).array('images', 5);
+  limits: { fileSize: 5 * 1024 * 1024 },
+}).fields([
+  { name: 'logo', maxCount: 1 },
+  { name: 'coverImage', maxCount: 1 },
+  { name: 'images', maxCount: 5 },
+]);
 
 const uploadReviewImages = multer({
   storage: reviewStorage,

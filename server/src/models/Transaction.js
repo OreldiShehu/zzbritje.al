@@ -7,7 +7,7 @@ const transactionSchema = new mongoose.Schema({
   vouchers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Voucher' }],
 
   // Payment
-  paymentMethod: { type: String, enum: ['stripe', 'paypal', 'wallet', 'card'], required: true },
+  paymentMethod: { type: String, enum: ['stripe', 'paypal', 'wallet', 'card', 'cash'], required: true },
   paymentProvider: { type: String, enum: ['stripe', 'paypal'] },
   paymentIntentId: { type: String, sparse: true },
   paypalOrderId: { type: String, sparse: true },

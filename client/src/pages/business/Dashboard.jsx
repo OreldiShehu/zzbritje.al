@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { TrendingUp, Ticket, Eye, Star, ArrowRight, Plus, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import {
+  TrendingUp, Ticket, Eye, Star, ArrowRight, Plus,
+  AlertCircle, CheckCircle, Clock, Banknote, Building2, Info,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useAuthStore } from '../../store/authStore';
 import api from '../../api/axios';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency } from '../../utils/formatters';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 function StatCard({ icon: Icon, label, value, sub, color, bg, change }) {
@@ -28,9 +30,22 @@ function StatCard({ icon: Icon, label, value, sub, color, bg, change }) {
   );
 }
 
+function EarningsRow({ label, value, sub, highlight, deduct, info }) {
+  return (
+    <div className={`flex items-center justify-between py-3 ${highlight ? 'border-t-2 border-gray-200 mt-1 pt-4' : 'border-b border-gray-100'}`}>
+      <div>
+        <p className={`text-sm font-medium ${highlight ? 'font-bold text-gray-900' : 'text-gray-600'}`}>{label}</p>
+        {info && <p className="text-xs text-gray-400 mt-0.5">{info}</p>}
+      </div>
+      <p className={`font-bold text-base ${highlight ? 'text-xl text-green-600' : deduct ? 'text-red-500' : 'text-gray-900'}`}>
+        {deduct ? '-' : ''}{value}
+      </p>
+    </div>
+  );
+}
+
 export default function BusinessDashboard() {
   const { t } = useTranslation();
-  const { user } = useAuthStore();
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ['business', 'stats'],
@@ -45,6 +60,21 @@ export default function BusinessDashboard() {
   const isVerified = business?.verificationStatus === 'verified';
   const isPending = business?.verificationStatus === 'pending' || business?.verificationStatus === 'under_review';
 
+  const MARKUP = stats?.markupRate || 0.07;
+  const COMMISSION = stats?.commissionRate || 0.10;
+
+  // Per-voucher example using top deal or generic
+  const topDeal = stats?.topDeals?.[0];
+  const exampleBusinessPrice = topDeal ? Math.round(topDeal.revenue / Math.max(1, topDeal.soldVouchers) / (1 - COMMISSION)) : 4500;
+  const exampleCustomerPrice = Math.round(exampleBusinessPrice * (1 + MARKUP));
+  const exampleMarkup = exampleCustomerPrice - exampleBusinessPrice;
+  const exampleCommission = Math.round(exampleBusinessPrice * COMMISSION);
+  const examplePlatformTotal = exampleMarkup + exampleCommission;
+  const exampleBusinessNet = exampleBusinessPrice - exampleCommission;
+
+  const revenue = stats?.revenue || {};
+  const vouchersSold = revenue.vouchersSold || stats?.vouchers?.total || 0;
+
   return (
     <div className="space-y-6">
       {/* Verification Banner */}
@@ -52,7 +82,9 @@ export default function BusinessDashboard() {
         <motion.div
           initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
           className={`rounded-2xl p-4 flex items-start gap-4 ${isPending ? 'bg-amber-50 border border-amber-200' : 'bg-red-50 border border-red-200'}`}>
-          {isPending ? <Clock size={20} className="text-amber-600 flex-shrink-0 mt-0.5" /> : <AlertCircle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />}
+          {isPending
+            ? <Clock size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
+            : <AlertCircle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />}
           <div className="flex-1">
             <p className={`font-bold text-sm ${isPending ? 'text-amber-800' : 'text-red-700'}`}>
               {isPending ? t('business.pending_verification_title') : t('business.not_verified_title')}
@@ -69,30 +101,32 @@ export default function BusinessDashboard() {
         </motion.div>
       )}
 
+      {/* Header banner */}
       {isVerified && (
         <motion.div
           initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
           className="bg-brand-gradient rounded-3xl p-6 text-white relative overflow-hidden">
           <div className="absolute right-0 top-0 w-40 h-40 bg-white/10 rounded-full -translate-y-10 translate-x-10" />
-          <div className="relative flex items-center justify-between">
+          <div className="relative flex items-center justify-between flex-wrap gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle size={18} className="text-emerald-300" />
                 <span className="text-blue-100 text-sm font-medium">{t('business.verified')}</span>
               </div>
-              <h2 className="text-2xl font-black">{business?.businessName}</h2>
-              <p className="text-blue-100 text-sm capitalize">{business?.subscriptionPlan} Plan</p>
+              <h2 className="text-2xl font-black">{business?.name}</h2>
+              <p className="text-blue-100 text-sm capitalize">{business?.plan || 'free'} Plan</p>
             </div>
-            <Link to="/business-dashboard/deals/create" className="bg-white text-brand-600 font-bold px-5 py-3 rounded-xl hover:bg-brand-50 transition-all flex items-center gap-2 shadow-lg">
+            <Link to="/business-dashboard/deals/create"
+              className="bg-white text-brand-600 font-bold px-5 py-3 rounded-xl hover:bg-brand-50 transition-all flex items-center gap-2 shadow-lg">
               <Plus size={18} />{t('business.create_deal_btn')}
             </Link>
           </div>
-          <div className="grid grid-cols-4 gap-3 mt-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
             {[
-              { label: t('business.revenue_label'), value: formatCurrency(stats?.revenue?.total || 0) },
-              { label: t('business.active_vouchers_label'), value: stats?.vouchers?.total || 0 },
-              { label: t('business.views_label'), value: (stats?.views || 0).toLocaleString() },
-              { label: t('business.rating_label'), value: `${(business?.averageRating || 0).toFixed(1)} ⭐` },
+              { label: 'Fitimi neto', value: formatCurrency(revenue.businessNet || 0) },
+              { label: 'Voucher të shitura', value: vouchersSold },
+              { label: 'Vizita', value: (stats?.views || 0).toLocaleString() },
+              { label: 'Vlerësim', value: `${(business?.averageRating || 0).toFixed(1)} ⭐` },
             ].map(({ label, value }) => (
               <div key={label} className="bg-white/15 rounded-xl p-3 text-center">
                 <p className="font-black text-lg">{value}</p>
@@ -103,12 +137,111 @@ export default function BusinessDashboard() {
         </motion.div>
       )}
 
-      {/* Stats */}
+      {/* STATS CARDS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={TrendingUp} label={t('business.revenue_month')} value={formatCurrency(stats?.revenue?.thisMonth || 0)} change={stats?.revenue?.change} color="text-brand-600" bg="bg-brand-50" />
-        <StatCard icon={Ticket} label={t('business.active_vouchers_label')} value={stats?.vouchers?.active || 0} sub={t('business.used_count', { count: stats?.vouchers?.redeemed || 0 })} color="text-blue-600" bg="bg-blue-50" />
+        <StatCard icon={TrendingUp} label="Fitimi këtë muaj" value={formatCurrency(revenue.thisMonth || 0)} change={revenue.change} color="text-brand-600" bg="bg-brand-50" />
+        <StatCard icon={Ticket} label={t('business.active_vouchers_label')} value={stats?.vouchers?.active || 0} sub={`${stats?.vouchers?.redeemed || 0} të përdorura`} color="text-blue-600" bg="bg-blue-50" />
         <StatCard icon={Eye} label={t('business.total_views')} value={(stats?.views || 0).toLocaleString()} color="text-purple-600" bg="bg-purple-50" />
         <StatCard icon={Star} label={t('business.avg_rating')} value={`${(business?.averageRating || 0).toFixed(1)}/5`} sub={`${business?.totalReviews || 0} ${t('business.reviews_label')}`} color="text-amber-500" bg="bg-amber-50" />
+      </div>
+
+      {/* ====== EARNINGS BREAKDOWN ====== */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        {/* Totals so far */}
+        <div className="card p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <div className="w-9 h-9 bg-green-50 rounded-xl flex items-center justify-center">
+              <Banknote size={18} className="text-green-600" />
+            </div>
+            <div>
+              <h3 className="font-bold text-gray-900">Totali i Fitimeve</h3>
+              <p className="text-xs text-gray-500">{vouchersSold} voucher të shitura deri tani</p>
+            </div>
+          </div>
+
+          <EarningsRow
+            label="Klientët paguan (cash tek ti)"
+            info="Çmimi që klientët paguan direkt tek biznesi juaj"
+            value={formatCurrency(revenue.totalCollected || 0)}
+          />
+          <EarningsRow
+            label="Platforma merr (markup 7%)"
+            info="Shtesa 7% e çmimit tënd — i mbledhur nga klienti"
+            value={formatCurrency((revenue.totalCollected || 0) - (revenue.commissionPaid || 0) - (revenue.businessNet || 0))}
+            deduct
+          />
+          <EarningsRow
+            label="Platforma merr (komision 10%)"
+            info="10% e çmimit tuaj bazë — paguhet platformës"
+            value={formatCurrency(revenue.commissionPaid || 0)}
+            deduct
+          />
+          <EarningsRow
+            label="Fitimi juaj neto"
+            info="Shuma që ju mbetet pas të gjitha zbritjeve"
+            value={formatCurrency(revenue.businessNet || 0)}
+            highlight
+          />
+
+          <div className="mt-4 flex items-start gap-2 p-3 bg-blue-50 rounded-xl">
+            <Info size={14} className="text-blue-500 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-blue-700">
+              <strong>Si funksionon cash:</strong> Klienti paguan çmimin e plotë direkt tek biznesi juaj kur paraqet voucherin. Platforma lëshon faturë mujore për komisionin.
+            </p>
+          </div>
+        </div>
+
+        {/* Per-voucher math */}
+        <div className="card p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <div className="w-9 h-9 bg-brand-50 rounded-xl flex items-center justify-center">
+              <Building2 size={18} className="text-brand-600" />
+            </div>
+            <div>
+              <h3 className="font-bold text-gray-900">Llogaritja për 1 Voucher</h3>
+              <p className="text-xs text-gray-500">Shembull bazuar në çmimin tuaj</p>
+            </div>
+          </div>
+
+          <EarningsRow
+            label="Çmimi që vendos ti (bazë)"
+            value={formatCurrency(exampleBusinessPrice)}
+          />
+          <EarningsRow
+            label={`+ Markup platformës (${Math.round(MARKUP * 100)}%)`}
+            info="Shtesa që platforma vendos — klient e paguan këtë"
+            value={formatCurrency(exampleMarkup)}
+          />
+          <div className="py-2 px-3 bg-brand-50 rounded-xl my-2 flex justify-between items-center">
+            <p className="text-sm font-bold text-brand-700">Klienti paguan</p>
+            <p className="text-base font-black text-brand-700">{formatCurrency(exampleCustomerPrice)}</p>
+          </div>
+          <EarningsRow
+            label={`− Komision platformës (${Math.round(COMMISSION * 100)}%)`}
+            info="10% e çmimit tuaj bazë, i zbritur nga fitimi juaj"
+            value={formatCurrency(exampleCommission)}
+            deduct
+          />
+          <EarningsRow
+            label="Ti fiton neto"
+            value={formatCurrency(exampleBusinessNet)}
+            highlight
+          />
+
+          <div className="mt-4 grid grid-cols-2 gap-2 text-center">
+            <div className="bg-red-50 rounded-xl p-3">
+              <p className="text-xs text-red-500 font-medium">Platforma merr gjithsej</p>
+              <p className="font-black text-red-600 text-lg">{formatCurrency(examplePlatformTotal)}</p>
+              <p className="text-xs text-red-400">({exampleMarkup} markup + {exampleCommission} komision)</p>
+            </div>
+            <div className="bg-green-50 rounded-xl p-3">
+              <p className="text-xs text-green-600 font-medium">Ti merr cash</p>
+              <p className="font-black text-green-700 text-lg">{formatCurrency(exampleCustomerPrice)}</p>
+              <p className="text-xs text-green-500">nga klienti direkt</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Chart */}
@@ -131,7 +264,7 @@ export default function BusinessDashboard() {
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="date" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip formatter={(v) => [formatCurrency(v), t('business.revenue_label')]} />
+              <Tooltip formatter={(v) => [formatCurrency(v), 'Fitim neto']} />
               <Area type="monotone" dataKey="revenue" stroke="#1a3f8a" strokeWidth={2} fill="url(#revGrad)" />
             </AreaChart>
           </ResponsiveContainer>
@@ -151,15 +284,33 @@ export default function BusinessDashboard() {
             {stats.topDeals.map((deal, i) => (
               <div key={deal._id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
                 <span className="text-sm font-bold text-gray-400 w-5">#{i + 1}</span>
-                <img src={deal.images?.[0]?.url || 'https://via.placeholder.com/40'} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                <div className="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {deal.images?.[0]?.url
+                    ? <img src={deal.images[0].url} alt="" className="w-full h-full object-cover" />
+                    : <Ticket size={16} className="text-brand-400" />}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900 truncate">{deal.title}</p>
-                  <p className="text-xs text-gray-400">{deal.vouchersSold || 0} {t('business.voucher_sales')}</p>
+                  <p className="text-xs text-gray-400">{deal.soldVouchers || 0} voucher të shitura</p>
                 </div>
                 <span className="text-sm font-bold text-brand-600">{formatCurrency(deal.revenue || 0)}</span>
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && !stats?.topDeals?.length && !revenue.totalCollected && (
+        <div className="card p-10 text-center">
+          <div className="w-16 h-16 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <TrendingUp size={28} className="text-brand-400" />
+          </div>
+          <h3 className="font-bold text-gray-900 mb-2">Ende nuk keni shitje</h3>
+          <p className="text-gray-500 text-sm mb-5">Krijoni deal-in tuaj të parë dhe filloni të fitoni.</p>
+          <Link to="/business-dashboard/deals/create" className="btn-primary inline-flex items-center gap-2">
+            <Plus size={16} /> Krijo Deal
+          </Link>
         </div>
       )}
     </div>

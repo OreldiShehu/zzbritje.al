@@ -5,8 +5,11 @@ const { protect } = require('../middleware/auth.middleware');
 const { restrictTo } = require('../middleware/role.middleware');
 const { paymentRateLimiter } = require('../middleware/rateLimit.middleware');
 
-router.post('/webhook', express.raw({ type: 'application/json' }), paymentController.stripeWebhook);
-router.post('/create-intent', protect, paymentRateLimiter, paymentController.createStripePaymentIntent);
+// PayPal
+router.post('/paypal/create-order', protect, paymentRateLimiter, paymentController.createPayPalOrder);
+router.post('/paypal/capture-order/:orderId', protect, paymentRateLimiter, paymentController.capturePayPalOrder);
+
+// Transactions
 router.get('/transactions', protect, paymentController.getMyTransactions);
 router.get('/transactions/:id', protect, paymentController.getTransactionDetails);
 router.post('/transactions/:transactionId/refund', protect, paymentController.requestRefund);

@@ -18,7 +18,9 @@ const dealSchema = new mongoose.Schema({
     required: true,
   },
   originalPrice: { type: Number, required: true, min: 0 },
-  discountedPrice: { type: Number, required: true, min: 0 },
+  businessPrice: { type: Number, required: true, min: 0 }, // price business sets (before platform markup)
+  discountedPrice: { type: Number, min: 0 },               // customer-facing price = businessPrice * 1.07 (auto)
+  platformMarkup: { type: Number, default: 0 },            // 7% of businessPrice (auto)
   discountPercentage: { type: Number, min: 0, max: 100 },
   currency: { type: String, default: 'ALL' },
   savingsAmount: { type: Number },
@@ -45,6 +47,7 @@ const dealSchema = new mongoose.Schema({
   remainingVouchers: { type: Number },
   maxPerCustomer: { type: Number, default: 1 },
   minPerOrder: { type: Number, default: 1 },
+  maxVouchersPerMonth: { type: Number, default: 10 }, // platform limit per deal per month
 
   // Location
   city: { type: String, required: true },
@@ -94,7 +97,7 @@ const dealSchema = new mongoose.Schema({
   metaDescription: { type: String },
 
   // Commission
-  commissionRate: { type: Number, default: 0.20 },
+  commissionRate: { type: Number, default: 0.10 },
   commissionAmount: { type: Number },
 
   // Highlight / badge
@@ -119,19 +122,28 @@ dealSchema.index({ averageRating: -1 });
 dealSchema.index({ createdAt: -1 });
 dealSchema.index({ title: 'text', description: 'text', tags: 'text' });
 
+const PLATFORM_MARKUP_RATE = 0.07; // 7% added on top of businessPrice
+
 dealSchema.pre('save', function (next) {
   if (this.isModified('title') || !this.slug) {
     this.slug = slugify(this.title, { lower: true, strict: true }) + '-' +
       Date.now().toString(36);
   }
 
-  // Calculate savings
+  // Auto-calculate customer-facing price from businessPrice
+  if (this.businessPrice) {
+    this.platformMarkup = Math.round(this.businessPrice * PLATFORM_MARKUP_RATE);
+    this.discountedPrice = this.businessPrice + this.platformMarkup;
+  }
+
+  // Calculate savings & commission
   this.discountPercentage = Math.round(
     ((this.originalPrice - this.discountedPrice) / this.originalPrice) * 100
   );
   this.savingsAmount = this.originalPrice - this.discountedPrice;
   this.remainingVouchers = this.totalVouchers - this.soldVouchers;
-  this.commissionAmount = this.discountedPrice * this.commissionRate;
+  // Commission is 20% of businessPrice (not including platform markup)
+  this.commissionAmount = (this.businessPrice || this.discountedPrice) * this.commissionRate;
 
   // Auto-expire check
   if (this.remainingVouchers <= 0) this.status = 'sold_out';

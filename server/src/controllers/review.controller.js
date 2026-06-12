@@ -8,7 +8,7 @@ exports.createReview = catchAsync(async (req, res, next) => {
   const voucher = await Voucher.findById(req.body.voucherId);
   if (!voucher) return next(new AppError('Voucher not found.', 404));
   if (!voucher.user.equals(req.user.id)) return next(new AppError('Not authorized.', 403));
-  if (voucher.status !== 'redeemed') return next(new AppError('You can only review redeemed vouchers.', 400));
+  if (voucher.status === 'cancelled') return next(new AppError('Cannot review a cancelled voucher.', 400));
   if (voucher.hasReview) return next(new AppError('You have already reviewed this voucher.', 400));
 
   const images = req.files?.map((f) => ({ url: f.path, publicId: f.filename })) || [];

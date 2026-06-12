@@ -119,10 +119,13 @@ exports.getBusinessStats = catchAsync(async (req, res, next) => {
 
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
 
   const [
-    totalVouchers, redeemedVouchers, pendingVouchers, recentTransactions,
-    monthlyRevenue, topDeals,
+    totalVouchers, redeemedVouchers, activeVouchers,
+    rawChartData, allTimeAgg, thisMonthAgg, lastMonthAgg, topDeals,
   ] = await Promise.all([
     Voucher.countDocuments({ business: business._id }),
     Voucher.countDocuments({ business: business._id, status: 'redeemed' }),
@@ -134,19 +137,51 @@ exports.getBusinessStats = catchAsync(async (req, res, next) => {
     ]),
     Transaction.aggregate([
       { $match: { business: business._id, paymentStatus: 'completed' } },
-      { $group: { _id: null, total: { $sum: '$businessAmount' } } },
+      { $group: { _id: null, businessNet: { $sum: '$businessAmount' }, totalCollected: { $sum: '$subtotal' }, commissionPaid: { $sum: '$commissionAmount' }, vouchersSold: { $sum: '$quantity' } } },
     ]),
-    Deal.find({ business: business._id }).sort({ soldVouchers: -1 }).limit(5).select('title soldVouchers revenue averageRating').lean(),
+    Transaction.aggregate([
+      { $match: { business: business._id, paymentStatus: 'completed', createdAt: { $gte: startOfMonth } } },
+      { $group: { _id: null, businessNet: { $sum: '$businessAmount' }, totalCollected: { $sum: '$subtotal' } } },
+    ]),
+    Transaction.aggregate([
+      { $match: { business: business._id, paymentStatus: 'completed', createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
+      { $group: { _id: null, businessNet: { $sum: '$businessAmount' } } },
+    ]),
+    Deal.find({ business: business._id }).sort({ soldVouchers: -1 }).limit(5).select('title soldVouchers revenue averageRating images').lean(),
   ]);
+
+  const allTime = allTimeAgg[0] || {};
+  const thisMonthData = thisMonthAgg[0] || {};
+  const lastMonthNet = lastMonthAgg[0]?.businessNet || 0;
+  const thisMonthNet = thisMonthData.businessNet || 0;
+  const change = lastMonthNet > 0 ? Math.round(((thisMonthNet - lastMonthNet) / lastMonthNet) * 100) : null;
+
+  // Rename _id → date for chart
+  const chartData = rawChartData.map(({ _id, revenue, count }) => ({ date: _id, revenue, count }));
 
   res.status(200).json({
     success: true,
     data: {
       business: { name: business.name, verificationStatus: business.verificationStatus, averageRating: business.averageRating, plan: business.plan },
-      vouchers: { total: totalVouchers, redeemed: redeemedVouchers, pending: pendingVouchers },
-      revenue: { total: monthlyRevenue[0]?.total || 0, commissionPaid: business.platformCommissionPaid },
-      recentTransactions,
+      vouchers: { total: totalVouchers, redeemed: redeemedVouchers, active: activeVouchers },
+      revenue: {
+        businessNet: allTime.businessNet || 0,      // what business actually earns (after commission)
+        totalCollected: allTime.totalCollected || 0, // total cash collected from customers
+        commissionPaid: allTime.commissionPaid || 0, // total paid to platform as commission
+        platformFee: (allTime.totalCollected || 0) - (allTime.businessNet || 0), // markup + commission total
+        vouchersSold: allTime.vouchersSold || 0,
+        thisMonth: thisMonthNet,
+        thisMonthCollected: thisMonthData.totalCollected || 0,
+        lastMonth: lastMonthNet,
+        change,
+        // aliases
+        total: allTime.businessNet || 0,
+      },
+      views: business.profileViews || 0,
+      chartData,
       topDeals,
+      commissionRate: business.commissionRate || 0.10,
+      markupRate: 0.07,
     },
   });
 });

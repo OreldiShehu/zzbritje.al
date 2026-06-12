@@ -23,7 +23,7 @@ const handleDealUpload = (req, res, next) => {
   });
 };
 router.post('/', protect, restrictTo('business'), handleDealUpload, dealController.createDeal);
-router.patch('/:id', protect, restrictTo('business', 'admin'), dealController.updateDeal);
+router.patch('/:id', protect, restrictTo('business', 'admin'), handleDealUpload, dealController.updateDeal);
 router.delete('/:id', protect, restrictTo('business', 'admin'), dealController.deleteDeal);
 
 router.post('/:id/wishlist', protect, dealController.toggleWishlist);

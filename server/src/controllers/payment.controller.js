@@ -1,95 +1,133 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const axios = require('axios');
 const Transaction = require('../models/Transaction');
 const Deal = require('../models/Deal');
 const User = require('../models/User');
+const Voucher = require('../models/Voucher');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const { paginate, buildPaginatedResponse } = require('../utils/helpers');
+const { createVoucherPurchase } = require('../services/voucher.service');
 
-exports.createStripePaymentIntent = catchAsync(async (req, res, next) => {
-  const { dealId, quantity = 1, useWallet } = req.body;
+// Albanian Lek → EUR conversion rate (update periodically)
+const ALL_TO_EUR = 0.0093; // 1 ALL ≈ 0.0093 EUR
+
+function getPayPalBase() {
+  return process.env.PAYPAL_MODE === 'live'
+    ? 'https://api-m.paypal.com'
+    : 'https://api-m.sandbox.paypal.com';
+}
+
+async function getPayPalToken() {
+  const base = getPayPalBase();
+  const res = await axios.post(
+    `${base}/v1/oauth2/token`,
+    'grant_type=client_credentials',
+    {
+      auth: {
+        username: process.env.PAYPAL_CLIENT_ID,
+        password: process.env.PAYPAL_CLIENT_SECRET,
+      },
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    }
+  );
+  return { token: res.data.access_token, base };
+}
+
+exports.createPayPalOrder = catchAsync(async (req, res, next) => {
+  const { dealId, quantity = 1 } = req.body;
 
   const deal = await Deal.findById(dealId);
   if (!deal) return next(new AppError('Deal not found.', 404));
   if (deal.status !== 'active') return next(new AppError('Deal not available.', 400));
 
-  const user = await User.findById(req.user.id);
-  let amount = deal.discountedPrice * quantity;
-  let walletUsed = 0;
+  const totalALL = deal.discountedPrice * quantity;
+  const totalEUR = (totalALL * ALL_TO_EUR).toFixed(2);
 
-  if (useWallet && user.walletBalance > 0) {
-    walletUsed = Math.min(user.walletBalance, amount);
-    amount -= walletUsed;
-  }
+  const { token, base } = await getPayPalToken();
 
-  if (amount <= 0) {
-    return res.status(200).json({ success: true, useWalletOnly: true, walletUsed });
-  }
-
-  // Stripe uses smallest currency unit; ALL to cents approximation
-  const amountInCents = Math.round(amount * 100);
-
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: amountInCents,
-    currency: 'all',
-    automatic_payment_methods: { enabled: true },
-    metadata: {
-      dealId: deal._id.toString(),
-      userId: user._id.toString(),
-      quantity: quantity.toString(),
-      walletUsed: walletUsed.toString(),
+  const order = await axios.post(
+    `${base}/v2/checkout/orders`,
+    {
+      intent: 'CAPTURE',
+      purchase_units: [{
+        reference_id: `${dealId}-${quantity}-${req.user.id}`,
+        description: deal.title.substring(0, 127),
+        amount: {
+          currency_code: 'EUR',
+          value: totalEUR,
+        },
+      }],
+      application_context: {
+        brand_name: 'Zbritje.al',
+        locale: 'sq-AL',
+        user_action: 'PAY_NOW',
+        shipping_preference: 'NO_SHIPPING',
+      },
     },
-  });
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
 
-  res.status(200).json({
-    success: true,
-    clientSecret: paymentIntent.client_secret,
-    paymentIntentId: paymentIntent.id,
-    amount,
-    walletUsed,
-  });
+  res.status(201).json({ success: true, orderId: order.data.id });
 });
 
-exports.stripeWebhook = catchAsync(async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  let event;
+exports.capturePayPalOrder = catchAsync(async (req, res, next) => {
+  const { orderId } = req.params;
+  const { dealId, quantity = 1 } = req.body;
 
+  if (!dealId) return next(new AppError('dealId is required.', 400));
+
+  const deal = await Deal.findById(dealId);
+  if (!deal) return next(new AppError('Deal not found.', 404));
+  if (deal.status !== 'active') return next(new AppError('Deal not available.', 400));
+  if (deal.remainingVouchers < quantity) {
+    return next(new AppError(`Only ${deal.remainingVouchers} vouchers remaining.`, 400));
+  }
+
+  // Verify existing purchase limit
+  const existingPurchases = await Voucher.countDocuments({ user: req.user.id, deal: dealId });
+  if (existingPurchases + quantity > deal.maxPerCustomer) {
+    return next(new AppError(`Maximum ${deal.maxPerCustomer} voucher(s) per customer.`, 400));
+  }
+
+  // Capture with PayPal
+  const { token, base } = await getPayPalToken();
+  let capture;
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    const captureRes = await axios.post(
+      `${base}/v2/checkout/orders/${orderId}/capture`,
+      {},
+      { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
+    );
+    capture = captureRes.data;
   } catch (err) {
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    const msg = err.response?.data?.message || 'PayPal capture failed.';
+    return next(new AppError(msg, 400));
   }
 
-  switch (event.type) {
-    case 'payment_intent.succeeded': {
-      const pi = event.data.object;
-      await Transaction.findOneAndUpdate(
-        { paymentIntentId: pi.id },
-        { paymentStatus: 'completed', completedAt: new Date() }
-      );
-      break;
-    }
-    case 'payment_intent.payment_failed': {
-      const pi = event.data.object;
-      await Transaction.findOneAndUpdate(
-        { paymentIntentId: pi.id },
-        { paymentStatus: 'failed', failureReason: pi.last_payment_error?.message }
-      );
-      break;
-    }
-    case 'charge.dispute.created': {
-      const dispute = event.data.object;
-      await Transaction.findOneAndUpdate(
-        { paymentIntentId: dispute.payment_intent },
-        { paymentStatus: 'disputed' }
-      );
-      break;
-    }
-    default:
-      break;
+  if (capture.status !== 'COMPLETED') {
+    return next(new AppError('Payment was not completed.', 400));
   }
 
-  res.json({ received: true });
+  // Create vouchers
+  const result = await createVoucherPurchase({
+    dealId,
+    userId: req.user.id,
+    quantity,
+    paymentMethod: 'paypal',
+    paymentIntentId: orderId,
+    ipAddress: req.ip,
+  });
+
+  res.status(201).json({
+    success: true,
+    message: 'Blerja u krye me sukses!',
+    data: result,
+  });
 });
 
 exports.requestRefund = catchAsync(async (req, res, next) => {
@@ -131,15 +169,17 @@ exports.processRefund = catchAsync(async (req, res, next) => {
 
   const refundAmount = amount || transaction.total;
 
-  if (transaction.paymentIntentId && transaction.paymentProvider === 'stripe') {
+  if (transaction.paymentIntentId && transaction.paymentMethod === 'paypal') {
     try {
-      const refund = await stripe.refunds.create({
-        payment_intent: transaction.paymentIntentId,
-        amount: Math.round(refundAmount * 100),
-      });
-      transaction.refundId = refund.id;
+      const captureId = transaction.captureId || transaction.paymentIntentId;
+      const { token, base } = await getPayPalToken();
+      await axios.post(
+        `${base}/v2/payments/captures/${captureId}/refund`,
+        { amount: { value: (refundAmount * ALL_TO_EUR).toFixed(2), currency_code: 'EUR' } },
+        { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
+      );
     } catch (err) {
-      return next(new AppError(`Stripe refund failed: ${err.message}`, 500));
+      return next(new AppError(`PayPal refund failed: ${err.response?.data?.message || err.message}`, 500));
     }
   } else {
     await User.findByIdAndUpdate(transaction.user, { $inc: { walletBalance: refundAmount } });
@@ -151,7 +191,6 @@ exports.processRefund = catchAsync(async (req, res, next) => {
   transaction.paymentStatus = 'refunded';
   await transaction.save();
 
-  // Cancel associated vouchers
   await require('../models/Voucher').updateMany(
     { transaction: transaction._id, status: 'active' },
     { status: 'refunded' }

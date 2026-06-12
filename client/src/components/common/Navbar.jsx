@@ -89,12 +89,13 @@ export default function Navbar() {
         <div className="container-custom">
           <div className="flex items-center gap-3 h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center flex-shrink-0">
+            <Link to="/" className="flex items-center gap-2 flex-shrink-0">
               <img
                 src="/logo.png"
                 alt="Zbritje.al"
                 className="h-8 sm:h-9 w-auto object-contain"
               />
+              <span className="font-black text-lg text-gray-900 font-display tracking-tight">Zbritje<span className="text-brand-600">.al</span></span>
             </Link>
 
             {/* Search */}
@@ -187,10 +188,10 @@ export default function Navbar() {
 
               {isAuthenticated ? (
                 <>
-                  <NavLink to="/dashboard/favorites" className="p-2 text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
+                  <NavLink to="/dashboard/favorites" className="hidden sm:flex p-2 text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
                     <Heart size={20} />
                   </NavLink>
-                  <NavLink to="/dashboard/notifications" className="relative p-2 text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
+                  <NavLink to="/dashboard/notifications" className="relative hidden sm:flex p-2 text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
                     <Bell size={20} />
                     {unreadCount > 0 && (
                       <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
@@ -298,6 +299,24 @@ export default function Navbar() {
                     </button>
                   ))}
                 </div>
+                {/* Favorites & Notifications in mobile menu */}
+                {isAuthenticated && (
+                  <div className="flex gap-2 pt-1">
+                    <NavLink to="/dashboard/favorites" onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2 flex-1 py-3 px-4 rounded-xl bg-gray-50 hover:bg-brand-50 text-gray-700 hover:text-brand-600 transition-colors text-sm font-medium">
+                      <Heart size={18} /> {t('nav.favorites', 'Të preferuarat')}
+                    </NavLink>
+                    <NavLink to="/dashboard/notifications" onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2 flex-1 py-3 px-4 rounded-xl bg-gray-50 hover:bg-brand-50 text-gray-700 hover:text-brand-600 transition-colors text-sm font-medium">
+                      <Bell size={18} /> {t('nav.notifications', 'Njoftime')}
+                      {unreadCount > 0 && (
+                        <span className="ml-auto w-5 h-5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </NavLink>
+                  </div>
+                )}
                 {!isAuthenticated && (
                   <div className="flex gap-2 pt-1">
                     <Link to="/login" onClick={() => setMobileOpen(false)} className="btn-secondary flex-1 py-2.5">{t('nav.login')}</Link>

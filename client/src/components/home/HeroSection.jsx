@@ -1,37 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Search, MapPin, ArrowRight, Play, TrendingUp, Shield, Star } from 'lucide-react';
+import { Search, MapPin, TrendingUp, Shield, Star, Users } from 'lucide-react';
 import { CITIES } from '../../utils/constants';
 
 const heroSlides = [
   {
-    title: 'Discover Albania\'s Best Deals',
-    titleAl: 'Zbuloni Ofertat Më të Mira në Shqipëri',
-    subtitle: 'Save up to 80% on restaurants, hotels, spa, activities and more.',
-    subtitleAl: 'Kurseni deri 80% në restorante, hotele, spa, aktivitete dhe shumë më tepër.',
     image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&q=80',
     accent: 'Restorante',
-    cta: '🍽️ Shfleto Restorantet',
   },
   {
-    title: 'Luxury Spa & Beauty',
-    titleAl: 'Bukuri & Relaksim me Çmime të Paprecedentë',
-    subtitle: 'Pamper yourself for less with premium beauty treatments.',
-    subtitleAl: 'Shijojeni kujdesin premium me çmimet më të ulëta.',
     image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1920&q=80',
     accent: 'Bukuri & Spa',
-    cta: '💅 Shfleto Spa',
   },
   {
-    title: 'Unforgettable Hotel Stays',
-    titleAl: 'Qëndroni në Hotelet Më të Mira',
-    subtitle: 'Book your next getaway at unbeatable prices.',
-    subtitleAl: 'Rezervoni pushimet tuaja me çmimet best-in-class.',
     image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920&q=80',
     accent: 'Hotele & Resorte',
-    cta: '🏨 Shfleto Hotelet',
   },
 ];
 
@@ -40,6 +25,72 @@ const getBadges = (t) => [
   { icon: Shield, label: t('hero.badges.trusted'), color: 'text-blue-400' },
   { icon: Star, label: t('hero.badges.rating'), color: 'text-amber-400' },
 ];
+
+/* ── iPhone-style slide button ── */
+function SlideBtn({ label, icon: Icon, onComplete, accent = false }) {
+  const trackRef = useRef(null);
+  const [maxDrag, setMaxDrag] = useState(220);
+  const [done, setDone] = useState(false);
+  const x = useMotionValue(0);
+
+  const textOpacity = useTransform(x, [0, maxDrag * 0.45], [1, 0]);
+  const trackFill = useTransform(
+    x,
+    [0, maxDrag],
+    accent
+      ? ['rgba(255,255,255,0.08)', 'rgba(255,255,255,0.22)']
+      : ['rgba(26,63,138,0.25)', 'rgba(26,63,138,0.7)']
+  );
+
+  useEffect(() => {
+    const measure = () => {
+      if (trackRef.current) {
+        setMaxDrag(trackRef.current.offsetWidth - 56 - 8);
+      }
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
+
+  const handleDragEnd = () => {
+    if (x.get() >= maxDrag * 0.70) {
+      animate(x, maxDrag, { duration: 0.15 });
+      setDone(true);
+      setTimeout(onComplete, 380);
+    } else {
+      animate(x, 0, { type: 'spring', stiffness: 400, damping: 30 });
+    }
+  };
+
+  return (
+    <motion.div
+      ref={trackRef}
+      style={{ background: trackFill }}
+      className="relative h-14 w-full rounded-full border border-white/25 backdrop-blur-sm overflow-hidden select-none touch-none"
+    >
+      <motion.span
+        style={{ opacity: textOpacity }}
+        className="absolute inset-0 flex items-center justify-center gap-2 text-white text-sm font-semibold tracking-wide pointer-events-none shimmer-text"
+      >
+        {done ? '✓' : label}
+      </motion.span>
+
+      <motion.div
+        drag={done ? false : 'x'}
+        style={{ x }}
+        dragConstraints={{ left: 0, right: maxDrag }}
+        dragElastic={0}
+        dragMomentum={false}
+        onDragEnd={handleDragEnd}
+        className={`absolute top-1 left-1 w-12 h-12 rounded-full flex items-center justify-center shadow-lg cursor-grab active:cursor-grabbing z-10 ${accent ? 'bg-white/20 border border-white/40' : 'bg-brand-600'}`}
+        whileTap={{ scale: 0.92 }}
+      >
+        <Icon size={20} className="text-white" />
+      </motion.div>
+    </motion.div>
+  );
+}
 
 export default function HeroSection() {
   const { t } = useTranslation();
@@ -78,13 +129,15 @@ export default function HeroSection() {
           className="absolute inset-0"
         >
           <img src={slide.image} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/30" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         </motion.div>
       </AnimatePresence>
 
-      <div className="relative container-custom py-20">
-        <div className="max-w-3xl">
+      <div className="relative container-custom py-20 w-full">
+        {/* Content — centered on mobile, left-aligned on md+ */}
+        <div className="max-w-2xl mx-auto md:mx-0 text-center md:text-left">
+
           {/* Accent badge */}
           <motion.div
             key={`badge-${activeSlide}`}
@@ -112,7 +165,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-lg md:text-xl text-gray-300 mb-8 max-w-xl leading-relaxed"
+            className="text-lg md:text-xl text-gray-300 mb-8 leading-relaxed"
           >
             {slide.subtitle}
           </motion.p>
@@ -132,7 +185,8 @@ export default function HeroSection() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('hero.search_placeholder')}
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/95 backdrop-blur-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-xl text-base" />
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/95 backdrop-blur-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-xl text-base"
+              />
             </div>
             <div className="relative sm:w-44">
               <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10" />
@@ -145,51 +199,42 @@ export default function HeroSection() {
                 {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-            <button type="submit" className="flex items-center justify-center gap-2 px-8 py-4 bg-brand-gradient text-white font-bold rounded-2xl shadow-brand-lg hover:shadow-brand hover:-translate-y-0.5 transition-all text-base">
+            <button
+              type="submit"
+              className="flex items-center justify-center gap-2 px-8 py-4 bg-brand-gradient text-white font-bold rounded-2xl shadow-brand-lg hover:shadow-brand hover:-translate-y-0.5 transition-all text-base"
+            >
               <Search size={20} /> {t('hero.search_btn')}
             </button>
           </motion.form>
 
-          {/* Quick links */}
+          {/* Two slide buttons — centered on mobile */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="flex flex-wrap gap-3 mb-10"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="flex flex-col sm:flex-row gap-3 items-center justify-center md:justify-start"
           >
-            <span className="text-gray-400 text-sm">{t('hero.popular')}</span>
-            {['Restorante', 'Spa & Bukuri', 'Hotele', 'Dentisti', 'Palestër'].map((tag) => (
-              <button
-                key={tag}
-                onClick={() => navigate(`/search?q=${tag}`)}
-                className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs hover:bg-white/20 transition-colors"
-              >
-                {tag}
-              </button>
-            ))}
+            <div className="w-full sm:w-64">
+              <SlideBtn
+                label={t('hero.explore_btn', 'Eksplorо Deale-t')}
+                icon={() => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>}
+                onComplete={() => navigate('/search')}
+                accent={false}
+              />
+            </div>
+            <div className="w-full sm:w-64">
+              <SlideBtn
+                label={t('hero.partner_btn', 'Bëhu Partner')}
+                icon={Users}
+                onComplete={() => navigate('/become-partner')}
+                accent={true}
+              />
+            </div>
           </motion.div>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-wrap gap-3">
-            <motion.button
-              onClick={() => navigate('/search')}
-              className="btn-primary text-base px-8 py-3.5"
-              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-            >
-              {t('hero.explore_btn')} <ArrowRight size={18} />
-            </motion.button>
-            <motion.a
-              href="/become-partner"
-              className="flex items-center gap-2 px-8 py-3.5 rounded-xl border-2 border-white/30 text-white font-semibold hover:bg-white/10 transition-all backdrop-blur-sm"
-              whileHover={{ scale: 1.02 }}
-            >
-              <Play size={18} /> {t('hero.partner_btn')}
-            </motion.a>
-          </div>
         </div>
       </div>
 
-      {/* Slide indicators */}
+      {/* Slide indicators — centered */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
         {heroSlides.map((_, i) => (
           <button
@@ -200,7 +245,7 @@ export default function HeroSection() {
         ))}
       </div>
 
-      {/* Trust badges */}
+      {/* Trust badges — desktop only */}
       <div className="absolute bottom-8 right-8 hidden lg:flex flex-col gap-3">
         {badges.map(({ icon: Icon, label, color }) => (
           <div key={label} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-black/40 backdrop-blur-sm border border-white/10">

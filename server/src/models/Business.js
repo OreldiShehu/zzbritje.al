@@ -104,7 +104,7 @@ const businessSchema = new mongoose.Schema({
   employeeCount: { type: String, enum: ['1-10', '11-50', '51-200', '201-500', '500+'] },
 
   // Commission
-  commissionRate: { type: Number, default: 0.20 },
+  commissionRate: { type: Number, default: 0.10 },
   commissionOverride: { type: Boolean, default: false },
 }, {
   timestamps: true,

@@ -66,15 +66,22 @@ export default function CreateDeal() {
   const nextStep = async () => {
     const fieldsPerStep = [
       ['title', 'description', 'dealType', 'category', 'city', 'startDate', 'endDate'],
-      ['originalPrice', 'discountedPrice'],
+      ['originalPrice', 'businessPrice'],
       [],
     ];
     const valid = await trigger(fieldsPerStep[step]);
     if (valid) setStep((s) => s + 1);
   };
 
-  const savings = values.originalPrice && values.discountedPrice
-    ? ((values.originalPrice - values.discountedPrice) / values.originalPrice * 100).toFixed(0)
+  const MARKUP_RATE = 0.07;
+  const COMMISSION_RATE = 0.10;
+  const businessPrice = Number(values.businessPrice) || 0;
+  const customerPrice = businessPrice ? Math.round(businessPrice * (1 + MARKUP_RATE)) : 0;
+  const platformMarkup = customerPrice - businessPrice;
+  const businessEarning = Math.round(businessPrice * (1 - COMMISSION_RATE));
+  const platformTotal = platformMarkup + Math.round(businessPrice * COMMISSION_RATE);
+  const savings = values.originalPrice && customerPrice
+    ? ((values.originalPrice - customerPrice) / values.originalPrice * 100).toFixed(0)
     : 0;
 
   return (
@@ -174,24 +181,42 @@ export default function CreateDeal() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">Çmimi Origjinal (ALL) *</label>
                     <input type="number" {...register('originalPrice', { required: true, min: 1, valueAsNumber: true })}
-                      className={`input-field ${errors.originalPrice ? 'input-error' : ''}`} placeholder="5000" />
+                      className={`input-field ${errors.originalPrice ? 'input-error' : ''}`} placeholder="9000" />
+                    <p className="text-xs text-gray-400 mt-1">Çmimi i plotë pa zbritje</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Çmimi me Zbritje (ALL) *</label>
-                    <input type="number" {...register('discountedPrice', { required: true, min: 1, valueAsNumber: true })}
-                      className={`input-field ${errors.discountedPrice ? 'input-error' : ''}`} placeholder="2500" />
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Çmimi juaj i Deal-it (ALL) *</label>
+                    <input type="number" {...register('businessPrice', { required: true, min: 1, valueAsNumber: true })}
+                      className={`input-field ${errors.businessPrice ? 'input-error' : ''}`} placeholder="4500" />
+                    <p className="text-xs text-gray-400 mt-1">Çmimi që dëshironi — platforma shton 7%</p>
                   </div>
                 </div>
 
-                {savings > 0 && (
-                  <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
-                    <div className="w-12 h-12 bg-brand-600 text-white rounded-xl flex items-center justify-center font-black text-lg">
-                      {savings}%
+                {businessPrice > 0 && (
+                  <div className="rounded-xl border-2 border-brand-200 bg-brand-50 p-4 space-y-3">
+                    <p className="text-sm font-bold text-brand-800">Ndarja e çmimit automatike</p>
+                    <div className="grid grid-cols-3 gap-3 text-center">
+                      <div className="bg-white rounded-lg p-3 border border-brand-100">
+                        <p className="text-xs text-gray-500 mb-1">Klienti paguan</p>
+                        <p className="font-black text-lg text-gray-900">{customerPrice.toLocaleString()} L</p>
+                        <p className="text-xs text-gray-400">({businessPrice.toLocaleString()} + 7%)</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-3 border border-green-200">
+                        <p className="text-xs text-gray-500 mb-1">Ju fitoni</p>
+                        <p className="font-black text-lg text-green-700">{businessEarning.toLocaleString()} L</p>
+                        <p className="text-xs text-gray-400">pas komisionit 10%</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-3 border border-amber-200">
+                        <p className="text-xs text-gray-500 mb-1">Platforma merr</p>
+                        <p className="font-black text-lg text-amber-700">{platformTotal.toLocaleString()} L</p>
+                        <p className="text-xs text-gray-400">markup + komision</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-green-800">Kursim: {savings}%</p>
-                      <p className="text-sm text-green-600">Klientët do të kursejnë {(values.originalPrice - values.discountedPrice).toLocaleString()} ALL</p>
-                    </div>
+                    {savings > 0 && (
+                      <p className="text-xs text-center text-brand-700 font-medium">
+                        Klienti kursen {savings}% nga çmimi origjinal
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -268,8 +293,10 @@ export default function CreateDeal() {
                   { label: 'Titulli', value: values.title },
                   { label: 'Qyteti', value: values.city },
                   { label: 'Çmimi Origjinal', value: `${(values.originalPrice || 0).toLocaleString()} ALL` },
-                  { label: 'Çmimi Zbritur', value: `${(values.discountedPrice || 0).toLocaleString()} ALL` },
-                  { label: 'Zbritja', value: `${savings}%` },
+                  { label: 'Çmimi juaj i Deal-it', value: `${(businessPrice || 0).toLocaleString()} ALL` },
+                  { label: 'Klienti paguan', value: `${customerPrice.toLocaleString()} ALL` },
+                  { label: 'Ju fitoni / voucher', value: `${businessEarning.toLocaleString()} ALL` },
+                  { label: 'Zbritja (klientit)', value: `${savings}%` },
                   { label: 'Total Voucher', value: values.totalVouchers },
                   { label: 'Max./Klient', value: values.maxPerCustomer },
                   { label: 'Imazhe', value: `${imagePreviews.length} të ngarkuara` },

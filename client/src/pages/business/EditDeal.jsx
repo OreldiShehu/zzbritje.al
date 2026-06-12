@@ -1,17 +1,20 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, ArrowLeft } from 'lucide-react';
+import { Save, ArrowLeft, ImagePlus, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axios';
 import { CITIES, DEAL_TYPES } from '../../utils/constants';
+import { getImageUrl } from '../../utils/formatters';
 import toast from 'react-hot-toast';
 
 export default function EditDeal() {
   const { id } = useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const [newImages, setNewImages] = useState([]);
+  const [newPreviews, setNewPreviews] = useState([]);
 
   const { data: deal, isLoading } = useQuery({
     queryKey: ['deal', id],
@@ -47,7 +50,12 @@ export default function EditDeal() {
   }, [deal, reset]);
 
   const updateMutation = useMutation({
-    mutationFn: (data) => api.patch(`/deals/${id}`, data),
+    mutationFn: (data) => {
+      const fd = new FormData();
+      Object.entries(data).forEach(([k, v]) => { if (v != null && v !== '') fd.append(k, v); });
+      newImages.forEach((img) => fd.append('images', img));
+      return api.patch(`/deals/${id}`, fd);
+    },
     onSuccess: () => {
       qc.invalidateQueries(['business', 'deals']);
       qc.invalidateQueries(['deal', id]);
@@ -56,6 +64,19 @@ export default function EditDeal() {
     },
     onError: (err) => toast.error(err.response?.data?.message || 'Ndodhi një gabim.'),
   });
+
+  const handleImageAdd = (e) => {
+    const files = Array.from(e.target.files);
+    const combined = [...newImages, ...files].slice(0, 5);
+    setNewImages(combined);
+    setNewPreviews(combined.map((f) => URL.createObjectURL(f)));
+  };
+
+  const removeNewImage = (i) => {
+    const imgs = newImages.filter((_, idx) => idx !== i);
+    setNewImages(imgs);
+    setNewPreviews(imgs.map((f) => URL.createObjectURL(f)));
+  };
 
   const values = watch();
   const savings = values.originalPrice && values.discountedPrice
@@ -159,9 +180,42 @@ export default function EditDeal() {
           </div>
         </div>
 
+        {/* Images */}
+        <div className="card p-6 space-y-4">
+          <h3 className="font-bold text-gray-900">Fotot e Deal-it</h3>
+          {deal?.images?.length > 0 && (
+            <div>
+              <p className="text-xs text-gray-500 mb-2">Foto ekzistuese</p>
+              <div className="flex flex-wrap gap-2">
+                {deal.images.map((img, i) => (
+                  <img key={i} src={getImageUrl(img.url, 200)} alt="" className="w-20 h-20 object-cover rounded-xl border border-gray-200" />
+                ))}
+              </div>
+            </div>
+          )}
+          <div>
+            <p className="text-xs text-gray-500 mb-2">Shto foto të reja (max 5)</p>
+            <div className="flex flex-wrap gap-2">
+              {newPreviews.map((src, i) => (
+                <div key={i} className="relative w-20 h-20">
+                  <img src={src} alt="" className="w-full h-full object-cover rounded-xl border border-gray-200" />
+                  <button type="button" onClick={() => removeNewImage(i)} className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center"><X size={10} /></button>
+                </div>
+              ))}
+              {newImages.length < 5 && (
+                <label className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition-colors">
+                  <ImagePlus size={18} className="text-gray-400" />
+                  <span className="text-xs text-gray-400 mt-1">Shto</span>
+                  <input type="file" accept="image/*" multiple onChange={handleImageAdd} className="sr-only" />
+                </label>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div className="flex justify-end gap-3">
           <Link to="/business-dashboard/deals" className="btn-secondary">Anulo</Link>
-          <button type="submit" disabled={updateMutation.isPending || !isDirty} className="btn-primary flex items-center gap-2">
+          <button type="submit" disabled={updateMutation.isPending || (!isDirty && newImages.length === 0)} className="btn-primary flex items-center gap-2">
             {updateMutation.isPending ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save size={16} />Ruaj Ndryshimet</>}
           </button>
         </div>

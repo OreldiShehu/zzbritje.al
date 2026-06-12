@@ -46,6 +46,16 @@ export default function DealCard({ deal, featured = false }) {
               className="w-full h-full object-cover transition-transform duration-500"
               loading="lazy"
             />
+          ) : deal.business?.logo ? (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-brand-50 via-blue-50 to-purple-50">
+              <img
+                src={getImageUrl(deal.business.logo, 400)}
+                alt={deal.business.name}
+                className="w-24 h-24 object-contain rounded-2xl"
+                loading="lazy"
+              />
+              <span className="mt-2 text-xs font-semibold text-brand-400 uppercase tracking-wide">{deal.category?.name || 'Ofertë'}</span>
+            </div>
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-brand-50 via-blue-50 to-purple-50">
               <p className="text-5xl font-black text-brand-200 leading-none">-{Math.round(deal.discountPercentage)}%</p>

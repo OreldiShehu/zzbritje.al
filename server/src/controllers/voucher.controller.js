@@ -82,9 +82,9 @@ exports.purchaseVoucher = catchAsync(async (req, res, next) => {
       status: 'active',
     };
 
-    // Generate QR code
-    const qrData = generateVoucherQRData({ ...voucherData, code });
+    // Generate QR code (wrapped fully — _id doesn't exist yet on voucherData)
     try {
+      const qrData = generateVoucherQRData({ ...voucherData, _id: new (require('mongoose').Types.ObjectId)() });
       const qr = await generateQRCode(qrData);
       voucherData.qrCodeData = JSON.stringify(qrData);
       voucherData.qrCodeImage = qr.imageUrl;

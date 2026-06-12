@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Upload, Save, Building, MapPin, Clock, Camera, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, Save, Building, MapPin, Clock, Camera, CheckCircle, AlertCircle, Instagram } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/axios';
 import { CITIES } from '../../utils/constants';
@@ -40,7 +40,8 @@ export default function BusinessProfile() {
         website: business.website,
         city: business.city || 'Tiranë',
         address: business.address,
-        category: business.category,
+        category: business.category?._id || business.category || '',
+        instagram: business.socialLinks?.instagram || '',
       });
       setLogoPreview(business.logo);
       setCoverPreview(business.coverImage);
@@ -61,7 +62,12 @@ export default function BusinessProfile() {
 
   const onSubmit = (data) => {
     const fd = new FormData();
-    Object.entries(data).forEach(([k, v]) => { if (v != null) fd.append(k, v); });
+    const { instagram, ...rest } = data;
+    Object.entries(rest).forEach(([k, v]) => {
+      if (v == null || v === '') return;
+      fd.append(k, typeof v === 'object' ? v._id || JSON.stringify(v) : v);
+    });
+    if (instagram != null) fd.append('socialLinks.instagram', instagram);
     if (logoFile) fd.append('logo', logoFile);
     if (coverFile) fd.append('coverImage', coverFile);
     updateMutation.mutate(fd);
@@ -94,7 +100,10 @@ export default function BusinessProfile() {
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('business.create_profile')}</h2>
         <p className="text-gray-500 mb-6">{t('business.create_profile_subtitle')}</p>
-        <form onSubmit={handleSubmit((d) => createMutation.mutate(d))} className="text-left space-y-4">
+        <form onSubmit={handleSubmit((d) => {
+          const { instagram, ...rest } = d;
+          createMutation.mutate({ ...rest, ...(instagram ? { socialLinks: { instagram } } : {}) });
+        })} className="text-left space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t('business.name')} *</label>
             <input {...register('name', { required: true })} className="input-field" placeholder="p.sh. Restorant Besa" />
@@ -130,7 +139,16 @@ export default function BusinessProfile() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t('business.address')}</label>
-            <input {...register('address')} className="input-field" />
+            <input {...register('address')} className="input-field" placeholder="Rruga, nr. ndërtesës" />
+          </div>
+          <div>
+            <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1">
+              <Instagram size={14} className="text-pink-500" /> Instagram
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">instagram.com/</span>
+              <input {...register('instagram')} className="input-field pl-28" placeholder="biznesijuaj" />
+            </div>
           </div>
           <button type="submit" disabled={createMutation.isPending} className="btn-primary w-full">
             {createMutation.isPending ? t('business.creating') : t('business.create_btn')}
@@ -195,7 +213,16 @@ export default function BusinessProfile() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('business.address')}</label>
-                <input {...register('address')} className="input-field" />
+                <input {...register('address')} className="input-field" placeholder="Rruga, nr. ndërtesës" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
+                  <Instagram size={14} className="text-pink-500" /> Instagram
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">instagram.com/</span>
+                  <input {...register('instagram')} className="input-field pl-28" placeholder="biznesijuaj" />
+                </div>
               </div>
             </div>
             <div>

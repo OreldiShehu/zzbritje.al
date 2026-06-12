@@ -84,11 +84,24 @@ exports.createDeal = catchAsync(async (req, res, next) => {
       slug: slugify(name, { lower: true, strict: true }) + '-' + Date.now(),
       city: req.body.city || 'Tiranë',
       category: req.body.category || defaultCategory?._id,
-      commissionRate: parseFloat(process.env.PLATFORM_COMMISSION_RATE) || 0.20,
+      commissionRate: parseFloat(process.env.PLATFORM_COMMISSION_RATE) || 0.10,
       verificationStatus: 'verified',
       verifiedAt: new Date(),
     });
     await require('../models/User').findByIdAndUpdate(req.user.id, { businessId: business._id });
+  }
+
+  // Enforce free-tier limit: max 2 active deals per month
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+  const dealsThisMonth = await Deal.countDocuments({
+    business: business._id,
+    createdAt: { $gte: startOfMonth },
+    status: { $nin: ['expired', 'rejected'] },
+  });
+  if (dealsThisMonth >= 2) {
+    return next(new AppError('Keni arritur limitin mujor falas prej 2 deal-eve. Kontaktoni Zbritje.al për plan premium.', 400));
   }
 
   const images = req.files?.map((f, i) => ({
@@ -133,7 +146,19 @@ exports.updateDeal = catchAsync(async (req, res, next) => {
     req.body = filteredBody;
   }
 
-  const updated = await Deal.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+  const updateOps = { ...req.body };
+
+  if (req.files?.length) {
+    const newImages = req.files.map((f, i) => ({
+      url: f.path,
+      publicId: f.filename,
+      isMain: deal.images.length === 0 && i === 0,
+    }));
+    updateOps.$push = { images: { $each: newImages } };
+    delete updateOps.images;
+  }
+
+  const updated = await Deal.findByIdAndUpdate(req.params.id, updateOps, { new: true, runValidators: true });
   res.status(200).json({ success: true, data: updated });
 });
 

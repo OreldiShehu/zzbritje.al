@@ -1,24 +1,47 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Wallet as WalletIcon, TrendingUp, TrendingDown, ArrowDownCircle } from 'lucide-react';
+import { Wallet as WalletIcon, Ticket, ArrowDownCircle, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../api/axios';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency, formatDate, getImageUrl } from '../../utils/formatters';
+
+const STATUS_MAP = {
+  completed: { label: 'Përfunduar', color: 'text-green-600 bg-green-50', Icon: CheckCircle },
+  pending:   { label: 'Në pritje',  color: 'text-amber-600 bg-amber-50',  Icon: Clock },
+  refunded:  { label: 'Rimbursuar', color: 'text-blue-600 bg-blue-50',    Icon: ArrowDownCircle },
+  failed:    { label: 'Dështuar',   color: 'text-red-500 bg-red-50',      Icon: XCircle },
+};
+
+const METHOD_LABEL = { cash: 'Cash në biznes', paypal: 'PayPal', wallet: 'Portofol', card: 'Kartë' };
 
 function TransactionRow({ tx }) {
-  const isCredit = ['wallet_credit', 'refund', 'referral_reward', 'welcome_bonus'].includes(tx.type);
+  const s = STATUS_MAP[tx.paymentStatus] || STATUS_MAP.pending;
+  const Icon = s.Icon;
+  const image = tx.deal?.images?.[0]?.url;
   return (
-    <div className="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isCredit ? 'bg-green-50' : 'bg-red-50'}`}>
-        {isCredit ? <TrendingUp size={18} className="text-green-600" /> : <TrendingDown size={18} className="text-red-500" />}
+    <div className="flex items-center gap-4 py-4 border-b border-gray-100 last:border-0">
+      <div className="w-12 h-12 rounded-xl overflow-hidden bg-brand-50 flex-shrink-0 flex items-center justify-center">
+        {image
+          ? <img src={getImageUrl(image, 100)} alt="" className="w-full h-full object-cover" />
+          : <Ticket size={18} className="text-brand-400" />}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-gray-900 truncate">{tx.description || (isCredit ? 'Rimbursim' : 'Blerje')}</p>
-        <p className="text-xs text-gray-400">{formatDate(tx.createdAt)}</p>
+        <p className="text-sm font-semibold text-gray-900 truncate">{tx.deal?.title || 'Blerje voucher'}</p>
+        <p className="text-xs text-gray-400">{tx.business?.name} · {formatDate(tx.createdAt)}</p>
+        <div className="flex items-center gap-2 mt-1">
+          <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${s.color}`}>
+            <Icon size={10} />{s.label}
+          </span>
+          <span className="text-xs text-gray-400">{METHOD_LABEL[tx.paymentMethod] || tx.paymentMethod}</span>
+          <span className="text-xs text-gray-400">{tx.quantity} voucher</span>
+        </div>
       </div>
-      <span className={`font-bold text-sm ${isCredit ? 'text-green-600' : 'text-red-500'}`}>
-        {isCredit ? '+' : '-'}{formatCurrency(tx.amount)}
-      </span>
+      <div className="text-right flex-shrink-0">
+        <p className="font-bold text-sm text-gray-900">{formatCurrency(tx.total)}</p>
+        {tx.walletUsed > 0 && (
+          <p className="text-xs text-brand-500">-{formatCurrency(tx.walletUsed)} portofol</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -28,7 +51,7 @@ export default function CustomerWallet() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['wallet', 'transactions'],
-    queryFn: () => api.get('/users/wallet-transactions').then((r) => r.data),
+    queryFn: () => api.get('/payments/transactions').then((r) => r.data),
   });
 
   return (
