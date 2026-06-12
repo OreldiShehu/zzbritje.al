@@ -2,9 +2,11 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, Tag, Ticket, BarChart2, Store, QrCode, LogOut, Menu, X, ChevronRight, Plus,
+  LayoutDashboard, Tag, Ticket, BarChart2, Store, QrCode, LogOut, Menu, X, ChevronRight, Plus, AlertTriangle,
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
+import api from '../../api/axios';
 import toast from 'react-hot-toast';
 
 const navItems = [
@@ -18,8 +20,17 @@ const navItems = [
 
 export default function BusinessLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+
+  const { data: business } = useQuery({
+    queryKey: ['my-business'],
+    queryFn: () => api.get('/business/my').then((r) => r.data.data),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const isUnverified = business && business.verificationStatus !== 'verified';
 
   const handleLogout = async () => {
     await logout();
@@ -35,11 +46,11 @@ export default function BusinessLayout() {
             <Store size={22} className="text-white" />
           </div>
           <div>
-            <p className="font-semibold text-gray-900">Business Panel</p>
+            <p className="font-semibold text-gray-900 truncate max-w-[120px]">{business?.name || 'Business Panel'}</p>
             <p className="text-xs text-brand-600">Zbritje.al Partner</p>
           </div>
         </div>
-        <NavLink to="/business-dashboard/deals/create" className="btn-primary w-full mt-4 text-sm py-2.5">
+        <NavLink to="/business-dashboard/deals/create" className="btn-primary w-full mt-4 text-sm py-2.5 flex items-center justify-center gap-2">
           <Plus size={16} /> Krijo Deal
         </NavLink>
       </div>
@@ -100,6 +111,30 @@ export default function BusinessLayout() {
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100"><Menu size={20} /></button>
           <h1 className="font-display font-bold text-gray-900">Business Dashboard</h1>
         </header>
+
+        {/* Verification banner */}
+        <AnimatePresence>
+          {isUnverified && !bannerDismissed && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="bg-amber-50 border-b border-amber-200 overflow-hidden"
+            >
+              <div className="flex items-center gap-3 px-4 py-3">
+                <AlertTriangle size={18} className="text-amber-600 flex-shrink-0" />
+                <p className="text-sm text-amber-800 flex-1">
+                  <span className="font-bold">Llogaria juaj është në pritje verifikimi.</span>{' '}
+                  Ekipi ynë do ta shqyrtojë dhe do të merrni një njoftim sapo të verifikohet. Deri atëherë, disa funksione mund të jenë të kufizuara.
+                </p>
+                <button onClick={() => setBannerDismissed(true)} className="p-1 rounded-lg hover:bg-amber-100 text-amber-600 flex-shrink-0">
+                  <X size={16} />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <main className="flex-1 p-4 md:p-8 overflow-y-auto"><Outlet /></main>
       </div>
     </div>

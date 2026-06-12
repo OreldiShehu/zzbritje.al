@@ -1,95 +1,129 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle, TrendingUp, Users, Zap, Star, Shield, BarChart2, ArrowRight, Percent, Banknote, Store } from 'lucide-react';
+import { CheckCircle, TrendingUp, Users, Zap, Star, Shield, BarChart2, ArrowRight, ChevronDown } from 'lucide-react';
+import { useState } from 'react';
 
 const STEPS = [
-  { num: '1', title: 'Regjistrohu Falas', desc: 'Krijo llogarinë tënde si biznes. Nuk nevojitet karta krediti.' },
-  { num: '2', title: 'Krijo Ofertën', desc: 'Vendos çmimin tënd bazë dhe platforma shton automatikisht 7% markup.' },
-  { num: '3', title: 'Merr Klientë', desc: 'Klientët blejnë voucher-in online dhe vijnë drejtpërdrejt tek ti.' },
-  { num: '4', title: 'Mblidh të Ardhurat', desc: 'Merr cash direkt nga klienti. Ne faturojmë komisionin 10% mujor.' },
+  { num: '1', title: 'Regjistrohu Falas', desc: 'Krijo llogarinë tënde si biznes. Nuk nevojitet karta krediti dhe nuk ka kosto fillestare.' },
+  { num: '2', title: 'Krijo Ofertën', desc: 'Vendos çmimin tënd bazë dhe publikoni dealin tuaj. Setup i shpejtë në pak minuta.' },
+  { num: '3', title: 'Merr Klientë', desc: 'Klientët blejnë voucher-in online dhe vijnë fizikisht tek biznesi juaj.' },
+  { num: '4', title: 'Mblidh të Ardhurat', desc: 'Klienti paguan direkt tek ju. Komisioni faturohet mujor — thjeshtë dhe transparent.' },
 ];
+
+const FAQS = [
+  {
+    q: 'Sa kushton listimi i biznesit?',
+    a: 'Regjistrimi dhe listimi janë plotësisht falas. Nuk ka abonime mujore. Paguani vetëm komisionin 10% bazuar në voucher-et e shitura.',
+  },
+  {
+    q: 'Si funksionon komisioni?',
+    a: 'Platforma shton 7% mbi çmimin tuaj bazë — këtë e paguan klienti, jo ju. Nga çmimi juaj bazë, platforma mban 10% si komision, i cili faturohel mujor.',
+  },
+  {
+    q: 'Kur marr paratë?',
+    a: 'Klienti paguan direkt tek ju kur vjen të përdorë voucher-in. Nuk ka pritje — cash direkt në biznesin tuaj.',
+  },
+  {
+    q: 'Mund të vendos çmimin që dua?',
+    a: 'Po, ju vendosni çmimin bazë. Platforma shton automatikisht 7% dhe klienti e sheh çmimin final përpara blerjes.',
+  },
+  {
+    q: 'Sa kohë duhet për t\'u verifikuar?',
+    a: 'Ekipi ynë shqyrton çdo biznes brenda 24-48 orësh. Do të merrni njoftim sapo llogaria juaj të verifikohet.',
+  },
+  {
+    q: 'Mund të vendos rregulla si "1 voucher për tavolinë"?',
+    a: 'Po. Gjatë krijimit të dealit mund të aktivizoni opsionin "1 voucher për tavolinë" dhe klientët e shohin këtë kufizim para blerjes.',
+  },
+];
+
+function FAQ({ q, a }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border border-gray-200 rounded-2xl overflow-hidden">
+      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between gap-4 p-5 text-left hover:bg-gray-50 transition-colors">
+        <span className="font-semibold text-gray-900 text-sm">{q}</span>
+        <ChevronDown size={18} className={`text-gray-400 flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      <AnimateHeight open={open}>
+        <p className="px-5 pb-5 text-sm text-gray-600 leading-relaxed">{a}</p>
+      </AnimateHeight>
+    </div>
+  );
+}
+
+function AnimateHeight({ open, children }) {
+  return (
+    <motion.div
+      initial={false}
+      animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }}
+      transition={{ duration: 0.2 }}
+      className="overflow-hidden"
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export default function BecomePartner() {
   return (
     <div className="bg-white">
       {/* Hero */}
-      <div className="bg-brand-gradient text-white py-20 text-center relative overflow-hidden">
+      <div className="bg-brand-gradient text-white py-24 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-10"
           style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         <div className="container-custom relative max-w-3xl">
           <div className="inline-flex items-center gap-2 bg-white/20 rounded-full px-4 py-2 text-sm font-medium mb-6">
             <Star size={16} className="text-amber-300" /> Falas për t'u bashkuar
           </div>
-          <h1 className="text-4xl md:text-5xl font-black mb-4">Rriti Biznesin Tënd me Zbritje.al</h1>
-          <p className="text-xl text-blue-100 mb-8">Listoni ofertat tuaja, arrini mijëra klientë, dhe merrni paratë direkt. Pa abonime mujore.</p>
-          <Link to="/register?role=business" className="bg-white text-brand-600 font-black px-8 py-4 rounded-2xl hover:bg-brand-50 transition-all shadow-xl text-lg inline-flex items-center gap-2">
-            Filloni Falas Sot <ArrowRight size={20} />
-          </Link>
+          <h1 className="text-4xl md:text-6xl font-black mb-5 leading-tight">Rriti Biznesin Tënd me Zbritje.al</h1>
+          <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">Listoni ofertat tuaja, arrini mijëra klientë aktivë, dhe merrni paratë direkt. Pa abonime mujore.</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/register?role=business" className="bg-white text-brand-600 font-black px-8 py-4 rounded-2xl hover:bg-brand-50 transition-all shadow-xl text-lg inline-flex items-center justify-center gap-2">
+              Filloni Falas Sot <ArrowRight size={20} />
+            </Link>
+            <a href="#how-it-works" className="border border-white/40 text-white font-semibold px-8 py-4 rounded-2xl hover:bg-white/10 transition-all text-lg inline-flex items-center justify-center gap-2">
+              Si funksionon?
+            </a>
+          </div>
         </div>
       </div>
 
-      {/* How the money works */}
+      {/* Commission info — clean, no fake numbers */}
       <div className="container-custom py-16 max-w-4xl">
-        <h2 className="text-3xl font-black text-gray-900 text-center mb-2">Si Funksionojnë Të Ardhurat</h2>
-        <p className="text-gray-500 text-center mb-10">Transparent dhe i thjeshtë — pa surpriza</p>
-
-        <div className="bg-gray-50 rounded-3xl p-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white rounded-2xl p-6 border border-gray-200 text-center">
-              <div className="w-12 h-12 bg-brand-50 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <Store size={24} className="text-brand-600" />
-              </div>
-              <p className="text-2xl font-black text-gray-900 mb-1">3,000 L</p>
-              <p className="text-sm font-semibold text-gray-600">Çmimi juaj bazë</p>
-              <p className="text-xs text-gray-400 mt-1">Ju vendosni këtë çmim</p>
-            </div>
-            <div className="bg-white rounded-2xl p-6 border border-brand-200 text-center ring-2 ring-brand-500">
-              <div className="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <Percent size={24} className="text-brand-600" />
-              </div>
-              <p className="text-2xl font-black text-brand-700 mb-1">3,210 L</p>
-              <p className="text-sm font-semibold text-gray-600">Klienti paguan</p>
-              <p className="text-xs text-gray-400 mt-1">Çmimi juaj + 7% markup</p>
-            </div>
-            <div className="bg-white rounded-2xl p-6 border border-green-200 text-center">
-              <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <Banknote size={24} className="text-green-600" />
-              </div>
-              <p className="text-2xl font-black text-green-700 mb-1">2,700 L</p>
-              <p className="text-sm font-semibold text-gray-600">Ju fitoni neto</p>
-              <p className="text-xs text-gray-400 mt-1">Pas komisionit 10%</p>
-            </div>
+        <h2 className="text-3xl font-black text-gray-900 text-center mb-2">Model Transparent & i Thjeshtë</h2>
+        <p className="text-gray-500 text-center mb-10">Pa surpriza. Pa abonime. Paguani vetëm kur shisni.</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="rounded-2xl border border-gray-200 p-7 text-center">
+            <div className="text-4xl font-black text-gray-900 mb-2">0 L</div>
+            <p className="font-bold text-gray-700 mb-1">Kosto Fillestare</p>
+            <p className="text-sm text-gray-400">Regjistrim falas, pa abonime, pa dokumentacion.</p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-blue-50 rounded-xl p-4 flex items-start gap-3">
-              <CheckCircle size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-bold text-blue-900">7% Markup nga Klienti</p>
-                <p className="text-xs text-blue-700 mt-0.5">Platforma shton 7% mbi çmimin tuaj bazë. Klienti e paguan këtë — jo ju.</p>
-              </div>
-            </div>
-            <div className="bg-amber-50 rounded-xl p-4 flex items-start gap-3">
-              <CheckCircle size={18} className="text-amber-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-bold text-amber-900">10% Komision nga Biznesi</p>
-                <p className="text-xs text-amber-700 mt-0.5">Faturojmë 10% të çmimit tuaj bazë mujor. Ju merrni cash direkt nga klienti.</p>
-              </div>
-            </div>
+          <div className="rounded-2xl border-2 border-brand-500 bg-brand-50 p-7 text-center relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-xs font-bold px-3 py-1 rounded-full">Nga Klienti</div>
+            <div className="text-4xl font-black text-brand-700 mb-2">+7%</div>
+            <p className="font-bold text-gray-700 mb-1">Markup Platformës</p>
+            <p className="text-sm text-gray-500">Platforma shton 7% mbi çmimin tuaj bazë. Këtë e paguan klienti, jo ju.</p>
+          </div>
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-7 text-center">
+            <div className="text-4xl font-black text-amber-700 mb-2">10%</div>
+            <p className="font-bold text-gray-700 mb-1">Komision Mujor</p>
+            <p className="text-sm text-gray-500">10% e çmimit tuaj bazë, faturuar mujor vetëm nga voucher-et e shitura.</p>
           </div>
         </div>
       </div>
 
       {/* Steps */}
-      <div className="bg-gray-50 py-16">
+      <div id="how-it-works" className="bg-gray-50 py-16">
         <div className="container-custom max-w-4xl">
-          <h2 className="text-3xl font-black text-gray-900 text-center mb-10">Si të Filloni</h2>
+          <h2 className="text-3xl font-black text-gray-900 text-center mb-2">Si të Filloni</h2>
+          <p className="text-gray-500 text-center mb-10">4 hapa dhe jeni live</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {STEPS.map((s) => (
-              <motion.div key={s.num} whileHover={{ y: -3 }} className="card p-6 text-center">
+              <motion.div key={s.num} whileHover={{ y: -4 }} className="card p-6 text-center">
                 <div className="w-12 h-12 bg-brand-gradient rounded-xl flex items-center justify-center mx-auto mb-4 text-white font-black text-lg">{s.num}</div>
                 <h3 className="font-bold text-gray-900 mb-2">{s.title}</h3>
-                <p className="text-gray-500 text-sm">{s.desc}</p>
+                <p className="text-gray-500 text-sm leading-relaxed">{s.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -101,28 +135,62 @@ export default function BecomePartner() {
         <h2 className="text-3xl font-black text-gray-900 text-center mb-10">Pse Zbritje.al?</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
           {[
-            { icon: Users, title: 'Klientë të Rinj', desc: 'Aksesoni menjëherë klientë shqiptarë që kërkojnë oferta aktivisht' },
-            { icon: TrendingUp, title: 'Rritja e Shitjeve', desc: 'Bizneset partnere raportojnë rritje të ndjeshme të klientëve pas listimit' },
-            { icon: BarChart2, title: 'Dashboard i Plotë', desc: 'Statistika të detajuara: voucher të shitura, të ardhura, vlerësime' },
-            { icon: Zap, title: 'Setup i Shpejtë', desc: 'Postoni ofertën e parë brenda 10 minutave. Pa dokumentacion kompleks.' },
-            { icon: Shield, title: 'Pa Abonime', desc: 'Zero kosto mujore. Paguani vetëm komisionin 10% kur shisni voucher.' },
-            { icon: Star, title: 'Mbështetje', desc: 'Ekipi ynë është gjithmonë gati për t\'ju ndihmuar të rriteni' },
+            { icon: Users, title: 'Klientë të Rinj', desc: 'Aksesoni menjëherë klientë shqiptarë që kërkojnë oferta aktivisht çdo ditë.' },
+            { icon: TrendingUp, title: 'Rritja e Vizitorëve', desc: 'Bizneset partnere shënojnë rritje të dukshme të klientëve të rinj pas listimit.' },
+            { icon: BarChart2, title: 'Dashboard i Plotë', desc: 'Statistika të detajuara: voucher të shitura, të ardhura, vlerësime klientësh.' },
+            { icon: Zap, title: 'Setup i Shpejtë', desc: 'Postoni dealin e parë brenda 10 minutave. Pa dokumentacion kompleks.' },
+            { icon: Shield, title: 'Pa Rrezik Financiar', desc: 'Zero kosto fillestare. Komisioni vlen vetëm kur ju fitoni — asnjë kosto tjetër.' },
+            { icon: Star, title: 'Mbështetje e Dedikuar', desc: 'Ekipi ynë është gjithmonë gati për t\'ju ndihmuar të maksimizoni ofertat.' },
           ].map(({ icon: Icon, title, desc }) => (
             <motion.div key={title} whileHover={{ y: -3 }} className="card p-6">
-              <Icon size={28} className="text-brand-600 mb-3" />
+              <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center mb-3">
+                <Icon size={22} className="text-brand-600" />
+              </div>
               <h3 className="font-bold text-gray-900 mb-1">{title}</h3>
-              <p className="text-gray-500 text-sm">{desc}</p>
+              <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
             </motion.div>
           ))}
         </div>
       </div>
 
+      {/* What's included checklist */}
+      <div className="bg-brand-50 py-16">
+        <div className="container-custom max-w-3xl">
+          <h2 className="text-3xl font-black text-gray-900 text-center mb-10">Çfarë Përfshihet</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              'Dashboard i dedikuar për biznesin tuaj',
+              'Skaner QR për verifikim të shpejtë',
+              'Statistika dhe analitika në kohë reale',
+              'Fotografi dhe galeri imazhesh për dealin',
+              'Opsion "1 voucher për tavolinë"',
+              'Sistemi i vlerësimeve nga klientët',
+              'Njoftimet kur shiten voucher-et',
+              'Mbështetje teknike nga ekipi ynë',
+            ].map((item) => (
+              <div key={item} className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-brand-100">
+                <CheckCircle size={18} className="text-brand-600 flex-shrink-0" />
+                <span className="text-sm font-medium text-gray-700">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div className="container-custom py-16 max-w-3xl">
+        <h2 className="text-3xl font-black text-gray-900 text-center mb-10">Pyetjet e Shpeshta</h2>
+        <div className="space-y-3">
+          {FAQS.map((faq) => <FAQ key={faq.q} {...faq} />)}
+        </div>
+      </div>
+
       {/* CTA */}
-      <div className="bg-brand-gradient py-16 text-center text-white">
+      <div className="bg-brand-gradient py-20 text-center text-white">
         <h2 className="text-3xl font-black mb-4">Gati të Filloni?</h2>
-        <p className="text-blue-100 mb-6 max-w-xl mx-auto">Regjistrohu falas dhe postoni ofertën e parë. Zero kosto, zero abonime.</p>
-        <Link to="/register?role=business" className="bg-white text-brand-600 font-black px-8 py-3.5 rounded-2xl hover:bg-brand-50 transition-all shadow-xl inline-flex items-center gap-2">
-          Regjistrohu Falas <ArrowRight size={18} />
+        <p className="text-blue-100 mb-8 max-w-xl mx-auto text-lg">Regjistrohu falas sot. Nuk nevojitet karta krediti.</p>
+        <Link to="/register?role=business" className="bg-white text-brand-600 font-black px-10 py-4 rounded-2xl hover:bg-brand-50 transition-all shadow-xl text-lg inline-flex items-center gap-2">
+          Regjistrohu Falas <ArrowRight size={20} />
         </Link>
       </div>
     </div>
