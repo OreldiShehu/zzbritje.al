@@ -266,3 +266,33 @@ exports.toggleFeatured = catchAsync(async (req, res, next) => {
   await doc.save();
   res.status(200).json({ success: true, isFeatured: doc.isFeatured });
 });
+
+exports.getCommissionTracker = catchAsync(async (req, res) => {
+  const businesses = await Business.find({ isActive: true, totalVouchersSold: { $gt: 0 } })
+    .select('name slug logo city totalVouchersSold totalVouchersRedeemed confirmedRevenue commissionOwed platformCommissionPaid commissionRate updatedAt')
+    .sort({ commissionOwed: -1 })
+    .lean();
+
+  const data = businesses.map((b) => ({
+    _id: b._id,
+    name: b.name,
+    slug: b.slug,
+    logo: b.logo,
+    city: b.city,
+    vouchersSold: b.totalVouchersSold || 0,
+    vouchersRedeemed: b.totalVouchersRedeemed || 0,
+    confirmedRevenue: b.confirmedRevenue || 0,
+    commissionOwed: b.commissionOwed || 0,
+    commissionPaid: b.platformCommissionPaid || 0,
+    commissionPending: Math.max(0, (b.commissionOwed || 0) - (b.platformCommissionPaid || 0)),
+    commissionRate: b.commissionRate || 0.10,
+  }));
+
+  const totals = data.reduce((acc, b) => ({
+    commissionOwed: acc.commissionOwed + b.commissionOwed,
+    commissionPaid: acc.commissionPaid + b.commissionPaid,
+    commissionPending: acc.commissionPending + b.commissionPending,
+  }), { commissionOwed: 0, commissionPaid: 0, commissionPending: 0 });
+
+  res.status(200).json({ success: true, data, totals });
+});

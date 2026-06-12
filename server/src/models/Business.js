@@ -75,7 +75,10 @@ const businessSchema = new mongoose.Schema({
   totalDeals: { type: Number, default: 0 },
   activeDeals: { type: Number, default: 0 },
   totalVouchersSold: { type: Number, default: 0 },
+  totalVouchersRedeemed: { type: Number, default: 0 },
   totalRevenue: { type: Number, default: 0 },
+  confirmedRevenue: { type: Number, default: 0 },  // from redeemed vouchers only
+  commissionOwed: { type: Number, default: 0 },    // platform commission from redeemed
   platformCommissionPaid: { type: Number, default: 0 },
   averageRating: { type: Number, default: 0, min: 0, max: 5 },
   totalReviews: { type: Number, default: 0 },

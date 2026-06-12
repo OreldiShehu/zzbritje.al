@@ -220,6 +220,15 @@ exports.redeemVoucher = catchAsync(async (req, res, next) => {
   if (req.body.location) voucher.redemptionLocation = req.body.location;
   await voucher.save();
 
+  // Recognize earnings on redemption
+  await Business.findByIdAndUpdate(voucher.business, {
+    $inc: {
+      confirmedRevenue: voucher.businessEarning || 0,
+      commissionOwed: voucher.commissionAmount || 0,
+      totalVouchersRedeemed: 1,
+    },
+  });
+
   // Notify voucher owner
   const notification = await Notification.create({
     user: voucher.user._id,

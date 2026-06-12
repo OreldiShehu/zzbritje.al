@@ -32,6 +32,7 @@ router.delete('/categories/:id', adminController.deleteCategory);
 
 // Commission
 router.patch('/commission', adminController.updateCommissionSettings);
+router.get('/commission-tracker', adminController.getCommissionTracker);
 
 // Featured
 router.patch('/feature/:type/:id', adminController.toggleFeatured);

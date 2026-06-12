@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Users, Building, Ticket, TrendingUp, AlertCircle, CheckCircle, Tag, DollarSign } from 'lucide-react';
+import { Users, Building, Ticket, TrendingUp, AlertCircle, CheckCircle, Tag, DollarSign, Banknote, Clock } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/axios';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency, formatDate, getImageUrl } from '../../utils/formatters';
 import { Link } from 'react-router-dom';
 
 function KpiCard({ icon: Icon, label, value, sub, change, color, bg, to }) {
@@ -28,6 +28,11 @@ export default function AdminDashboard() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['admin', 'stats'],
     queryFn: () => api.get('/admin/dashboard').then((r) => r.data.data),
+  });
+
+  const { data: commissionData } = useQuery({
+    queryKey: ['admin', 'commission-tracker'],
+    queryFn: () => api.get('/admin/commission-tracker').then((r) => r.data),
   });
 
   if (isLoading) return (
@@ -77,6 +82,68 @@ export default function AdminDashboard() {
           </ResponsiveContainer>
         </div>
       )}
+
+      {/* Commission Tracker */}
+      <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h3 className="font-bold text-gray-100 flex items-center gap-2"><Banknote size={18} className="text-green-400" /> Komisioni për t'u Mbledhur</h3>
+            <p className="text-xs text-gray-500 mt-0.5">Bazuar vetëm në voucher-ët e skanuar/konfirmuar</p>
+          </div>
+          {commissionData?.totals && (
+            <div className="text-right">
+              <p className="text-xl font-black text-green-400">{formatCurrency(commissionData.totals.commissionPending)}</p>
+              <p className="text-xs text-gray-500">total në pritje</p>
+            </div>
+          )}
+        </div>
+
+        {/* Totals row */}
+        {commissionData?.totals && (
+          <div className="grid grid-cols-3 gap-3 mb-5">
+            <div className="bg-gray-700 rounded-xl p-3 text-center">
+              <p className="text-sm font-black text-gray-100">{formatCurrency(commissionData.totals.commissionOwed)}</p>
+              <p className="text-xs text-gray-400">Total komision</p>
+            </div>
+            <div className="bg-gray-700 rounded-xl p-3 text-center">
+              <p className="text-sm font-black text-green-400">{formatCurrency(commissionData.totals.commissionPaid)}</p>
+              <p className="text-xs text-gray-400">Mbledhur</p>
+            </div>
+            <div className="bg-amber-900/40 rounded-xl p-3 text-center">
+              <p className="text-sm font-black text-amber-400">{formatCurrency(commissionData.totals.commissionPending)}</p>
+              <p className="text-xs text-gray-400">Mbetur</p>
+            </div>
+          </div>
+        )}
+
+        {/* Per-business table */}
+        {commissionData?.data?.length > 0 ? (
+          <div className="space-y-2">
+            {commissionData.data.map((b) => (
+              <div key={b._id} className="flex items-center gap-3 bg-gray-700/50 rounded-xl p-3">
+                <div className="w-9 h-9 rounded-lg overflow-hidden bg-gray-600 flex-shrink-0 flex items-center justify-center">
+                  {b.logo
+                    ? <img src={getImageUrl(b.logo, 80)} alt="" className="w-full h-full object-cover" />
+                    : <Building size={14} className="text-gray-400" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-100 truncate">{b.name}</p>
+                  <p className="text-xs text-gray-400">{b.vouchersRedeemed} skanuar / {b.vouchersSold} shitur · {b.city}</p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-sm font-bold text-amber-400">{formatCurrency(b.commissionPending)}</p>
+                  <p className="text-xs text-gray-500">në pritje</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500 text-sm">
+            <Clock size={24} className="mx-auto mb-2 opacity-40" />
+            Asnjë voucher i skanuar akoma
+          </div>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Pending Actions */}
