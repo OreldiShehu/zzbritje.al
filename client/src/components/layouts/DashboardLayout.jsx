@@ -1,20 +1,12 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  LayoutDashboard, Ticket, Heart, User, Bell, Wallet, Users, BarChart2,
-  LogOut, Menu, X, ChevronRight, Star, RefreshCw,
-} from 'lucide-react';
+import { Ticket, User, Bell, LogOut, Menu, X, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 
 const navItems = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Ballina', end: true },
-  { to: '/dashboard/vouchers', icon: Ticket, label: 'Voucherët' },
-  { to: '/dashboard/favorites', icon: Heart, label: 'Të Preferuarat' },
-  { to: '/dashboard/wallet', icon: Wallet, label: 'Portofol' },
-  { to: '/dashboard/transactions', icon: RefreshCw, label: 'Transaksionet' },
-  { to: '/dashboard/referrals', icon: Users, label: 'Referime' },
+  { to: '/dashboard', icon: Ticket, label: 'Voucher-at e Mia', end: true },
   { to: '/dashboard/notifications', icon: Bell, label: 'Njoftime' },
   { to: '/dashboard/profile', icon: User, label: 'Profili' },
 ];
@@ -35,29 +27,14 @@ export default function DashboardLayout() {
       {/* User info */}
       <div className="p-6 border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <img
-              src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=1a3f8a&color=fff&size=48`}
-              alt={user?.firstName}
-              className="w-12 h-12 rounded-full object-cover"
-            />
-            <span className="absolute -bottom-1 -right-1 text-sm">
-              {user?.loyaltyLevel === 'diamond' ? '💠' : user?.loyaltyLevel === 'platinum' ? '💎' : user?.loyaltyLevel === 'gold' ? '🥇' : user?.loyaltyLevel === 'silver' ? '🥈' : '🥉'}
-            </span>
-          </div>
+          <img
+            src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=1a3f8a&color=fff&size=48`}
+            alt={user?.firstName}
+            className="w-12 h-12 rounded-full object-cover"
+          />
           <div className="min-w-0">
             <p className="font-semibold text-gray-900 truncate">{user?.firstName} {user?.lastName}</p>
-            <p className="text-xs text-brand-600 capitalize">{user?.loyaltyLevel} Member</p>
-          </div>
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <div className="bg-brand-50 rounded-lg p-2 text-center">
-            <p className="text-lg font-bold text-brand-700">{user?.walletBalance?.toLocaleString() || 0}</p>
-            <p className="text-xs text-gray-500">ALL Portofol</p>
-          </div>
-          <div className="bg-emerald-50 rounded-lg p-2 text-center">
-            <p className="text-lg font-bold text-emerald-700">{user?.loyaltyPoints?.toLocaleString() || 0}</p>
-            <p className="text-xs text-gray-500">Pikë Besnikërie</p>
+            <p className="text-xs text-gray-400">{user?.email}</p>
           </div>
         </div>
       </div>
@@ -72,7 +49,7 @@ export default function DashboardLayout() {
             onClick={() => mobile && setSidebarOpen(false)}
             className={({ isActive }) =>
               isActive
-                ? 'sidebar-link-active flex items-center gap-3 px-4 py-3 rounded-xl text-brand-700 bg-brand-50 font-semibold border-r-4 border-brand-600'
+                ? 'flex items-center gap-3 px-4 py-3 rounded-xl text-brand-700 bg-brand-50 font-semibold border-r-4 border-brand-600'
                 : 'flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium transition-all duration-150'
             }
           >
