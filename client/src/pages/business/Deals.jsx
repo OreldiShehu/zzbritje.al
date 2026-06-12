@@ -86,7 +86,7 @@ export default function BusinessDeals() {
                   <span><Tag size={12} className="inline mr-1" />{deal.vouchersSold || 0}/{deal.totalVouchers} voucher</span>
                 </div>
                 <div className="flex gap-2">
-                  <Link to={`/business/deals/${deal._id}/edit`} className="flex-1 btn-secondary text-xs py-2 flex items-center justify-center gap-1.5">
+                  <Link to={`/business-dashboard/deals/edit/${deal._id}`} className="flex-1 btn-secondary text-xs py-2 flex items-center justify-center gap-1.5">
                     <Edit size={13} />Edito
                   </Link>
                   <button onClick={() => { if (confirm('Jeni të sigurt?')) deleteMutation.mutate(deal._id); }}

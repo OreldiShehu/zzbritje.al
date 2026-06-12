@@ -93,8 +93,8 @@ exports.login = catchAsync(async (req, res, next) => {
 
   if (user.isBlocked) return next(new AppError('Account suspended. Contact support.', 403));
   if (!user.isActive) return next(new AppError('Account deactivated.', 401));
-  // Email verification enforced only when email sending is configured
-  if (!user.isEmailVerified && process.env.EMAIL_HOST) return next(new AppError('Ju lutemi verifikoni email-in tuaj para se të kyçeni. Kontrolloni kutinë postare dhe klikoni linkun e verifikimit.', 401));
+  // Email verification enforced only when email sending is configured and field is explicitly false (not undefined for legacy accounts)
+  if (user.isEmailVerified === false && process.env.EMAIL_HOST) return next(new AppError('Ju lutemi verifikoni email-in tuaj para se të kyçeni. Kontrolloni kutinë postare dhe klikoni linkun e verifikimit.', 401));
 
   // Reset login attempts on success
   if (user.loginAttempts > 0) {

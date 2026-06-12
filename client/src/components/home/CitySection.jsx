@@ -3,12 +3,12 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 const cities = [
-  { name: 'Tiranë', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80', deals: '1,200+' },
-  { name: 'Durrës', img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80', deals: '340+' },
-  { name: 'Vlorë', img: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=400&q=80', deals: '280+' },
-  { name: 'Shkodër', img: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80', deals: '150+' },
-  { name: 'Sarandë', img: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&q=80', deals: '120+' },
-  { name: 'Berat', img: 'https://images.unsplash.com/photo-1518684079-3c830dcef090?w=400&q=80', deals: '95+' },
+  { name: 'Tiranë', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80', deals: '5+' },
+  { name: 'Durrës', img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80', deals: '5+' },
+  { name: 'Vlorë', img: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=400&q=80', deals: '5+' },
+  { name: 'Shkodër', img: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80', deals: '5+' },
+  { name: 'Sarandë', img: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&q=80', deals: '5+' },
+  { name: 'Berat', img: 'https://images.unsplash.com/photo-1518684079-3c830dcef090?w=400&q=80', deals: '5+' },
 ];
 
 export default function CitySection() {

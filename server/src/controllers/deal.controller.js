@@ -149,9 +149,13 @@ exports.updateDeal = catchAsync(async (req, res, next) => {
   }
 
   if (['active', 'expired'].includes(deal.status)) {
-    const allowedFields = ['description', 'termsAndConditions', 'redemptionInstructions'];
+    const allowedFields = ['description', 'termsAndConditions', 'redemptionInstructions', 'endDate', 'startDate'];
     const filteredBody = {};
-    allowedFields.forEach((f) => { if (req.body[f]) filteredBody[f] = req.body[f]; });
+    allowedFields.forEach((f) => { if (req.body[f] !== undefined) filteredBody[f] = req.body[f]; });
+    // Re-activate expired deal if endDate is extended into the future
+    if (deal.status === 'expired' && filteredBody.endDate && new Date(filteredBody.endDate) > new Date()) {
+      filteredBody.status = 'active';
+    }
     req.body = filteredBody;
   }
 
