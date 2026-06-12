@@ -69,6 +69,7 @@ const Privacy = lazy(() => import('./pages/static/Privacy'));
 const Terms = lazy(() => import('./pages/static/Terms'));
 const Contact = lazy(() => import('./pages/static/Contact'));
 const BecomePartner = lazy(() => import('./pages/static/BecomePartner'));
+const VoucherScan = lazy(() => import('./pages/VoucherScan'));
 
 // Route guards
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -111,6 +112,7 @@ export default function App() {
           <Route path="/terms" element={<SuspenseWrapper><Terms /></SuspenseWrapper>} />
           <Route path="/contact" element={<SuspenseWrapper><Contact /></SuspenseWrapper>} />
           <Route path="/become-partner" element={<SuspenseWrapper><BecomePartner /></SuspenseWrapper>} />
+          <Route path="/v/:code" element={<SuspenseWrapper><VoucherScan /></SuspenseWrapper>} />
         </Route>
 
         {/* Guest-only auth routes */}

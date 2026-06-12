@@ -2,7 +2,8 @@ const QRCode = require('qrcode');
 const { cloudinary } = require('../config/cloudinary');
 
 const generateQRCode = async (data) => {
-  const qrDataUrl = await QRCode.toDataURL(JSON.stringify(data), {
+  // data is a URL string now
+  const qrDataUrl = await QRCode.toDataURL(data, {
     errorCorrectionLevel: 'H',
     type: 'image/png',
     width: 400,
@@ -10,9 +11,10 @@ const generateQRCode = async (data) => {
     color: { dark: '#111827', light: '#ffffff' },
   });
 
+  const code = data.split('/').pop();
   const uploadResult = await cloudinary.uploader.upload(qrDataUrl, {
     folder: 'zbritje.al/qrcodes',
-    public_id: `voucher_${data.code}`,
+    public_id: `voucher_${code}`,
     overwrite: true,
   });
 
@@ -23,16 +25,9 @@ const generateQRCode = async (data) => {
   };
 };
 
-const generateVoucherQRData = (voucher) => ({
-  platform: 'zbritje.al',
-  type: 'voucher',
-  code: voucher.code,
-  voucherId: voucher._id.toString(),
-  dealId: voucher.deal.toString(),
-  businessId: voucher.business.toString(),
-  userId: voucher.user.toString(),
-  expiresAt: voucher.expiresAt,
-  checksum: Buffer.from(`${voucher.code}:${voucher._id}`).toString('base64'),
-});
+const generateVoucherQRData = (voucher) => {
+  const clientUrl = process.env.CLIENT_URL || 'https://client-one-tawny-73.vercel.app';
+  return `${clientUrl}/v/${voucher.code}`;
+};
 
 module.exports = { generateQRCode, generateVoucherQRData };
