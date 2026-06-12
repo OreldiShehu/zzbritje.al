@@ -134,8 +134,28 @@ exports.refreshToken = catchAsync(async (req, res, next) => {
   res.status(200).json({ success: true, accessToken, refreshToken });
 });
 
+exports.resendVerificationEmail = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) return next(new AppError('Email is required.', 400));
+
+  const user = await User.findOne({ email });
+  if (!user) return res.status(200).json({ success: true, message: 'Nëse email-i ekziston, do të merrni një link verifikimi.' });
+  if (user.isEmailVerified) return next(new AppError('Ky email është tashmë i verifikuar.', 400));
+
+  const verifyToken = user.generateEmailVerificationToken();
+  await user.save({ validateBeforeSave: false });
+
+  const emailData = templates.welcome(user);
+  emailData.html = emailData.html.replace('${user._verifyToken}', verifyToken);
+  await sendEmail({ to: user.email, ...emailData });
+
+  res.status(200).json({ success: true, message: 'Email-i i verifikimit u dërgua. Kontrolloni kutinë postare.' });
+});
+
 exports.verifyEmail = catchAsync(async (req, res, next) => {
-  const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+  const rawToken = req.params.token || req.body.token;
+  if (!rawToken) return next(new AppError('Token is required.', 400));
+  const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
   const user = await User.findOne({
     emailVerificationToken: hashedToken,
     emailVerificationExpires: { $gt: Date.now() },

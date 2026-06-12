@@ -14,6 +14,8 @@ export default function Login() {
   const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState(null);
+  const [resendLoading, setResendLoading] = useState(false);
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -38,6 +40,7 @@ export default function Login() {
     } catch (err) {
       const msg = err.response?.data?.message || t('common.error');
       toast.error(msg);
+      if (msg.includes('verifikoni email')) setUnverifiedEmail(data.email);
     } finally {
       setLoading(false);
     }
@@ -104,6 +107,28 @@ export default function Login() {
             <span className="text-gray-400 text-sm">{t('auth.or_email')}</span>
             <div className="h-px flex-1 bg-gray-200" />
           </div>
+
+          {unverifiedEmail && (
+            <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
+              <p className="font-semibold mb-2">Email-i juaj nuk është verifikuar.</p>
+              <button
+                onClick={async () => {
+                  setResendLoading(true);
+                  try {
+                    await api.post('/auth/resend-verification', { email: unverifiedEmail });
+                    toast.success('Email-i i verifikimit u dërgua! Kontrolloni kutinë postare.');
+                    setUnverifiedEmail(null);
+                  } catch (e) {
+                    toast.error(e.response?.data?.message || 'Ndodhi një gabim');
+                  } finally { setResendLoading(false); }
+                }}
+                disabled={resendLoading}
+                className="font-bold text-amber-700 underline hover:text-amber-900"
+              >
+                {resendLoading ? 'Duke dërguar...' : 'Dërgo email verifikimi →'}
+              </button>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
