@@ -48,6 +48,7 @@ const dealSchema = new mongoose.Schema({
   maxPerCustomer: { type: Number, default: 1 },
   minPerOrder: { type: Number, default: 1 },
   maxVouchersPerMonth: { type: Number, default: 10 }, // platform limit per deal per month
+  onePerTable: { type: Boolean, default: false },
 
   // Location
   city: { type: String, required: true },

@@ -280,6 +280,14 @@ export default function DealDetails() {
               </div>
             </div>
 
+            {/* One per table */}
+            {deal.onePerTable && (
+              <div className="flex items-center gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm font-semibold">
+                <span className="text-lg">⚠️</span>
+                <span>1 voucher për tavolinë — biznesi e kontrollon gjatë skanimit të QR</span>
+              </div>
+            )}
+
             {/* Terms */}
             {deal.termsAndConditions && (
               <div className="card p-6">

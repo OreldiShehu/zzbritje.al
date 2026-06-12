@@ -55,6 +55,13 @@ function VoucherCard({ v }) {
         </div>
       </div>
 
+      {/* One per table notice */}
+      {v.deal?.onePerTable && (
+        <div className="px-4 py-2 bg-amber-50 border-t border-amber-100 text-xs text-amber-700 font-medium flex items-center gap-2">
+          <span>⚠️</span> 1 voucher për tavolinë
+        </div>
+      )}
+
       {/* Code + QR */}
       <div className={`flex items-center justify-between gap-4 px-4 py-3 border-t ${isActive ? 'border-brand-100 bg-brand-50/50' : 'border-gray-200'}`}>
         <div>

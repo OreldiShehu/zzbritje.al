@@ -153,6 +153,13 @@ export default function DealCard({ deal, featured = false }) {
           )}
 
           {/* Pricing */}
+          {deal.onePerTable && (
+            <div className="mb-2">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">
+                1 voucher / tavolinë
+              </span>
+            </div>
+          )}
           <div className="flex items-end justify-between">
             <div>
               <p className="text-xs text-gray-400 line-through">{formatCurrency(deal.originalPrice)}</p>

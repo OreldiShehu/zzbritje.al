@@ -230,6 +230,13 @@ export default function CreateDeal() {
                     <input type="number" {...register('maxPerCustomer', { min: 1, max: 10, valueAsNumber: true })} className="input-field" />
                   </div>
                 </div>
+                <label className="flex items-center gap-3 p-4 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <input type="checkbox" {...register('onePerTable')} className="w-5 h-5 rounded accent-brand-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">1 voucher për tavolinë</p>
+                    <p className="text-xs text-gray-400">Çdo tavolinë mund të përdorë vetëm 1 voucher — ju e kontrolloni gjatë skanimi</p>
+                  </div>
+                </label>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Kushtet (opsionale)</label>
                   <textarea {...register('termsAndConditions')} rows={3} className="input-field resize-none"

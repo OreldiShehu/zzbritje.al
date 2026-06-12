@@ -166,7 +166,7 @@ exports.getMyVouchers = catchAsync(async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
-      .populate('deal', 'title slug images originalPrice discountedPrice')
+      .populate('deal', 'title slug images originalPrice discountedPrice onePerTable')
       .populate('business', 'name slug logo city address phone'),
     Voucher.countDocuments(filter),
   ]);
