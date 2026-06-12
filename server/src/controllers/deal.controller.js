@@ -10,6 +10,14 @@ const { emitToAdmin } = require('../config/socket');
 
 exports.getAllDeals = catchAsync(async (req, res) => {
   const { page = 1, limit = 20, sort, ...queryParams } = req.query;
+
+  // Resolve category slug → ObjectId if needed
+  if (queryParams.category && !/^[0-9a-fA-F]{24}$/.test(queryParams.category)) {
+    const cat = await Category.findOne({ slug: queryParams.category }).select('_id').lean();
+    if (cat) queryParams.category = cat._id.toString();
+    else delete queryParams.category;
+  }
+
   const filters = buildDealFilters(queryParams);
   const sortObj = buildSortObject(sort);
   const { skip } = paginate(null, page, limit);
@@ -91,17 +99,18 @@ exports.createDeal = catchAsync(async (req, res, next) => {
     await require('../models/User').findByIdAndUpdate(req.user.id, { businessId: business._id });
   }
 
-  // Enforce free-tier limit: max 2 active deals per month
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0, 0, 0, 0);
-  const dealsThisMonth = await Deal.countDocuments({
-    business: business._id,
-    createdAt: { $gte: startOfMonth },
-    status: { $nin: ['expired', 'rejected'] },
-  });
-  if (dealsThisMonth >= 2) {
-    return next(new AppError('Keni arritur limitin mujor falas prej 2 deal-eve. Kontaktoni Zbritje.al për plan premium.', 400));
+  // Enforce plan-based active deal limits
+  const PLAN_LIMITS = { free: 2, starter: 5, growth: 15, premium: Infinity, enterprise: Infinity };
+  const limit = PLAN_LIMITS[business.plan] ?? 2;
+  if (limit !== Infinity) {
+    const activeDeals = await Deal.countDocuments({
+      business: business._id,
+      status: { $in: ['active', 'pending', 'paused'] },
+    });
+    if (activeDeals >= limit) {
+      const planLabel = business.plan === 'free' ? 'falas' : business.plan;
+      return next(new AppError(`Keni arritur limitin e planit ${planLabel} (${limit} deal aktive). Kontaktoni Zbritje.al për upgrade.`, 400));
+    }
   }
 
   const images = req.files?.map((f, i) => ({

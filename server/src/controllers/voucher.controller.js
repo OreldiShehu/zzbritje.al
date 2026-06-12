@@ -12,7 +12,7 @@ const { paginate, buildPaginatedResponse, calculateLoyaltyPoints, createAuditLog
 const { emitToUser } = require('../config/socket');
 
 exports.purchaseVoucher = catchAsync(async (req, res, next) => {
-  const { dealId, quantity = 1, paymentMethod, paymentIntentId, useWallet } = req.body;
+  const { dealId, quantity = 1, paymentMethod, paymentIntentId, useWallet, isGift, giftRecipientEmail, giftMessage } = req.body;
 
   const deal = await Deal.findById(dealId).populate('business');
   if (!deal) return next(new AppError('Deal not found.', 404));
@@ -80,6 +80,11 @@ exports.purchaseVoucher = catchAsync(async (req, res, next) => {
       businessEarning: deal.discountedPrice * (1 - deal.commissionRate),
       expiresAt,
       status: 'active',
+      ...(isGift && {
+        giftRecipientEmail,
+        giftMessage,
+        giftSentAt: new Date(),
+      }),
     };
 
     // Generate QR code (wrapped fully — _id doesn't exist yet on voucherData)
@@ -282,6 +287,36 @@ exports.validateVoucher = catchAsync(async (req, res, next) => {
         paidPrice: voucher.paidPrice,
         deal: voucher.deal,
         customer: voucher.user,
+      },
+    },
+  });
+});
+
+exports.getVoucherPublicInfo = catchAsync(async (req, res, next) => {
+  const { code } = req.params;
+  const voucher = await Voucher.findOne({ code })
+    .populate('deal', 'title images')
+    .populate('user', 'firstName lastName')
+    .populate('business', 'name');
+
+  if (!voucher) return next(new AppError('Voucher-i nuk u gjet.', 404));
+
+  const isExpired = new Date() > voucher.expiresAt;
+  const status = isExpired && voucher.status === 'active' ? 'expired' : voucher.status;
+
+  res.status(200).json({
+    success: true,
+    data: {
+      status,
+      voucher: {
+        code: voucher.code,
+        expiresAt: voucher.expiresAt,
+        paidPrice: voucher.paidPrice,
+        deal: voucher.deal,
+        businessName: voucher.business?.name,
+      },
+      customer: {
+        name: `${voucher.user?.firstName} ${voucher.user?.lastName}`.trim(),
       },
     },
   });

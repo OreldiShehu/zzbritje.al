@@ -27,6 +27,7 @@ const analyticsRoutes = require('./routes/analytics.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const categoryRoutes = require('./routes/category.routes');
 const uploadRoutes = require('./routes/upload.routes');
+const cronRoutes = require('./routes/cron.routes');
 
 // Passport config
 require('./config/passport');
@@ -126,6 +127,7 @@ app.use(`${API}/analytics`, analyticsRoutes);
 app.use(`${API}/notifications`, notificationRoutes);
 app.use(`${API}/categories`, categoryRoutes);
 app.use(`${API}/upload`, uploadRoutes);
+app.use(`${API}/cron`, cronRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

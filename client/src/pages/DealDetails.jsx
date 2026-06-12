@@ -9,6 +9,7 @@ import {
   AlertCircle, Users, Eye, Instagram, Send, Banknote, CreditCard, X,
 } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons, FUNDING } from '@paypal/react-paypal-js';
+import { Helmet } from 'react-helmet-async';
 import api from '../api/axios';
 import { useAuthStore } from '../store/authStore';
 import { formatCurrency, formatCountdown, formatDate, getImageUrl } from '../utils/formatters';
@@ -64,6 +65,9 @@ export default function DealDetails() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [checkoutPayment, setCheckoutPayment] = useState('cash');
   const [cashPending, setCashPending] = useState(false);
+  const [isGift, setIsGift] = useState(false);
+  const [giftEmail, setGiftEmail] = useState('');
+  const [giftMessage, setGiftMessage] = useState('');
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['deal', slug],
@@ -131,10 +135,14 @@ export default function DealDetails() {
   };
 
   const handleCashPurchase = async () => {
+    if (isGift && !giftEmail.trim()) { toast.error('Shkruaj email-in e marrësit'); return; }
     setCashPending(true);
     try {
-      await api.post('/vouchers/purchase', { dealId: deal._id, quantity, paymentMethod: 'cash' });
-      toast.success(t('checkout.success'));
+      await api.post('/vouchers/purchase', {
+        dealId: deal._id, quantity, paymentMethod: 'cash',
+        ...(isGift && { isGift: true, giftRecipientEmail: giftEmail.trim(), giftMessage: giftMessage.trim() }),
+      });
+      toast.success(isGift ? 'Dhurata u dërgua me sukses!' : t('checkout.success'));
       setShowCheckout(false);
       navigate('/dashboard/vouchers', { state: { newVoucher: true } });
     } catch (e) {
@@ -165,8 +173,25 @@ export default function DealDetails() {
     else { navigator.clipboard.writeText(window.location.href); toast.success('✓ Link copied!'); }
   };
 
+  const ogImage = deal.images?.[0]?.url ? getImageUrl(deal.images[0].url, 1200) : 'https://zbritje.al/og-image.jpg';
+  const pageTitle = `${deal.title} — ${Math.round(deal.discountPercentage)}% Zbritje | Zbritje.al`;
+  const pageDesc = `${deal.description?.slice(0, 150) || deal.title}. Çmimi: ${deal.discountedPrice} ALL (prej ${deal.originalPrice} ALL).`;
+
   return (
     <div className="bg-gray-50 min-h-screen pb-20">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDesc} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDesc} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:url" content={`https://zbritje.al/deals/${deal.slug}`} />
+        <meta property="og:type" content="product" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:image" content={ogImage} />
+        <link rel="canonical" href={`https://zbritje.al/deals/${deal.slug}`} />
+      </Helmet>
       {/* Breadcrumb */}
       <div className="bg-white border-b">
         <div className="container-custom py-3">
@@ -543,6 +568,33 @@ export default function DealDetails() {
                     <span className="text-brand-700">{formatCurrency(deal.discountedPrice * quantity)}</span>
                   </div>
                 </div>
+
+                {/* Gift option */}
+                <label className="flex items-center gap-3 p-3.5 rounded-2xl border-2 border-gray-200 cursor-pointer hover:bg-gray-50 transition-all mb-3">
+                  <input type="checkbox" checked={isGift} onChange={(e) => setIsGift(e.target.checked)} className="w-5 h-5 rounded accent-brand-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">🎁 Dërgoje si Dhuratë</p>
+                    <p className="text-xs text-gray-400">Voucher-i do t'i dërgohet një personi tjetër</p>
+                  </div>
+                </label>
+                {isGift && (
+                  <div className="space-y-2 mb-3 p-3 bg-pink-50 rounded-2xl border border-pink-200">
+                    <input
+                      type="email"
+                      value={giftEmail}
+                      onChange={(e) => setGiftEmail(e.target.value)}
+                      placeholder="Email-i i marrësit *"
+                      className="input-field text-sm"
+                    />
+                    <textarea
+                      value={giftMessage}
+                      onChange={(e) => setGiftMessage(e.target.value)}
+                      placeholder="Mesazh personal (opsional)..."
+                      rows={2}
+                      className="input-field text-sm resize-none"
+                    />
+                  </div>
+                )}
 
                 {/* Payment method */}
                 <div className="space-y-2 mb-5">

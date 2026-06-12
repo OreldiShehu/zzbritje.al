@@ -6,9 +6,11 @@ const Transaction = require('../models/Transaction');
 const AuditLog = require('../models/AuditLog');
 const SupportTicket = require('../models/SupportTicket');
 const Category = require('../models/Category');
+const Notification = require('../models/Notification');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const { paginate, buildPaginatedResponse, createAuditLog } = require('../utils/helpers');
+const { emitToUser } = require('../config/socket');
 
 exports.getDashboardStats = catchAsync(async (req, res) => {
   const now = new Date();
@@ -122,6 +124,15 @@ exports.verifyBusiness = catchAsync(async (req, res, next) => {
 
   await User.findByIdAndUpdate(business.owner._id, { 'businessId': business._id });
   await createAuditLog({ actor: req.user, action: 'verify_business', resource: 'Business', resourceId: business._id, req });
+
+  const notification = await Notification.create({
+    user: business.owner._id,
+    type: 'system',
+    title: '✅ Biznesi juaj u verifikua!',
+    message: `Biznesi "${business.name}" u verifikua me sukses nga ekipi i Zbritje.al. Tani mund të krijoni deal-e dhe të filloni të shitni voucher-ë!`,
+  });
+  emitToUser(business.owner._id.toString(), 'notification', notification);
+
   res.status(200).json({ success: true, message: 'Business verified.' });
 });
 
@@ -230,9 +241,21 @@ exports.approveDeal = catchAsync(async (req, res, next) => {
     req.params.id,
     { status: 'active', approvedAt: new Date(), approvedBy: req.user.id },
     { new: true }
-  );
+  ).populate('business', 'owner name');
   if (!deal) return next(new AppError('Deal not found.', 404));
-  await Business.findByIdAndUpdate(deal.business, { $inc: { activeDeals: 1 } });
+  await Business.findByIdAndUpdate(deal.business._id, { $inc: { activeDeals: 1 } });
+
+  if (deal.business?.owner) {
+    const notification = await Notification.create({
+      user: deal.business.owner,
+      type: 'deal_approved',
+      title: '🎉 Deal-i u aprovua!',
+      message: `Deal-i juaj "${deal.title}" u aprovua dhe është tani aktiv në platformë. Klientët mund ta blejnë tani!`,
+      deal: deal._id,
+    });
+    emitToUser(deal.business.owner.toString(), 'notification', notification);
+  }
+
   res.status(200).json({ success: true, data: deal });
 });
 

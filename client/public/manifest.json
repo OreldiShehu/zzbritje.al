@@ -1,0 +1,27 @@
+{
+  "name": "Zbritje.al — Oferta & Zbritje",
+  "short_name": "Zbritje.al",
+  "description": "Oferta dhe zbritjet më të mira në Shqipëri",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a3f8a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "food", "lifestyle"],
+  "lang": "sq",
+  "scope": "/"
+}

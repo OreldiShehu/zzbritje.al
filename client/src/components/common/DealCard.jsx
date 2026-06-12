@@ -1,12 +1,29 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, Star, MapPin, Clock, ShoppingCart, Flame, Zap } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency, formatCountdown, getImageUrl } from '../../utils/formatters';
 import api from '../../api/axios';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
+
+function FlashCountdown({ endDate }) {
+  const [time, setTime] = useState(formatCountdown(endDate));
+  useEffect(() => {
+    const t = setInterval(() => setTime(formatCountdown(endDate)), 1000);
+    return () => clearInterval(t);
+  }, [endDate]);
+  if (time.expired) return null;
+  return (
+    <div className="flex items-center gap-1 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
+      <Zap size={11} />
+      {time.days > 0
+        ? `${time.days}d ${String(time.hours).padStart(2,'0')}:${String(time.minutes).padStart(2,'0')}`
+        : `${String(time.hours).padStart(2,'0')}:${String(time.minutes).padStart(2,'0')}:${String(time.seconds).padStart(2,'0')}`}
+    </div>
+  );
+}
 
 export default function DealCard({ deal, featured = false }) {
   const { t } = useTranslation();
@@ -89,12 +106,16 @@ export default function DealCard({ deal, featured = false }) {
           </button>
 
           {/* Time remaining */}
-          {timeLeft && (
-            <div className={`absolute bottom-3 left-3 flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-sm ${isEndingSoon ? 'bg-orange-500 animate-pulse' : 'bg-black/70 backdrop-blur-sm'}`}>
-              <Clock size={12} />
-              {isEndingSoon ? `${t('deal.expires_today')} ${timeLeft}` : `${t('deal.expires')} ${timeLeft}`}
-            </div>
-          )}
+          <div className="absolute bottom-3 left-3">
+            {deal.dealType === 'flash'
+              ? <FlashCountdown endDate={deal.endDate} />
+              : timeLeft && (
+                <div className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-sm ${isEndingSoon ? 'bg-orange-500 animate-pulse' : 'bg-black/70 backdrop-blur-sm'}`}>
+                  <Clock size={12} />
+                  {isEndingSoon ? `${t('deal.expires_today')} ${timeLeft}` : `${t('deal.expires')} ${timeLeft}`}
+                </div>
+              )}
+          </div>
 
           {/* Sold out overlay */}
           {deal.status === 'sold_out' && (

@@ -1,13 +1,14 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Ticket, User, Bell, LogOut, Menu, X, ChevronRight } from 'lucide-react';
+import { Ticket, User, Bell, Gift, LogOut, Menu, X, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 
 const navItems = [
   { to: '/dashboard', icon: Ticket, label: 'Voucher-at e Mia', end: true },
   { to: '/dashboard/notifications', icon: Bell, label: 'Njoftime' },
+  { to: '/dashboard/referrals', icon: Gift, label: 'Ftoni Miq' },
   { to: '/dashboard/profile', icon: User, label: 'Profili' },
 ];
 

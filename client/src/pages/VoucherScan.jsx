@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { CheckCircle, XCircle, Clock, AlertTriangle, Loader, RotateCcw } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, AlertTriangle, Loader, RotateCcw, LogIn } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import api from '../api/axios';
 import { formatCurrency, formatDate } from '../utils/formatters';
@@ -12,14 +12,15 @@ export default function VoucherScan() {
   const { user, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const [approved, setApproved] = useState(false);
-  const [denied, setDenied] = useState(null); // message string
+  const [denied, setDenied] = useState(null);
 
   const isBusiness = isAuthenticated && user?.role === 'business';
 
+  // Public fetch — no auth required
   const { data, isLoading, error } = useQuery({
-    queryKey: ['voucher-scan', code],
-    queryFn: () => api.get(`/vouchers/validate/${code}`).then((r) => r.data.data),
-    enabled: !!code && isBusiness,
+    queryKey: ['voucher-public', code],
+    queryFn: () => api.get(`/vouchers/info/${code}`).then((r) => r.data.data),
+    enabled: !!code,
     retry: false,
   });
 
@@ -66,51 +67,17 @@ export default function VoucherScan() {
     );
   }
 
-  // Not logged in
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-8 text-center">
-        <div className="card p-8 max-w-sm w-full">
-          <AlertTriangle size={40} className="text-amber-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Kyçuni si Biznes</h2>
-          <p className="text-gray-500 text-sm mb-6">Duhet të kyçeni si biznes për të verifikuar këtë voucher.</p>
-          <Link
-            to={`/login?redirect=/v/${code}`}
-            className="btn-primary w-full block text-center"
-          >
-            Kyçu tani
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // Logged in but not a business
-  if (!isBusiness) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-8 text-center">
-        <div className="card p-8 max-w-sm w-full">
-          <AlertTriangle size={40} className="text-amber-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Vetëm për Biznese</h2>
-          <p className="text-gray-500 text-sm">Vetëm llogaritë e bizneseve mund të verifikojnë voucher-ët.</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Loading
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader size={36} className="animate-spin text-brand-500 mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">Duke verifikuar voucher-in...</p>
+          <p className="text-gray-500 text-sm">Duke ngarkuar voucher-in...</p>
         </div>
       </div>
     );
   }
 
-  // Error / invalid
   if (error) {
     const msg = error.response?.data?.message || 'Voucher-i nuk u gjet';
     const isExpired = msg.toLowerCase().includes('expir') || msg.toLowerCase().includes('skadu');
@@ -129,9 +96,6 @@ export default function VoucherScan() {
           </h2>
           <p className={`text-sm mb-2 ${isRedeemed ? 'text-blue-600' : isExpired ? 'text-amber-600' : 'text-red-600'}`}>{msg}</p>
           <p className="text-xs text-gray-400 font-mono mb-6">{code}</p>
-          <button onClick={() => navigate('/business-dashboard/scanner')} className="btn-secondary text-sm">
-            <RotateCcw size={14} /> Skano tjetrin
-          </button>
         </div>
       </div>
     );
@@ -139,8 +103,43 @@ export default function VoucherScan() {
 
   const voucher = data?.voucher;
   const customer = data?.customer;
+  const status = data?.status;
 
-  // Valid — show confirm screen
+  // Voucher is not active
+  if (status === 'redeemed') {
+    return (
+      <div className="min-h-screen bg-blue-50 flex flex-col items-center justify-center p-8 text-center">
+        <CheckCircle size={72} className="text-blue-500 mx-auto mb-4" />
+        <h2 className="text-2xl font-black text-blue-800 mb-2">Tashmë i Përdorur</h2>
+        <p className="text-blue-600 text-sm mb-1">{voucher?.deal?.title}</p>
+        <p className="text-xs text-gray-400 font-mono">{code}</p>
+      </div>
+    );
+  }
+
+  if (status === 'expired') {
+    return (
+      <div className="min-h-screen bg-amber-50 flex flex-col items-center justify-center p-8 text-center">
+        <Clock size={72} className="text-amber-500 mx-auto mb-4" />
+        <h2 className="text-2xl font-black text-amber-800 mb-2">Ka Skaduar</h2>
+        <p className="text-amber-600 text-sm mb-1">{voucher?.deal?.title}</p>
+        <p className="text-xs text-gray-400 font-mono">{code}</p>
+      </div>
+    );
+  }
+
+  if (status === 'cancelled' || status === 'refunded') {
+    return (
+      <div className="min-h-screen bg-red-50 flex flex-col items-center justify-center p-8 text-center">
+        <XCircle size={72} className="text-red-500 mx-auto mb-4" />
+        <h2 className="text-2xl font-black text-red-800 mb-2">I Pavlefshëm</h2>
+        <p className="text-red-600 text-sm mb-1">{voucher?.deal?.title}</p>
+        <p className="text-xs text-gray-400 font-mono">{code}</p>
+      </div>
+    );
+  }
+
+  // Valid voucher — show to everyone, gate confirm on business login
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
       <div className="card w-full max-w-sm overflow-hidden">
@@ -172,22 +171,39 @@ export default function VoucherScan() {
         </div>
 
         {/* Actions */}
-        <div className="px-6 pb-6 flex gap-3">
-          <button
-            onClick={() => redeemMutation.mutate()}
-            disabled={redeemMutation.isPending}
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm"
-          >
-            {redeemMutation.isPending
-              ? <Loader size={16} className="animate-spin" />
-              : <><CheckCircle size={16} /> Konfirmo</>}
-          </button>
-          <button
-            onClick={() => setDenied('Voucher-i u refuzua nga biznesi.')}
-            className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm border border-red-200"
-          >
-            <XCircle size={16} /> Refuzo
-          </button>
+        <div className="px-6 pb-6">
+          {isBusiness ? (
+            <div className="flex gap-3">
+              <button
+                onClick={() => redeemMutation.mutate()}
+                disabled={redeemMutation.isPending}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm"
+              >
+                {redeemMutation.isPending
+                  ? <Loader size={16} className="animate-spin" />
+                  : <><CheckCircle size={16} /> Konfirmo</>}
+              </button>
+              <button
+                onClick={() => setDenied('Voucher-i u refuzua nga biznesi.')}
+                className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm border border-red-200"
+              >
+                <XCircle size={16} /> Refuzo
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-start gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
+                <span>Për të konfirmuar këtë voucher, kyçuni si biznes në pajisjen e restorantit.</span>
+              </div>
+              <Link
+                to={`/login?redirect=/v/${code}`}
+                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm"
+              >
+                <LogIn size={16} /> Kyçu si Biznes
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>
