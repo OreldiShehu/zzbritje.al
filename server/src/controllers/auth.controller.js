@@ -97,7 +97,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
   if (user.isBlocked) return next(new AppError('Account suspended. Contact support.', 403));
   if (!user.isActive) return next(new AppError('Account deactivated.', 401));
-  if (!user.isEmailVerified) return next(new AppError('Ju lutemi verifikoni email-in tuaj para se të hyni.', 403));
+  if (!user.isEmailVerified && !['admin', 'superadmin'].includes(user.role)) return next(new AppError('Ju lutemi verifikoni email-in tuaj para se të hyni.', 403));
 
   // Reset login attempts on success
   if (user.loginAttempts > 0) {

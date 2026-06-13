@@ -23,8 +23,7 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
     owner: req.user.id,
     logo,
     commissionRate: parseFloat(process.env.PLATFORM_COMMISSION_RATE) || 0.20,
-    verificationStatus: 'verified',
-    verifiedAt: new Date(),
+    verificationStatus: 'pending',
   });
 
   await User.findByIdAndUpdate(req.user.id, { businessId: business._id });

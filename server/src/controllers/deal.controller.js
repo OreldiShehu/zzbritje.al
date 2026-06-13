@@ -81,22 +81,12 @@ exports.getDeal = catchAsync(async (req, res, next) => {
 });
 
 exports.createDeal = catchAsync(async (req, res, next) => {
-  let business = await Business.findOne({ owner: req.user.id });
+  const business = await Business.findOne({ owner: req.user.id });
   if (!business) {
-    const slugify = require('slugify');
-    const defaultCategory = await Category.findOne({ isActive: true }).select('_id').lean();
-    const name = req.user.businessName || `${req.user.firstName} ${req.user.lastName}`.trim() || req.user.email;
-    business = await Business.create({
-      name,
-      owner: req.user.id,
-      slug: slugify(name, { lower: true, strict: true }) + '-' + Date.now(),
-      city: req.body.city || 'Tiranë',
-      category: req.body.category || defaultCategory?._id,
-      commissionRate: parseFloat(process.env.PLATFORM_COMMISSION_RATE) || 0.10,
-      verificationStatus: 'verified',
-      verifiedAt: new Date(),
-    });
-    await require('../models/User').findByIdAndUpdate(req.user.id, { businessId: business._id });
+    return next(new AppError('Ju nuk keni një profil biznesi. Krijoni profilin tuaj së pari.', 403));
+  }
+  if (business.verificationStatus !== 'verified') {
+    return next(new AppError('BUSINESS_NOT_VERIFIED:Biznesi juaj nuk është verifikuar ende nga admini. Prisni aprovimin para se të krijoni deals.', 403));
   }
 
   // Enforce plan-based limits
