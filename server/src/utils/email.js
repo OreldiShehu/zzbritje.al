@@ -1,24 +1,21 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const logger = require('./logger');
 
-const createTransporter = () => nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: parseInt(process.env.EMAIL_PORT) || 587,
-  secure: parseInt(process.env.EMAIL_PORT) === 465,
-  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-  tls: { rejectUnauthorized: false },
-});
+const getResend = () => new Resend(process.env.RESEND_API_KEY);
 
-const sendEmail = async ({ to, subject, html, text, attachments }) => {
-  if (process.env.NODE_ENV === 'test') return { messageId: 'test' };
+const sendEmail = async ({ to, subject, html, text }) => {
+  if (process.env.NODE_ENV === 'test') return { id: 'test' };
   try {
-    const transporter = createTransporter();
-    const info = await transporter.sendMail({
-      from: process.env.EMAIL_FROM || 'Zbritje.al <noreply@zbritje.al>',
-      to, subject, html, text, attachments,
+    const resend = getResend();
+    const data = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'Zbritje.al <onboarding@resend.dev>',
+      to,
+      subject,
+      html,
+      text,
     });
-    logger.info(`Email sent to ${to}: ${info.messageId}`);
-    return info;
+    logger.info(`Email sent to ${to}: ${data.id}`);
+    return data;
   } catch (err) {
     logger.error('Email send failed:', err);
     throw err;

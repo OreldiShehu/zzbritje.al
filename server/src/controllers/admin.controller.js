@@ -146,6 +146,32 @@ exports.rejectBusiness = catchAsync(async (req, res, next) => {
   res.status(200).json({ success: true, message: 'Business rejected.' });
 });
 
+exports.updateBusinessPlan = catchAsync(async (req, res, next) => {
+  const business = await Business.findById(req.params.id).populate('owner');
+  if (!business) return next(new AppError('Business not found.', 404));
+
+  const { plan } = req.body;
+  if (!['free', 'pro'].includes(plan)) return next(new AppError('Invalid plan.', 400));
+
+  business.plan = plan;
+  business.planExpiresAt = plan === 'pro' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : undefined;
+  await business.save();
+
+  await createAuditLog({ actor: req.user, action: 'update_business_plan', resource: 'Business', resourceId: business._id, req });
+
+  const notification = await Notification.create({
+    user: business.owner._id,
+    type: 'system',
+    title: plan === 'pro' ? '🎉 Plani Pro u aktivizua!' : 'Plani juaj u ndryshua',
+    message: plan === 'pro'
+      ? `Biznesi "${business.name}" u ngrit në planin Pro. Tani keni 20+ deals dhe vouchers të pakufizuara!`
+      : `Biznesi "${business.name}" u kthye në planin Falas.`,
+  });
+  emitToUser(business.owner._id.toString(), 'notification', notification);
+
+  res.status(200).json({ success: true, plan: business.plan, message: `Plan updated to ${plan}.` });
+});
+
 // CATEGORIES
 exports.createCategory = catchAsync(async (req, res) => {
   const category = await Category.create(req.body);

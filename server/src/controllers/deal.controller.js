@@ -99,18 +99,25 @@ exports.createDeal = catchAsync(async (req, res, next) => {
     await require('../models/User').findByIdAndUpdate(req.user.id, { businessId: business._id });
   }
 
-  // Enforce plan-based active deal limits
-  const PLAN_LIMITS = { free: 2, starter: 5, growth: 15, premium: Infinity, enterprise: Infinity };
-  const limit = PLAN_LIMITS[business.plan] ?? 2;
-  if (limit !== Infinity) {
-    const activeDeals = await Deal.countDocuments({
+  // Enforce plan-based limits
+  const PLAN_DEAL_LIMITS = { free: 2, pro: Infinity, starter: 5, growth: 15, premium: Infinity, enterprise: Infinity };
+  const PLAN_VOUCHER_LIMITS = { free: 10, pro: Infinity, starter: Infinity, growth: Infinity, premium: Infinity, enterprise: Infinity };
+  const dealLimit = PLAN_DEAL_LIMITS[business.plan] ?? 2;
+  const voucherLimit = PLAN_VOUCHER_LIMITS[business.plan] ?? 10;
+
+  if (dealLimit !== Infinity) {
+    const activeCount = await Deal.countDocuments({
       business: business._id,
       status: { $in: ['active', 'pending', 'paused'] },
     });
-    if (activeDeals >= limit) {
-      const planLabel = business.plan === 'free' ? 'falas' : business.plan;
-      return next(new AppError(`Keni arritur limitin e planit ${planLabel} (${limit} deal aktive). Kontaktoni Zbritje.al për upgrade.`, 400));
+    if (activeCount >= dealLimit) {
+      return next(new AppError(`PLAN_LIMIT_DEALS:Keni arritur limitin e planit falas (${dealLimit} deals aktive). Kaloni në Pro për të vazhduar.`, 400));
     }
+  }
+
+  const totalVouchers = parseInt(req.body.totalVouchers) || 0;
+  if (voucherLimit !== Infinity && totalVouchers > voucherLimit) {
+    return next(new AppError(`PLAN_LIMIT_VOUCHERS:Plani falas lejon maksimumi ${voucherLimit} vouchers për deal. Kaloni në Pro për vouchers të pakufizuara.`, 400));
   }
 
   const images = req.files?.map((f, i) => ({

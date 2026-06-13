@@ -65,7 +65,7 @@ const businessSchema = new mongoose.Schema({
   rejectionReason: { type: String },
 
   // Plan & Subscription
-  plan: { type: String, enum: ['free', 'starter', 'growth', 'premium', 'enterprise'], default: 'free' },
+  plan: { type: String, enum: ['free', 'pro', 'starter', 'growth', 'premium', 'enterprise'], default: 'free' },
   planExpiresAt: { type: Date },
   isFeatured: { type: Boolean, default: false },
   featuredUntil: { type: Date },

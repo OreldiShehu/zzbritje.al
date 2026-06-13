@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Building, CheckCircle, XCircle, Eye, ExternalLink } from 'lucide-react';
+import { Search, Building, CheckCircle, XCircle, Eye, ExternalLink, Crown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/axios';
 import { formatDate } from '../../utils/formatters';
@@ -14,10 +14,11 @@ const STATUS_BADGE = {
   rejected: 'bg-red-900/50 text-red-400',
 };
 
-function ReviewModal({ business, onClose, onVerify, onReject }) {
+function ReviewModal({ business, onClose, onVerify, onReject, onPlanChange }) {
   const { t } = useTranslation();
   const [reason, setReason] = useState('');
   const [mode, setMode] = useState(null);
+  const isPro = business.plan === 'pro';
 
   const fields = [
     [t('admin_ui.category'), business.category?.name],
@@ -73,6 +74,21 @@ function ReviewModal({ business, onClose, onVerify, onReject }) {
           </div>
         )}
 
+        {/* Plan toggle */}
+        <div className="mb-4 flex items-center justify-between p-3 bg-gray-700/50 rounded-xl">
+          <div className="flex items-center gap-2">
+            <Crown size={16} className={isPro ? 'text-amber-400' : 'text-gray-500'} />
+            <span className="text-sm font-semibold text-gray-200">
+              Plan: <span className={isPro ? 'text-amber-400' : 'text-gray-400'}>{isPro ? 'Pro' : 'Falas'}</span>
+            </span>
+          </div>
+          <button
+            onClick={() => onPlanChange(business._id, isPro ? 'free' : 'pro')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${isPro ? 'bg-gray-600 hover:bg-gray-500 text-gray-300' : 'bg-amber-500 hover:bg-amber-600 text-white'}`}>
+            {isPro ? 'Ktheje Falas' : '⬆ Aktivo Pro'}
+          </button>
+        </div>
+
         <div className="flex gap-3">
           <button onClick={() => onVerify(business._id)} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-colors">
             <CheckCircle size={16} />{t('admin_ui.verify_btn')}
@@ -114,6 +130,16 @@ export default function AdminBusinesses() {
   const rejectMutation = useMutation({
     mutationFn: ({ id, reason }) => api.patch(`/admin/businesses/${id}/reject`, { reason }),
     onSuccess: () => { qc.invalidateQueries(['admin', 'businesses']); toast.success(t('admin_ui.business_rejected')); setSelected(null); },
+    onError: () => toast.error(t('common.error')),
+  });
+
+  const planMutation = useMutation({
+    mutationFn: ({ id, plan }) => api.patch(`/admin/businesses/${id}/plan`, { plan }),
+    onSuccess: (res) => {
+      qc.invalidateQueries(['admin', 'businesses']);
+      toast.success(`Plani u ndryshua në ${res.data.plan === 'pro' ? 'Pro ⭐' : 'Falas'}`);
+      setSelected((prev) => prev ? { ...prev, plan: res.data.plan } : null);
+    },
     onError: () => toast.error(t('common.error')),
   });
 
@@ -198,7 +224,8 @@ export default function AdminBusinesses() {
         {selected && (
           <ReviewModal business={selected} onClose={() => setSelected(null)}
             onVerify={(id) => verifyMutation.mutate(id)}
-            onReject={(id, reason) => rejectMutation.mutate({ id, reason })} />
+            onReject={(id, reason) => rejectMutation.mutate({ id, reason })}
+            onPlanChange={(id, plan) => planMutation.mutate({ id, plan })} />
         )}
       </AnimatePresence>
     </div>

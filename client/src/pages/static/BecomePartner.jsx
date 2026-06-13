@@ -1,6 +1,7 @@
+﻿// v3
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle, TrendingUp, Users, Zap, Star, Shield, BarChart2, ArrowRight, ChevronDown, Banknote, MapPin, QrCode } from 'lucide-react';
+import { CheckCircle, TrendingUp, Users, Zap, Star, Shield, BarChart2, ArrowRight, ChevronDown, Banknote, MapPin, QrCode, Crown, X } from 'lucide-react';
 import { useState } from 'react';
 
 const STEPS = [
@@ -13,7 +14,7 @@ const STEPS = [
 const FAQS = [
   {
     q: 'Sa kushton listimi i biznesit?',
-    a: 'Regjistrimi dhe listimi janë plotësisht falas. Nuk ka abonime mujore apo kosto fillestare. Detajet e komisionit do t\'i merrni pas regjistrimit.',
+    a: 'Regjistrimi është plotësisht falas dhe përfshin deri në 2 deals aktive dhe 10 vouchers/deal. Plani Pro kushton 1,500 ALL/muaj dhe ju jep 20+ deals mujore, vouchers të pakufizuara dhe prioritet në kërkime.',
   },
   {
     q: 'Kur marr paratë nga voucher-et?',
@@ -32,8 +33,8 @@ const FAQS = [
     a: 'Pasi të krijoni profilin, llogaria juaj verifikohet nga ekipi ynë. Do të merrni një njoftim me të gjitha informacionet e nevojshme sapo të verifikohet.',
   },
   {
-    q: 'Mund të vendos "1 voucher për tavolinë"?',
-    a: 'Po. Gjatë krijimit të dealit mund të aktivizoni opsionin "1 voucher për tavolinë" dhe klientët e shohin këtë kufizim para blerjes. Ju e kontrolloni gjatë skanimit.',
+    q: 'Mund të vendos "1 voucher max"?',
+    a: 'Po. Gjatë krijimit të dealit mund të aktivizoni opsionin "1 voucher max" dhe klientët e shohin këtë kufizim para blerjes. Ju e kontrolloni gjatë skanimit.',
   },
 ];
 
@@ -65,11 +66,16 @@ export default function BecomePartner() {
         <div className="absolute inset-0 opacity-10"
           style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         <div className="container-custom relative max-w-3xl">
-          <div className="inline-flex items-center gap-2 bg-white/20 rounded-full px-4 py-2 text-sm font-medium mb-6">
-            <Star size={16} className="text-amber-300" /> Falas për t'u bashkuar
+          <div className="flex items-center justify-center gap-3 mb-6 flex-wrap">
+            <span className="inline-flex items-center gap-2 bg-white/20 rounded-full px-4 py-2 text-sm font-medium">
+              <Star size={16} className="text-amber-300" /> Falas për të filluar
+            </span>
+            <span className="inline-flex items-center gap-2 bg-amber-500/30 border border-amber-400/40 rounded-full px-4 py-2 text-sm font-bold text-amber-200">
+              <Crown size={14} /> Pro — 1,500 ALL/muaj
+            </span>
           </div>
           <h1 className="text-4xl md:text-6xl font-black mb-5 leading-tight">Rriti Biznesin Tënd me Zbritje.al</h1>
-          <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">Listoni ofertat tuaja, arrini mijëra klientë aktivë, dhe merrni paratë direkt. Pa abonime mujore.</p>
+          <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">Listoni ofertat tuaja, arrini mijëra klientë aktivë, dhe merrni paratë direkt. Filloni falas ose kaloni në Pro.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/register?role=business" className="bg-white text-brand-600 font-black px-8 py-4 rounded-2xl hover:bg-brand-50 transition-all shadow-xl text-lg inline-flex items-center justify-center gap-2">
               Filloni Falas Sot <ArrowRight size={20} />
@@ -81,9 +87,86 @@ export default function BecomePartner() {
         </div>
       </div>
 
+      {/* Pricing */}
+      <div className="container-custom py-16 max-w-3xl">
+        <h2 className="text-3xl font-black text-gray-900 text-center mb-2">Zgjidhni Planin Tuaj</h2>
+        <p className="text-gray-500 text-center mb-10">Filloni falas ose kaloni në Pro për kapacitet të plotë</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Free plan */}
+          <div className="rounded-2xl border-2 border-gray-200 p-8 flex flex-col">
+            <div className="mb-6">
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Falas</span>
+              <div className="mt-2 flex items-end gap-1">
+                <span className="text-4xl font-black text-gray-900">0</span>
+                <span className="text-gray-500 mb-1">ALL / muaj</span>
+              </div>
+              <p className="text-gray-500 text-sm mt-2">Ideal për të filluar dhe testuar platformën</p>
+            </div>
+            <ul className="space-y-3 flex-1">
+              {[
+                { text: 'Deri në 2 deals aktive', ok: true },
+                { text: 'Deri në 10 vouchers/deal', ok: true },
+                { text: 'Dashboard dhe statistika bazë', ok: true },
+                { text: 'Skaner QR', ok: true },
+                { text: 'Komision 10%', ok: true },
+                { text: 'Deals të pakufizuara', ok: false },
+                { text: 'Vouchers të pakufizuara', ok: false },
+                { text: 'Prioritet në kërkime', ok: false },
+              ].map(({ text, ok }) => (
+                <li key={text} className="flex items-center gap-3 text-sm">
+                  {ok
+                    ? <CheckCircle size={16} className="text-brand-500 flex-shrink-0" />
+                    : <X size={16} className="text-gray-300 flex-shrink-0" />}
+                  <span className={ok ? 'text-gray-700' : 'text-gray-400'}>{text}</span>
+                </li>
+              ))}
+            </ul>
+            <Link to="/register?role=business" className="mt-8 btn-secondary w-full py-3 text-center text-sm font-bold">
+              Fillo Falas
+            </Link>
+          </div>
+
+          {/* Pro plan */}
+          <motion.div whileHover={{ y: -4 }} className="rounded-2xl border-2 border-brand-500 bg-brand-50 p-8 flex flex-col relative overflow-hidden">
+            <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-brand-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+              <Crown size={11} /> PRO
+            </div>
+            <div className="mb-6">
+              <span className="text-xs font-bold text-brand-600 uppercase tracking-widest">Pro</span>
+              <div className="mt-2 flex items-end gap-1">
+                <span className="text-4xl font-black text-gray-900">1,500</span>
+                <span className="text-gray-500 mb-1">ALL / muaj</span>
+              </div>
+              <p className="text-gray-500 text-sm mt-2">Për biznese që duan rritje të shpejtë</p>
+            </div>
+            <ul className="space-y-3 flex-1">
+              {[
+                '20+ deals aktive çdo muaj',
+                'Vouchers të pakufizuara',
+                'Prioritet në rezultatet e kërkimit',
+                'Dashboard i avancuar me analitika',
+                'Skaner QR i dedikuar',
+                'Komision i reduktuar',
+                'Mbështetje prioritare 24/7',
+                'Badge "Biznes i Verifikuar" ✓',
+              ].map((text) => (
+                <li key={text} className="flex items-center gap-3 text-sm">
+                  <CheckCircle size={16} className="text-brand-600 flex-shrink-0" />
+                  <span className="text-gray-700 font-medium">{text}</span>
+                </li>
+              ))}
+            </ul>
+            <Link to="/register?role=business" className="mt-8 w-full py-3 text-center text-sm font-bold rounded-2xl bg-brand-600 hover:bg-brand-700 text-white transition-colors flex items-center justify-center gap-2">
+              Fillo Tani <ArrowRight size={16} />
+            </Link>
+            <p className="mt-3 text-xs text-center text-gray-400">Pas regjistrimit, kaloni në Pro direkt nga dashboardi juaj</p>
+          </motion.div>
+        </div>
+      </div>
+
       {/* 3 value props */}
       <div className="container-custom py-16 max-w-4xl">
-        <h2 className="text-3xl font-black text-gray-900 text-center mb-2">Pa Rrezik. Pa Abonime.</h2>
+        <h2 className="text-3xl font-black text-gray-900 text-center mb-2">Pa Rrezik. Filloni Falas.</h2>
         <p className="text-gray-500 text-center mb-10">Ju fokusoheni te biznesi — ne kujdesemi për pjesën tjetër</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="rounded-2xl border border-gray-200 p-7 text-center">
@@ -173,6 +256,7 @@ export default function BecomePartner() {
           </div>
         </div>
       </div>
+
 
       {/* FAQ */}
       <div className="container-custom py-16 max-w-3xl">

@@ -153,39 +153,6 @@ export default function Navbar() {
             {/* Right side */}
             <div className="flex items-center gap-1 ml-auto">
 
-              {/* Language switcher */}
-              <div ref={langRef} className="relative">
-                <button
-                  onClick={() => setLangOpen(!langOpen)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition-colors text-sm text-gray-600 font-medium"
-                  title="Change language"
-                >
-                  <span className="text-base">{currentLang.flag}</span>
-                  <span className="hidden sm:block">{currentLang.code.toUpperCase()}</span>
-                  <ChevronDown size={12} className="text-gray-400" />
-                </button>
-                <AnimatePresence>
-                  {langOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
-                      className="absolute right-0 top-full mt-2 w-44 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50"
-                    >
-                      {LANGUAGES.map((lang) => (
-                        <button
-                          key={lang.code}
-                          onClick={() => changeLanguage(lang.code)}
-                          className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm hover:bg-brand-50 hover:text-brand-700 transition-colors ${i18n.language === lang.code ? 'text-brand-600 font-semibold bg-brand-50' : 'text-gray-700'}`}
-                        >
-                          <span className="text-base">{lang.flag}</span>
-                          <span>{lang.label}</span>
-                          {i18n.language === lang.code && <span className="ml-auto text-brand-500">✓</span>}
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
               {isAuthenticated ? (
                 <>
                   <NavLink to="/dashboard/favorites" className="hidden sm:flex p-2 text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
@@ -199,48 +166,10 @@ export default function Navbar() {
                       </span>
                     )}
                   </NavLink>
-
-                  <div ref={profileRef} className="relative">
-                    <button onClick={() => setProfileOpen(!profileOpen)}
-                      className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl hover:bg-gray-100 transition-colors">
-                      <img
-                        src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=1a3f8a&color=fff&size=32`}
-                        alt={user?.firstName}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                      <span className="hidden sm:block text-sm font-medium text-gray-700">{user?.firstName}</span>
-                      <ChevronDown size={14} className="text-gray-400" />
-                    </button>
-
-                    <AnimatePresence>
-                      {profileOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
-                          className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50"
-                        >
-                          <div className="px-4 py-3 border-b border-gray-100">
-                            <p className="font-semibold text-gray-900">{user?.firstName} {user?.lastName}</p>
-                            <p className="text-xs text-gray-500">{user?.email}</p>
-                          </div>
-                          {[
-                            { to: getDashboardLink(), icon: LayoutDashboard, label: t('nav.dashboard') },
-                            { to: '/dashboard/vouchers', icon: Ticket, label: t('nav.my_vouchers') },
-                            { to: '/dashboard/wallet', icon: Wallet, label: `${t('nav.wallet')}: ${user?.walletBalance?.toLocaleString() || 0} L` },
-                          ].map(({ to, icon: Icon, label }) => (
-                            <Link key={to} to={to} onClick={() => setProfileOpen(false)}
-                              className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition-colors">
-                              <Icon size={16} className="text-gray-400" />{label}
-                            </Link>
-                          ))}
-                          <div className="border-t border-gray-100 mt-1 pt-1">
-                            <button onClick={handleLogout}
-                              className="flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-sm text-red-600 w-full transition-colors">
-                              <LogOut size={16} />{t('nav.logout')}
-                            </button>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                  <div className="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-xs font-black">
+                      {(user?.firstName?.[0] || '').toUpperCase()}{(user?.lastName?.[0] || '').toUpperCase()}
+                    </span>
                   </div>
                 </>
               ) : (
@@ -250,7 +179,7 @@ export default function Navbar() {
                 </>
               )}
 
-              <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100">
+              <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-lg hover:bg-gray-100">
                 {mobileOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
             </div>
@@ -262,7 +191,7 @@ export default function Navbar() {
           {mobileOpen && (
             <motion.div
               initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-              className="lg:hidden bg-white border-t border-gray-100 overflow-hidden"
+              className="bg-white border-t border-gray-100 overflow-hidden"
             >
               <div className="container-custom py-4">
                 {isAuthenticated ? (
@@ -310,6 +239,22 @@ export default function Navbar() {
                     <Link to="/register" onClick={() => setMobileOpen(false)} className="btn-primary w-full py-3 text-center">{t('nav.register')}</Link>
                   </div>
                 )}
+
+                {/* Language selector */}
+                <div className="flex items-center gap-2 pt-3 mt-1 border-t border-gray-100">
+                  <Globe size={14} className="text-gray-400 flex-shrink-0" />
+                  <div className="flex flex-wrap gap-1.5">
+                    {LANGUAGES.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => { changeLanguage(lang.code); setMobileOpen(false); }}
+                        className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${i18n.language === lang.code ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
+                      >
+                        {lang.flag} {lang.code.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </motion.div>
           )}

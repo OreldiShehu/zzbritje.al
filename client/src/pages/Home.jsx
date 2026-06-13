@@ -16,8 +16,6 @@ const HowItWorks = lazy(() => import('../components/home/HowItWorks'));
 const Stats = lazy(() => import('../components/home/Stats'));
 const Testimonials = lazy(() => import('../components/home/Testimonials'));
 const Newsletter = lazy(() => import('../components/home/Newsletter'));
-const TopBusinesses = lazy(() => import('../components/home/TopBusinesses'));
-const CitySection = lazy(() => import('../components/home/CitySection'));
 
 function NewestCarousel({ deals }) {
   return (
@@ -194,12 +192,6 @@ export default function Home() {
           </div>
         </section>
       )}
-
-      {/* Top Businesses */}
-      <Suspense fallback={null}><TopBusinesses /></Suspense>
-
-      {/* Cities */}
-      <Suspense fallback={null}><CitySection /></Suspense>
 
       {/* How It Works */}
       <Suspense fallback={null}><HowItWorks /></Suspense>

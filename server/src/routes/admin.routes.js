@@ -18,6 +18,7 @@ router.post('/businesses/:id/verify', adminController.verifyBusiness);
 router.patch('/businesses/:id/verify', adminController.verifyBusiness);
 router.post('/businesses/:id/reject', adminController.rejectBusiness);
 router.patch('/businesses/:id/reject', adminController.rejectBusiness);
+router.patch('/businesses/:id/plan', adminController.updateBusinessPlan);
 
 // Deals
 router.get('/deals', adminController.getAllDealsAdmin);
