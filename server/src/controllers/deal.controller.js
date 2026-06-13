@@ -85,7 +85,7 @@ exports.createDeal = catchAsync(async (req, res, next) => {
   if (!business) {
     const slugify = require('slugify');
     const defaultCategory = await Category.findOne({ isActive: true }).select('_id').lean();
-    const name = `${req.user.firstName} ${req.user.lastName}`.trim() || req.user.email;
+    const name = req.user.businessName || `${req.user.firstName} ${req.user.lastName}`.trim() || req.user.email;
     business = await Business.create({
       name,
       owner: req.user.id,

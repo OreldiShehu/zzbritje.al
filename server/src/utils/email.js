@@ -39,7 +39,7 @@ const templates = {
           <p style="color:#6b7280;line-height:1.6">Faleminderit që u regjistrove në Zbritje.al.
           Tani ke qasje në mijëra oferta dhe zbritje nga bizneset më të mira në Shqipëri.</p>
           <div style="margin:30px 0;">
-            <a href="${process.env.FRONTEND_URL}/verify-email?token=${user._verifyToken}"
+            <a href="${process.env.FRONTEND_URL}/verify-email/${user._verifyToken}"
                style="background:#16a34a;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">
               Verifiko Email-in Tënd
             </a>
@@ -64,7 +64,7 @@ const templates = {
         <div style="padding:40px;">
           <h2>Konfirmo Adresën Email</h2>
           <p style="color:#6b7280">Kliko butonin më poshtë për të verifikuar email-in tënd:</p>
-          <a href="${process.env.FRONTEND_URL}/verify-email?token=${token}"
+          <a href="${process.env.FRONTEND_URL}/verify-email/${token}"
              style="background:#16a34a;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;margin:20px 0">
             Verifiko Email-in
           </a>
@@ -84,7 +84,7 @@ const templates = {
         <div style="padding:40px;">
           <h2>Rivendos Fjalëkalimin</h2>
           <p style="color:#6b7280">Ke kërkuar rivendosjen e fjalëkalimit. Kliko butonin:</p>
-          <a href="${process.env.FRONTEND_URL}/reset-password?token=${token}"
+          <a href="${process.env.FRONTEND_URL}/reset-password/${token}"
              style="background:#16a34a;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;margin:20px 0">
             Rivendos Fjalëkalimin
           </a>

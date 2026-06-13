@@ -1,19 +1,23 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || 'https://server-kappa-seven-49.vercel.app/api/v1',
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
   timeout: 15000,
 });
 
-// Request interceptor: attach access token
+// Request interceptor: attach access token + fix multipart Content-Type
 api.interceptors.request.use(
   (config) => {
     const stored = JSON.parse(localStorage.getItem('zbritje-auth') || '{}');
     const token = stored?.state?.accessToken;
     if (token && !config.headers['Authorization']) {
       config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    // Let browser set Content-Type with boundary for FormData
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
     }
     return config;
   },

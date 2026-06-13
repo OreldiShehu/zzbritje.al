@@ -24,6 +24,9 @@ const userSchema = new mongoose.Schema({
   emailVerificationExpires: { type: Date, select: false },
   passwordResetToken: { type: String, select: false },
   passwordResetExpires: { type: Date, select: false },
+  phoneOtpHash: { type: String, select: false },
+  phoneOtpExpires: { type: Date, select: false },
+  phoneOtpSentAt: { type: Date, select: false },
 
   // Address
   city: { type: String, default: 'Tiranë' },
@@ -98,6 +101,7 @@ const userSchema = new mongoose.Schema({
 
   // Business reference
   businessId: { type: mongoose.Schema.Types.ObjectId, ref: 'Business' },
+  businessName: { type: String, trim: true },
 
   // Stats
   vouchersPurchased: { type: Number, default: 0 },

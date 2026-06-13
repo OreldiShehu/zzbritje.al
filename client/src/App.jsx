@@ -121,6 +121,7 @@ export default function App() {
         <Route path="/forgot-password" element={<GuestRoute><SuspenseWrapper><ForgotPassword /></SuspenseWrapper></GuestRoute>} />
         <Route path="/reset-password/:token" element={<SuspenseWrapper><ResetPassword /></SuspenseWrapper>} />
         <Route path="/verify-email" element={<SuspenseWrapper><VerifyEmail /></SuspenseWrapper>} />
+        <Route path="/verify-email/:token" element={<SuspenseWrapper><VerifyEmail /></SuspenseWrapper>} />
         <Route path="/auth/callback" element={<SuspenseWrapper><AuthCallback /></SuspenseWrapper>} />
 
         {/* Customer Dashboard */}

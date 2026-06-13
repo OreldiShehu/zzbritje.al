@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { QrCode, Download } from 'lucide-react';
@@ -10,6 +10,59 @@ import { formatCurrency, formatDate, formatCountdown } from '../../utils/formatt
 function VoucherCard({ voucher }) {
   const { t } = useTranslation();
   const [showQR, setShowQR] = useState(false);
+  const qrRef = useRef(null);
+
+  const handleDownload = () => {
+    const svgEl = qrRef.current?.querySelector('svg');
+    const qrSvg = svgEl ? svgEl.outerHTML : '';
+    const dealImg = voucher.deal?.images?.[0]?.url || '';
+    const businessName = voucher.deal?.business?.name || '';
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Voucher ${voucher.code}</title><style>
+      *{box-sizing:border-box;margin:0;padding:0}
+      body{font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+      .v{background:#fff;border-radius:20px;overflow:hidden;width:360px;box-shadow:0 8px 32px rgba(0,0,0,.15)}
+      .header{background:linear-gradient(135deg,#1a3f8a,#2563eb);padding:24px;text-align:center;color:#fff}
+      .logo{font-size:28px;font-weight:900;letter-spacing:-1px;margin-bottom:4px}
+      .logo span{color:#93c5fd}
+      .badge{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 14px;font-size:12px;display:inline-block;margin-top:4px}
+      .img{width:100%;height:160px;object-fit:cover}
+      .body{padding:20px}
+      .title{font-size:17px;font-weight:700;color:#111;margin-bottom:6px}
+      .biz{font-size:13px;color:#6b7280;margin-bottom:16px}
+      .row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:13px}
+      .row:last-child{border:none}
+      .label{color:#9ca3af}
+      .val{font-weight:600;color:#111}
+      .val.green{color:#16a34a}
+      .code-box{background:#f8fafc;border:2px dashed #e2e8f0;border-radius:12px;padding:12px;text-align:center;margin:16px 0}
+      .code{font-family:monospace;font-size:20px;font-weight:700;letter-spacing:3px;color:#1a3f8a}
+      .qr{display:flex;justify-content:center;margin:16px 0}
+      .qr svg{border-radius:8px;padding:8px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+      .footer{background:#f8fafc;padding:12px 20px;text-align:center;font-size:11px;color:#9ca3af;border-top:1px solid #e5e7eb}
+      @media print{body{background:#fff;padding:0}@page{margin:10mm}.v{box-shadow:none}}
+    </style></head><body>
+    <div class="v">
+      <div class="header">
+        <div class="logo">Zbritje<span>.al</span></div>
+        <div class="badge">Voucher Zyrtar</div>
+      </div>
+      ${dealImg ? `<img class="img" src="${dealImg}" alt="" crossorigin="anonymous" />` : ''}
+      <div class="body">
+        <div class="title">${voucher.deal?.title || ''}</div>
+        <div class="biz">${businessName}</div>
+        <div class="row"><span class="label">Çmimi i paguar</span><span class="val green">${formatCurrency(voucher.paidPrice)}</span></div>
+        <div class="row"><span class="label">Skadon më</span><span class="val">${formatDate(voucher.expiresAt)}</span></div>
+        <div class="row"><span class="label">Statusi</span><span class="val">${voucher.status === 'active' ? '✓ Aktiv' : voucher.status === 'redeemed' ? 'Përdorur' : 'Skaduar'}</span></div>
+        <div class="code-box"><div class="code">${voucher.code}</div><div style="font-size:11px;color:#9ca3af;margin-top:4px">Kodi i Voucher-it</div></div>
+        <div class="qr">${qrSvg}</div>
+      </div>
+      <div class="footer">Trego këtë voucher tek biznesi për ta skanuar · zbritje.al</div>
+    </div>
+    <script>window.onload=()=>{window.print();}</script>
+    </body></html>`;
+    const win = window.open('', '_blank');
+    if (win) { win.document.write(html); win.document.close(); }
+  };
   const countdown = voucher.status === 'active' ? formatCountdown(voucher.expiresAt) : null;
   const daysLeft = countdown && !countdown.expired ? countdown.days : null;
   const isExpiringSoon = daysLeft !== null && daysLeft <= 3;
@@ -59,14 +112,14 @@ function VoucherCard({ voucher }) {
           initial={{ height: 0 }} animate={{ height: 'auto' }}
           className="border-t border-gray-100 p-6 flex flex-col items-center gap-4"
         >
-          <div className="p-4 bg-white rounded-2xl shadow-lg">
+          <div ref={qrRef} className="p-4 bg-white rounded-2xl shadow-lg">
             <QRCode value={voucher.qrCodeData || voucher.code} size={160} />
           </div>
           <div className="text-center">
             <p className="font-mono text-lg font-bold tracking-widest text-gray-900">{voucher.code}</p>
             <p className="text-xs text-gray-400 mt-1">{t('dashboard.show_to_business')}</p>
           </div>
-          <button className="btn-secondary text-xs py-2 px-4 flex items-center gap-1.5">
+          <button onClick={handleDownload} className="btn-secondary text-xs py-2 px-4 flex items-center gap-1.5">
             <Download size={14} />{t('dashboard.download_voucher')}
           </button>
         </motion.div>

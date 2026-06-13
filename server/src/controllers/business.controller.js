@@ -15,9 +15,13 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
   const existing = await Business.findOne({ owner: req.user.id });
   if (existing) return next(new AppError('You already have a business profile.', 409));
 
+  const logo = req.files?.logo?.[0]?.path || null;
+  if (!logo) return next(new AppError('Foto e biznesit është e detyrueshme.', 400));
+
   const business = await Business.create({
     ...req.body,
     owner: req.user.id,
+    logo,
     commissionRate: parseFloat(process.env.PLATFORM_COMMISSION_RATE) || 0.20,
     verificationStatus: 'verified',
     verifiedAt: new Date(),

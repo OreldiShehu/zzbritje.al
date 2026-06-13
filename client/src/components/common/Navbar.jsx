@@ -264,63 +264,50 @@ export default function Navbar() {
               initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
               className="lg:hidden bg-white border-t border-gray-100 overflow-hidden"
             >
-              <div className="container-custom py-4 space-y-3">
-                <form onSubmit={handleSearch} className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder={t('nav.search_placeholder_short')}
-                      className="input-field text-sm py-2.5 pl-9"
-                    />
-                  </div>
-                  <button type="submit" className="btn-primary py-2.5 px-4"><Search size={18} /></button>
-                </form>
-                <div className="grid grid-cols-3 gap-2">
-                  {CATEGORIES.slice(0, 6).map((cat) => (
-                    <Link key={cat.slug} to={`/category/${cat.slug}`} onClick={() => setMobileOpen(false)}
-                      className="flex flex-col items-center gap-1 p-3 rounded-xl bg-gray-50 hover:bg-brand-50 text-center transition-colors">
-                      <span className="text-2xl">{cat.icon}</span>
-                      <span className="text-xs text-gray-700 font-medium leading-tight">{t(`nav.categories_list.${cat.slug}`)}</span>
-                    </Link>
-                  ))}
-                </div>
-                {/* Language selector mobile */}
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {LANGUAGES.map((lang) => (
-                    <button
-                      key={lang.code}
-                      onClick={() => { changeLanguage(lang.code); setMobileOpen(false); }}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border transition-colors ${i18n.language === lang.code ? 'border-brand-500 bg-brand-50 text-brand-700 font-semibold' : 'border-gray-200 text-gray-600 hover:border-brand-300'}`}
-                    >
-                      {lang.flag} {lang.label}
+              <div className="container-custom py-4">
+                {isAuthenticated ? (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-3 px-3 py-3 bg-brand-50 rounded-xl mb-2">
+                      <img
+                        src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=1a3f8a&color=fff&size=40`}
+                        alt={user?.firstName}
+                        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <p className="font-semibold text-gray-900 text-sm truncate">{user?.firstName} {user?.lastName}</p>
+                        <p className="text-xs text-brand-600 font-medium capitalize">
+                          {user?.role === 'customer' ? 'Klient' : user?.role === 'business' ? 'Biznes' : 'Admin'}
+                        </p>
+                      </div>
+                    </div>
+                    {[
+                      { to: getDashboardLink(), icon: LayoutDashboard, label: t('nav.dashboard') },
+                      { to: '/dashboard/vouchers', icon: Ticket, label: t('nav.my_vouchers') },
+                      { to: '/dashboard/favorites', icon: Heart, label: t('nav.favorites', 'Të preferuarat') },
+                      { to: '/dashboard/notifications', icon: Bell, label: t('nav.notifications', 'Njoftime'), badge: unreadCount },
+                      { to: '/dashboard/wallet', icon: Wallet, label: `${t('nav.wallet')}: ${user?.walletBalance?.toLocaleString() || 0} L` },
+                    ].map(({ to, icon: Icon, label, badge }) => (
+                      <NavLink key={to} to={to} onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors text-sm font-medium">
+                        <Icon size={18} className="text-gray-400 flex-shrink-0" />
+                        <span>{label}</span>
+                        {badge > 0 && (
+                          <span className="ml-auto w-5 h-5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                            {badge > 9 ? '9+' : badge}
+                          </span>
+                        )}
+                      </NavLink>
+                    ))}
+                    <button onClick={() => { handleLogout(); setMobileOpen(false); }}
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-red-600 w-full transition-colors text-sm font-medium">
+                      <LogOut size={18} className="flex-shrink-0" />
+                      {t('nav.logout')}
                     </button>
-                  ))}
-                </div>
-                {/* Favorites & Notifications in mobile menu */}
-                {isAuthenticated && (
-                  <div className="flex gap-2 pt-1">
-                    <NavLink to="/dashboard/favorites" onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2 flex-1 py-3 px-4 rounded-xl bg-gray-50 hover:bg-brand-50 text-gray-700 hover:text-brand-600 transition-colors text-sm font-medium">
-                      <Heart size={18} /> {t('nav.favorites', 'Të preferuarat')}
-                    </NavLink>
-                    <NavLink to="/dashboard/notifications" onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2 flex-1 py-3 px-4 rounded-xl bg-gray-50 hover:bg-brand-50 text-gray-700 hover:text-brand-600 transition-colors text-sm font-medium">
-                      <Bell size={18} /> {t('nav.notifications', 'Njoftime')}
-                      {unreadCount > 0 && (
-                        <span className="ml-auto w-5 h-5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                          {unreadCount > 9 ? '9+' : unreadCount}
-                        </span>
-                      )}
-                    </NavLink>
                   </div>
-                )}
-                {!isAuthenticated && (
-                  <div className="flex gap-2 pt-1">
-                    <Link to="/login" onClick={() => setMobileOpen(false)} className="btn-secondary flex-1 py-2.5">{t('nav.login')}</Link>
-                    <Link to="/register" onClick={() => setMobileOpen(false)} className="btn-primary flex-1 py-2.5">{t('nav.register')}</Link>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    <Link to="/login" onClick={() => setMobileOpen(false)} className="btn-secondary w-full py-3 text-center">{t('nav.login')}</Link>
+                    <Link to="/register" onClick={() => setMobileOpen(false)} className="btn-primary w-full py-3 text-center">{t('nav.register')}</Link>
                   </div>
                 )}
               </div>

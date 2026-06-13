@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, UserPlus, Mail, Lock, User, Gift } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, Mail, Lock, User, Gift, Building } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../api/axios';
@@ -22,6 +22,7 @@ export default function Register() {
   const schema = z.object({
     firstName: z.string().min(2, t('common.error')).max(50),
     lastName: z.string().min(2, t('common.error')).max(50),
+    businessName: z.string().optional(),
     email: z.string().email(t('common.error')),
     phone: z.string().optional(),
     password: z.string().min(8, t('common.error')),
@@ -32,6 +33,9 @@ export default function Register() {
   }).refine((d) => d.password === d.confirmPassword, {
     message: t('common.error'),
     path: ['confirmPassword'],
+  }).refine((d) => d.role !== 'business' || (d.businessName && d.businessName.length >= 2), {
+    message: 'Emri i biznesit është i detyrueshëm',
+    path: ['businessName'],
   });
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm({
@@ -150,6 +154,17 @@ export default function Register() {
                 </div>
               ))}
             </div>
+
+            {role === 'business' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Emri i Biznesit *</label>
+                <div className="relative">
+                  <Building size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input {...register('businessName')} placeholder="p.sh. Restorant Besa" className={`input-field pl-9 ${errors.businessName ? 'input-error' : ''}`} />
+                </div>
+                {errors.businessName && <p className="text-red-500 text-xs mt-1">{errors.businessName.message}</p>}
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('auth.email')}</label>

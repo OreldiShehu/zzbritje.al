@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Camera, Save, User, Mail, Phone, MapPin, Lock, Trash2 } from 'lucide-react';
+import { Camera, Save, Phone, Lock, Trash2, CheckCircle, ShieldCheck } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../api/axios';
 import { CITIES } from '../../utils/constants';
@@ -13,6 +13,9 @@ export default function CustomerProfile() {
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [activeTab, setActiveTab] = useState('profile');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpValue, setOtpValue] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
   const qc = useQueryClient();
 
   const { register, handleSubmit, formState: { isDirty } } = useForm({
@@ -38,6 +41,31 @@ export default function CustomerProfile() {
     onSuccess: () => { toast.success('Fjalëkalimi u ndryshua!'); pwdReset(); },
     onError: (err) => toast.error(err.response?.data?.message || 'Ndodhi një gabim.'),
   });
+
+  const handleSendOtp = async () => {
+    setOtpLoading(true);
+    try {
+      await api.post('/auth/send-phone-otp');
+      setOtpSent(true);
+      toast.success('Kodi OTP u dërgua në telefonin tuaj!');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Dërgimi dështoi.');
+    } finally { setOtpLoading(false); }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otpValue.length !== 6) { toast.error('Kodi duhet të jetë 6 shifra.'); return; }
+    setOtpLoading(true);
+    try {
+      await api.post('/auth/verify-phone-otp', { otp: otpValue });
+      updateUser({ ...user, isPhoneVerified: true });
+      setOtpSent(false);
+      setOtpValue('');
+      toast.success('Numri i telefonit u verifikua! ✓');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Kodi i pasaktë.');
+    } finally { setOtpLoading(false); }
+  };
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
@@ -110,9 +138,44 @@ export default function CustomerProfile() {
                 ))}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Telefon</label>
-                <div className="relative"><Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input {...register('phone')} className="input-field pl-9" placeholder="+355 69 000 0000" /></div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Telefon
+                  {user?.isPhoneVerified && (
+                    <span className="ml-2 inline-flex items-center gap-1 text-xs text-green-600 font-semibold bg-green-50 px-2 py-0.5 rounded-full">
+                      <CheckCircle size={11} /> Verifikuar
+                    </span>
+                  )}
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input {...register('phone')} className="input-field pl-9" placeholder="+355 69 000 0000" />
+                  </div>
+                  {!user?.isPhoneVerified && user?.phone && (
+                    <button type="button" onClick={handleSendOtp} disabled={otpLoading}
+                      className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 bg-brand-600 text-white text-sm font-medium rounded-xl hover:bg-brand-700 transition-colors disabled:opacity-60">
+                      <ShieldCheck size={15} />{otpSent ? 'Ridërgo' : 'Verifiko'}
+                    </button>
+                  )}
+                </div>
+                {otpSent && !user?.isPhoneVerified && (
+                  <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mt-3 p-4 bg-brand-50 border border-brand-200 rounded-xl">
+                    <p className="text-sm text-brand-700 font-medium mb-2">Shkruaj kodin 6-shifror të dërguar në {user?.phone}:</p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text" inputMode="numeric" maxLength={6} value={otpValue}
+                        onChange={(e) => setOtpValue(e.target.value.replace(/\D/g, ''))}
+                        placeholder="123456"
+                        className="input-field flex-1 tracking-[0.4em] text-center font-mono font-bold text-lg"
+                      />
+                      <button type="button" onClick={handleVerifyOtp} disabled={otpLoading || otpValue.length !== 6}
+                        className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50">
+                        {otpLoading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" /> : 'Konfirmo'}
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1.5">Kodi skadon pas 10 minutash</p>
+                  </motion.div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Qyteti</label>

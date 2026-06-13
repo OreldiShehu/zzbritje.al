@@ -38,7 +38,7 @@ export default function BusinessVouchers() {
           <h1 className="text-2xl font-bold text-gray-900">Voucherët</h1>
           <p className="text-gray-500 text-sm">Menaxhoni shitjet dhe rilëshimet e voucher-ve</p>
         </div>
-        <a href="/business/scanner" className="btn-primary flex items-center gap-2">
+        <a href="/business-dashboard/scanner" className="btn-primary flex items-center gap-2">
           <span className="text-lg">📷</span>Skano QR
         </a>
       </div>

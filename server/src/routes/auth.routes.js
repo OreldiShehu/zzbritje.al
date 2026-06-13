@@ -17,6 +17,8 @@ router.patch('/change-password', protect, authController.changePassword);
 router.get('/verify-email/:token', authController.verifyEmail);
 router.post('/verify-email', authController.verifyEmail);
 router.post('/resend-verification', emailRateLimiter, authController.resendVerificationEmail);
+router.post('/send-phone-otp', protect, authController.sendPhoneOtp);
+router.post('/verify-phone-otp', protect, authController.verifyPhoneOtp);
 
 // Google OAuth
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'], session: false }));

@@ -4,6 +4,7 @@ const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const { generateTokens, setTokenCookies, verifyRefreshToken } = require('../middleware/auth.middleware');
 const { sendEmail, templates } = require('../utils/email');
+const { sendSms } = require('../utils/sms');
 const { createAuditLog } = require('../utils/helpers');
 
 const sendTokenResponse = (user, statusCode, res) => {
@@ -30,13 +31,16 @@ const sendTokenResponse = (user, statusCode, res) => {
 };
 
 exports.register = catchAsync(async (req, res, next) => {
-  const { firstName, lastName, email, password, phone, role, referralCode } = req.body;
+  const { firstName, lastName, businessName, email, password, phone, role, referralCode } = req.body;
 
   const existingUser = await User.findOne({ email });
   if (existingUser) return next(new AppError('Email already in use.', 409));
 
   const userData = { firstName, lastName, email, password, phone };
-  if (role === 'business') userData.role = 'business';
+  if (role === 'business') {
+    userData.role = 'business';
+    if (businessName) userData.businessName = businessName;
+  }
 
   let referredBy;
   if (referralCode) {
@@ -93,8 +97,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
   if (user.isBlocked) return next(new AppError('Account suspended. Contact support.', 403));
   if (!user.isActive) return next(new AppError('Account deactivated.', 401));
-  // Email verification enforced only when email sending is configured and field is explicitly false (not undefined for legacy accounts)
-  if (user.isEmailVerified === false && process.env.EMAIL_HOST) return next(new AppError('Ju lutemi verifikoni email-in tuaj para se të kyçeni. Kontrolloni kutinë postare dhe klikoni linkun e verifikimit.', 401));
+  if (!user.isEmailVerified) return next(new AppError('Ju lutemi verifikoni email-in tuaj para se të hyni.', 403));
 
   // Reset login attempts on success
   if (user.loginAttempts > 0) {
@@ -238,4 +241,59 @@ exports.getMe = catchAsync(async (req, res) => {
     .populate('preferences.categories', 'name slug icon')
     .populate('businessId', 'name slug logo verificationStatus');
   res.status(200).json({ success: true, data: user });
+});
+
+exports.sendPhoneOtp = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select('+phoneOtpSentAt');
+  if (!user.phone) return next(new AppError('Ju nuk keni numër telefoni. Shtojeni në profil fillimisht.', 400));
+  if (user.isPhoneVerified) return next(new AppError('Numri juaj i telefonit është tashmë i verifikuar.', 400));
+
+  // Rate limit: 1 OTP per 60 seconds
+  if (user.phoneOtpSentAt && Date.now() - user.phoneOtpSentAt.getTime() < 60 * 1000) {
+    return next(new AppError('Ju lutemi prisni 60 sekonda para se të kërkoni kod të ri.', 429));
+  }
+
+  const otp = String(Math.floor(100000 + Math.random() * 900000));
+  const hash = crypto.createHash('sha256').update(otp).digest('hex');
+
+  user.phoneOtpHash = hash;
+  user.phoneOtpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+  user.phoneOtpSentAt = new Date();
+  await user.save({ validateBeforeSave: false });
+
+  try {
+    await sendSms(user.phone, `Kodi juaj i verifikimit për Zbritje.al është: ${otp}\nKodi skadon pas 10 minutash.`);
+  } catch (err) {
+    user.phoneOtpHash = undefined;
+    user.phoneOtpExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+    return next(new AppError('Dërgimi i SMS-it dështoi. Kontrolloni numrin e telefonit.', 500));
+  }
+
+  res.status(200).json({ success: true, message: 'Kodi OTP u dërgua në telefonin tuaj.' });
+});
+
+exports.verifyPhoneOtp = catchAsync(async (req, res, next) => {
+  const { otp } = req.body;
+  if (!otp) return next(new AppError('Ju lutemi jepni kodin OTP.', 400));
+
+  const user = await User.findById(req.user.id).select('+phoneOtpHash +phoneOtpExpires');
+  if (!user.phoneOtpHash || !user.phoneOtpExpires) {
+    return next(new AppError('Nuk ka kod aktiv. Kërkoni një kod të ri.', 400));
+  }
+  if (user.phoneOtpExpires < new Date()) {
+    return next(new AppError('Kodi OTP ka skaduar. Kërkoni një kod të ri.', 400));
+  }
+
+  const hash = crypto.createHash('sha256').update(String(otp)).digest('hex');
+  if (hash !== user.phoneOtpHash) {
+    return next(new AppError('Kodi OTP është i pasaktë.', 400));
+  }
+
+  user.isPhoneVerified = true;
+  user.phoneOtpHash = undefined;
+  user.phoneOtpExpires = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({ success: true, message: 'Numri i telefonit u verifikua me sukses!' });
 });

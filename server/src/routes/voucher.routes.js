@@ -10,6 +10,7 @@ router.get('/my', protect, voucherController.getMyVouchers);
 router.get('/info/:code', voucherController.getVoucherPublicInfo);
 router.get('/validate/:code', protect, restrictTo('business', 'admin'), voucherController.validateVoucher);
 router.get('/business/all', protect, restrictTo('business'), voucherController.getBusinessVouchers);
+router.get('/business', protect, restrictTo('business'), voucherController.getBusinessVouchers);
 router.post('/redeem', protect, restrictTo('business', 'admin'), voucherController.redeemVoucher);
 router.get('/:code', protect, voucherController.getVoucher);
 

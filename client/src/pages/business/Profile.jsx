@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Upload, Save, Building, MapPin, Clock, Camera, CheckCircle, AlertCircle, Instagram } from 'lucide-react';
+import { Upload, Save, Building, MapPin, Clock, Camera, CheckCircle, AlertCircle, Instagram, ImagePlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/axios';
 import { CITIES } from '../../utils/constants';
@@ -84,8 +84,18 @@ export default function BusinessProfile() {
   const sInfo = STATUS_INFO[status] || STATUS_INFO.pending;
   const SIcon = sInfo.icon;
 
+  const [createLogoFile, setCreateLogoFile] = useState(null);
+  const [createLogoPreview, setCreateLogoPreview] = useState(null);
+
   const createMutation = useMutation({
-    mutationFn: (data) => api.post('/businesses', data),
+    mutationFn: (data) => {
+      const fd = new FormData();
+      const { instagram, ...rest } = data;
+      Object.entries(rest).forEach(([k, v]) => { if (v != null && v !== '') fd.append(k, v); });
+      if (instagram) fd.append('socialLinks.instagram', instagram);
+      if (createLogoFile) fd.append('logo', createLogoFile);
+      return api.post('/businesses', fd);
+    },
     onSuccess: () => { qc.invalidateQueries(['business', 'my']); toast.success(t('business.profile_created')); },
     onError: (e) => toast.error(e.response?.data?.message || t('common.error')),
   });
@@ -101,9 +111,31 @@ export default function BusinessProfile() {
         <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('business.create_profile')}</h2>
         <p className="text-gray-500 mb-6">{t('business.create_profile_subtitle')}</p>
         <form onSubmit={handleSubmit((d) => {
-          const { instagram, ...rest } = d;
-          createMutation.mutate({ ...rest, ...(instagram ? { socialLinks: { instagram } } : {}) });
+          if (!createLogoFile) { toast.error('Foto e biznesit është e detyrueshme.'); return; }
+          createMutation.mutate(d);
         })} className="text-left space-y-4">
+
+          {/* Logo upload — mandatory */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Foto / Logo e Biznesit *</label>
+            <label className={`flex flex-col items-center justify-center gap-3 h-36 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${createLogoPreview ? 'border-brand-400 bg-brand-50' : 'border-gray-300 bg-gray-50 hover:border-brand-400 hover:bg-brand-50'}`}>
+              {createLogoPreview ? (
+                <img src={createLogoPreview} alt="logo preview" className="h-28 w-28 object-cover rounded-xl" />
+              ) : (
+                <>
+                  <ImagePlus size={28} className="text-gray-400" />
+                  <span className="text-sm text-gray-500">Kliko për të ngarkuar logon</span>
+                  <span className="text-xs text-gray-400">PNG, JPG · max 2MB</span>
+                </>
+              )}
+              <input type="file" accept="image/*" className="sr-only" onChange={(e) => {
+                const f = e.target.files[0];
+                if (f) { setCreateLogoFile(f); setCreateLogoPreview(URL.createObjectURL(f)); }
+              }} />
+            </label>
+            {!createLogoPreview && <p className="text-xs text-red-500 mt-1">E detyrueshme — do të shfaqet kudo biznesi juaj</p>}
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t('business.name')} *</label>
             <input {...register('name', { required: true })} className="input-field" placeholder="p.sh. Restorant Besa" />

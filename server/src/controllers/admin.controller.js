@@ -269,6 +269,16 @@ exports.rejectDeal = catchAsync(async (req, res, next) => {
   res.status(200).json({ success: true, data: deal });
 });
 
+exports.deleteDeal = catchAsync(async (req, res, next) => {
+  const deal = await Deal.findById(req.params.id);
+  if (!deal) return next(new AppError('Deal not found.', 404));
+  await Business.findByIdAndUpdate(deal.business, {
+    $inc: { totalDeals: -1, activeDeals: deal.status === 'active' ? -1 : 0 },
+  });
+  await Deal.findByIdAndDelete(req.params.id);
+  res.status(200).json({ success: true, message: 'Deal deleted.' });
+});
+
 exports.featureDeal = catchAsync(async (req, res, next) => {
   const deal = await Deal.findById(req.params.id);
   if (!deal) return next(new AppError('Deal not found.', 404));

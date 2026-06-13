@@ -14,6 +14,10 @@ const { emitToUser } = require('../config/socket');
 exports.purchaseVoucher = catchAsync(async (req, res, next) => {
   const { dealId, quantity = 1, paymentMethod, paymentIntentId, useWallet, isGift, giftRecipientEmail, giftMessage } = req.body;
 
+  if (req.user.role === 'business') {
+    return next(new AppError('Llogaritë e biznesit nuk mund të blejnë voucher. Ju lutemi përdorni një llogari klienti.', 403));
+  }
+
   const deal = await Deal.findById(dealId).populate('business');
   if (!deal) return next(new AppError('Deal not found.', 404));
   if (deal.status !== 'active') return next(new AppError('This deal is no longer available.', 400));
@@ -326,17 +330,31 @@ exports.getBusinessVouchers = catchAsync(async (req, res, next) => {
   const business = await Business.findOne({ owner: req.user.id });
   if (!business) return next(new AppError('Business not found.', 404));
 
-  const { page = 1, limit = 20, status } = req.query;
+  const { page = 1, limit = 20, status, search } = req.query;
   const { skip } = paginate(null, page, limit);
-  const filter = { business: business._id };
+  const baseFilter = { business: business._id };
+  const filter = { ...baseFilter };
   if (status) filter.status = status;
+  if (search) filter.code = { $regex: search, $options: 'i' };
 
-  const [vouchers, total] = await Promise.all([
+  const [vouchers, total, statsRaw] = await Promise.all([
     Voucher.find(filter)
       .sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit))
       .populate('deal', 'title').populate('user', 'firstName lastName email avatar'),
     Voucher.countDocuments(filter),
+    Voucher.aggregate([
+      { $match: baseFilter },
+      { $group: { _id: '$status', count: { $sum: 1 }, revenue: { $sum: '$paidPrice' } } },
+    ]),
   ]);
 
-  res.status(200).json({ success: true, ...buildPaginatedResponse(vouchers, total, page, limit) });
+  const stats = { total: 0, active: 0, redeemed: 0, revenue: 0 };
+  statsRaw.forEach(({ _id, count, revenue }) => {
+    stats.total += count;
+    stats.revenue += revenue;
+    if (_id === 'active') stats.active = count;
+    if (_id === 'redeemed') stats.redeemed = count;
+  });
+
+  res.status(200).json({ success: true, stats, ...buildPaginatedResponse(vouchers, total, page, limit) });
 });

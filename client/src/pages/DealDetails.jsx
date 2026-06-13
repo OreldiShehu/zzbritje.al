@@ -57,7 +57,8 @@ function StarRating({ rating, reviews }) {
 export default function DealDetails() {
   const { t } = useTranslation();
   const { slug } = useParams();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
+  const isBusiness = user?.role === 'business';
   const navigate = useNavigate();
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -130,6 +131,7 @@ export default function DealDetails() {
 
   const handleBuyNow = () => {
     if (!isAuthenticated) { toast.error(t('deal.login_to_buy')); navigate('/login?redirect=' + encodeURIComponent(`/deals/${slug}`)); return; }
+    if (isBusiness) { toast.error('Llogaritë e biznesit nuk mund të blejnë voucher.'); return; }
     if (deal.status !== 'active') { toast.error(t('deal.not_active')); return; }
     setShowCheckout(true);
   };
@@ -453,15 +455,21 @@ export default function DealDetails() {
                   </div>
                 )}
 
-                <button
-                  onClick={handleBuyNow}
-                  disabled={deal.status !== 'active' || purchasing}
-                  className="btn-primary w-full py-4 text-base font-bold disabled:opacity-50"
-                >
-                  {purchasing
-                    ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    : `${t('deal.buy_now')} — ${formatCurrency(deal.discountedPrice * quantity)}`}
-                </button>
+                {isBusiness ? (
+                  <div className="w-full py-4 text-center text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-2xl font-medium">
+                    Llogaritë e biznesit nuk mund të blejnë voucher
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleBuyNow}
+                    disabled={deal.status !== 'active' || purchasing}
+                    className="btn-primary w-full py-4 text-base font-bold disabled:opacity-50"
+                  >
+                    {purchasing
+                      ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      : `${t('deal.buy_now')} — ${formatCurrency(deal.discountedPrice * quantity)}`}
+                  </button>
+                )}
 
                 {/* Trust badges */}
                 <div className="mt-4 space-y-2 text-xs text-gray-500">

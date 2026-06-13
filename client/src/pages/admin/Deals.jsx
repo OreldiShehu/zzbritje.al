@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Tag, CheckCircle, XCircle, Star } from 'lucide-react';
+import { Search, Tag, CheckCircle, XCircle, Star, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/axios';
 import { formatCurrency, formatDate } from '../../utils/formatters';
@@ -33,6 +33,12 @@ export default function AdminDeals() {
   const featuredMutation = useMutation({
     mutationFn: (id) => api.patch(`/admin/deals/${id}/featured`),
     onSuccess: () => { qc.invalidateQueries(['admin', 'deals']); toast.success(t('admin_ui.status_changed')); },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => api.delete(`/admin/deals/${id}`),
+    onSuccess: () => { qc.invalidateQueries(['admin', 'deals']); toast.success('Deal-i u fshi!'); },
+    onError: () => toast.error(t('common.error')),
   });
 
   const deals = data?.data || [];
@@ -114,6 +120,10 @@ export default function AdminDeals() {
                       </button>
                     </>
                   )}
+                  <button onClick={() => { if (window.confirm(`Fshi deal-in "${deal.title}"? Kjo veprim nuk mund të anulohet.`)) deleteMutation.mutate(deal._id); }}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-700 text-gray-500 hover:bg-red-900/40 hover:text-red-400 transition-colors" title="Fshi Deal-in">
+                    <Trash2 size={15} />
+                  </button>
                 </div>
               </div>
             </div>
