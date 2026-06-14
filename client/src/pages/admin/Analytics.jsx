@@ -44,7 +44,7 @@ export default function AdminAnalytics() {
           { icon: TrendingUp, label: 'Komisione', value: formatCurrency(summary.commission || 0), color: 'text-brand-400', bg: 'bg-brand-900/20' },
           { icon: Users, label: 'Përdorues Aktiv', value: (summary.activeUsers || 0).toLocaleString(), color: 'text-blue-400', bg: 'bg-blue-900/20' },
           { icon: Building, label: 'Biznese Aktive', value: (summary.activeBusinesses || 0).toLocaleString(), color: 'text-purple-400', bg: 'bg-purple-900/20' },
-          { icon: Ticket, label: 'Voucher Shitje', value: (summary.vouchersSold || 0).toLocaleString(), color: 'text-amber-400', bg: 'bg-amber-900/20' },
+          { icon: Ticket, label: 'Kupon Shitje', value: (summary.vouchersSold || 0).toLocaleString(), color: 'text-amber-400', bg: 'bg-amber-900/20' },
         ].map(({ icon: Icon, label, value, color, bg }) => (
           <div key={label} className={`${bg} border border-gray-700 rounded-2xl p-4 flex items-center gap-3`}>
             <div className={`w-10 h-10 ${bg} rounded-xl flex items-center justify-center flex-shrink-0 border border-gray-600`}><Icon size={18} className={color} /></div>

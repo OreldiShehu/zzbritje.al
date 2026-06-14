@@ -6,7 +6,8 @@ const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const { paginate, buildPaginatedResponse, buildDealFilters, buildSortObject, createAuditLog } = require('../utils/helpers');
 const { sendEmail, templates } = require('../utils/email');
-const { emitToAdmin } = require('../config/socket');
+const { emitToAdmin, emitToUser } = require('../config/socket');
+const Notification = require('../models/Notification');
 
 exports.getAllDeals = catchAsync(async (req, res) => {
   const { page = 1, limit = 20, sort, ...queryParams } = req.query;
@@ -16,6 +17,13 @@ exports.getAllDeals = catchAsync(async (req, res) => {
     const cat = await Category.findOne({ slug: queryParams.category }).select('_id').lean();
     if (cat) queryParams.category = cat._id.toString();
     else delete queryParams.category;
+  }
+
+  // Resolve business slug → ObjectId if needed
+  if (queryParams.business && !/^[0-9a-fA-F]{24}$/.test(queryParams.business)) {
+    const biz = await Business.findOne({ slug: queryParams.business }).select('_id').lean();
+    if (biz) queryParams.business = biz._id.toString();
+    else delete queryParams.business;
   }
 
   const filters = buildDealFilters(queryParams);
@@ -142,9 +150,21 @@ exports.createDeal = catchAsync(async (req, res, next) => {
   // Notify admins
   emitToAdmin('new_deal_review', { deal: deal._id, business: business.name });
 
+  // Notify business owner that their deal is live
+  try {
+    const notification = await Notification.create({
+      user: req.user.id,
+      type: 'deal',
+      title: `Deal-i juaj "${deal.title}" është tani live! 🎉`,
+      message: `Deal-i "${deal.title}" u aktivizua me sukses dhe është i dukshëm për të gjithë klientët në platformë. Ndajeni linkun me klientët tuaj për të nxitur shitjet!`,
+      isRead: false,
+    });
+    try { emitToUser(req.user.id.toString(), 'notification', notification); } catch {}
+  } catch {}
+
   await createAuditLog({ actor: req.user, action: 'create_deal', resource: 'Deal', resourceId: deal._id, req });
 
-  res.status(201).json({ success: true, data: deal, message: 'Deal submitted for review.' });
+  res.status(201).json({ success: true, data: deal, message: 'Deal is now live.' });
 });
 
 exports.updateDeal = catchAsync(async (req, res, next) => {

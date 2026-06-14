@@ -1,10 +1,10 @@
 export default function Terms() {
   const sections = [
     { title: '1. Pranimi i Kushteve', content: 'Duke aksesuar ose përdorur platformën Zbritje.al, ju pranoni të jeni i lidhur me këto Kushte dhe Terma. Nëse nuk pranoni, ju lutem mos e përdorni platformën.' },
-    { title: '2. Shërbimi', content: 'Zbritje.al është një platformë online që lejon bizneset të publikojnë oferta dhe zbritje, dhe klientët të blejnë voucher elektronike për t\'i përdorur pranë bizneseve partnere.' },
+    { title: '2. Shërbimi', content: 'Zbritje.al është një platformë online që lejon bizneset të publikojnë oferta dhe zbritje, dhe klientët të blejnë kupon elektronike për t\'i përdorur pranë bizneseve partnere.' },
     { title: '3. Llogaritë e Përdoruesve', content: 'Ju jeni përgjegjës për ruajtjen e konfidencialitetit të llogarisë dhe fjalëkalimit tuaj. Çdo aktivitet që ndodh nën llogarinë tuaj është përgjegjësia juaj.' },
-    { title: '4. Blerja dhe Voucherat', content: 'Të gjitha blerjet e voucher-ve janë përfundimtare, me përjashtim të rasteve të kërkimit të rimbursimit brenda 14 ditësh nga blerja dhe nëse voucher-i nuk është përdorur. Voucher-ët kanë datë skadence dhe nuk mund të kthehen pas skadimit.' },
-    { title: '5. Politika e Rimbursimit', content: 'Kërkoni rimbursim brenda 14 ditëve nga blerja nëse voucher-i nuk është përdorur akoma. Kontaktoni ekipin tonë të supportit. Rimbursimi do të kryhet brenda 5-10 ditëve pune.' },
+    { title: '4. Blerja dhe Kupona', content: 'Të gjitha blerjet e kuponave janë përfundimtare, me përjashtim të rasteve të kërkimit të rimbursimit brenda 14 ditësh nga blerja dhe nëse kuponi nuk është përdorur. Kupona kanë datë skadence dhe nuk mund të kthehen pas skadimit.' },
+    { title: '5. Politika e Rimbursimit', content: 'Kërkoni rimbursim brenda 14 ditëve nga blerja nëse kuponi nuk është përdorur akoma. Kontaktoni ekipin tonë të supportit. Rimbursimi do të kryhet brenda 5-10 ditëve pune.' },
     { title: '6. Komisionet dhe Pagesat', content: 'Zbritje.al mban një komision prej 18-25% nga çdo shitje. Bizneset marrin pagesën e tyre brenda 7-14 ditësh pas shitjes, sipas planit të zgjedhur.' },
     { title: '7. Pronësia Intelektuale', content: 'Çdo përmbajtje në platformë, përfshirë logon, tekstin, imazhet dhe software-in, është pronë e Zbritje.al ose licencuesve të saj dhe mbrohet nga ligjet e pronësisë intelektuale.' },
     { title: '8. Kufizimi i Përgjegjësisë', content: 'Zbritje.al nuk është përgjegjëse për cilësinë e shërbimeve të ofruara nga bizneset partnere. Çdo mosmarrëveshje me biznesin duhet zgjidhur direkt me të.' },

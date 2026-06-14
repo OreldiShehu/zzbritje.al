@@ -2,7 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, Tag, Ticket, BarChart2, Store, QrCode, LogOut, Menu, X, ChevronRight, Plus, AlertTriangle, Lock,
+  LayoutDashboard, Tag, BarChart2, Store, QrCode, LogOut, Menu, X, ChevronRight, Plus, AlertTriangle, Lock,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
@@ -13,9 +13,8 @@ const WA_ADMIN = '355692866668';
 const FREE_DEAL_LIMIT = 2;
 
 const navItems = [
-  { to: '/business-dashboard', icon: LayoutDashboard, label: 'Ballina', end: true },
+  { to: '/business-dashboard', icon: LayoutDashboard, label: 'HOME', end: true },
   { to: '/business-dashboard/deals', icon: Tag, label: 'Deal-et' },
-  { to: '/business-dashboard/vouchers', icon: Ticket, label: 'Voucherët' },
   { to: '/business-dashboard/analytics', icon: BarChart2, label: 'Analitikë' },
   { to: '/business-dashboard/scanner', icon: QrCode, label: 'Skaner QR' },
   { to: '/business-dashboard/profile', icon: Store, label: 'Profili Biznesit' },

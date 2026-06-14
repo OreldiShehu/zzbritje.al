@@ -79,7 +79,7 @@ voucherSchema.index({ transaction: 1 });
 
 // Generate unique voucher code
 voucherSchema.statics.generateCode = function () {
-  const prefix = 'ZBR';
+  const prefix = 'ALB';
   const randomPart = crypto.randomBytes(5).toString('hex').toUpperCase();
   const checksum = crypto.randomBytes(2).toString('hex').toUpperCase();
   return `${prefix}-${randomPart}-${checksum}`;

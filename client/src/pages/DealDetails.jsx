@@ -131,7 +131,7 @@ export default function DealDetails() {
 
   const handleBuyNow = () => {
     if (!isAuthenticated) { toast.error(t('deal.login_to_buy')); navigate('/login?redirect=' + encodeURIComponent(`/deals/${slug}`)); return; }
-    if (isBusiness) { toast.error('Llogaritë e biznesit nuk mund të blejnë voucher.'); return; }
+    if (isBusiness) { toast.error('Llogaritë e biznesit nuk mund të blejnë kupon.'); return; }
     if (deal.status !== 'active') { toast.error(t('deal.not_active')); return; }
     setShowCheckout(true);
   };

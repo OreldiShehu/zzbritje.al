@@ -21,6 +21,7 @@ exports.buildPaginatedResponse = (data, total, page, limit) => ({
 exports.buildDealFilters = (query) => {
   const filters = { status: 'active', endDate: { $gt: new Date() } };
   if (query.category) filters.category = new mongoose.Types.ObjectId(query.category);
+  if (query.business) filters.business = new mongoose.Types.ObjectId(query.business);
   if (query.city) filters.city = { $regex: query.city, $options: 'i' };
   if (query.minDiscount) filters.discountPercentage = { $gte: parseInt(query.minDiscount) };
   if (query.maxPrice) filters.discountedPrice = { ...(filters.discountedPrice || {}), $lte: parseFloat(query.maxPrice) };

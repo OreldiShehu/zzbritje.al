@@ -87,7 +87,7 @@ export default function AdminLayout() {
       <div className="flex-1 lg:pl-64 flex flex-col">
         <header className="sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100"><Menu size={20} /></button>
-          <h1 className="font-display font-bold text-gray-900">Admin Panel — Zbritje.al</h1>
+          <h1 className="font-display font-bold text-gray-900 truncate">Admin Panel</h1>
           <span className="ml-auto text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">Live System</span>
         </header>
         <main className="flex-1 p-4 md:p-8 overflow-y-auto"><Outlet /></main>

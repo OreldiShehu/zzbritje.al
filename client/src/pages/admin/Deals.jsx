@@ -97,13 +97,13 @@ export default function AdminDeals() {
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_BADGE[deal.status] || 'bg-gray-700 text-gray-400'}`}>{deal.status}</span>
                     {deal.isFeatured && <span className="text-xs bg-amber-900/50 text-amber-400 px-2 py-0.5 rounded-full">⭐ Featured</span>}
                   </div>
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                  <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
                     <span>{deal.business?.businessName}</span>
                     <span>{formatCurrency(deal.discountedPrice)} (-{deal.discountPercentage}%)</span>
-                    <span>{formatDate(deal.createdAt)}</span>
+                    <span className="hidden sm:inline">{formatDate(deal.createdAt)}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
                   <button onClick={() => featuredMutation.mutate(deal._id)}
                     className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${deal.isFeatured ? 'bg-amber-900/40 text-amber-400' : 'bg-gray-700 text-gray-500 hover:text-amber-400'}`} title="Toggle Featured">
                     <Star size={15} />

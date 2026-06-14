@@ -6,7 +6,7 @@ import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 
 const navItems = [
-  { to: '/dashboard', icon: Ticket, label: 'Voucher-at e Mia', end: true },
+  { to: '/dashboard', icon: Ticket, label: 'Kupona-t e Mia', end: true },
   { to: '/dashboard/notifications', icon: Bell, label: 'Njoftime' },
   { to: '/dashboard/referrals', icon: Gift, label: 'Ftoni Miq' },
   { to: '/dashboard/profile', icon: User, label: 'Profili' },

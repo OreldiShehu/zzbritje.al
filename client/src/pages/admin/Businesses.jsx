@@ -91,7 +91,6 @@ function ReviewModal({ business, onClose, onVerify, onReject, onPlanChange }) {
                   businessName: business.businessName || business.name,
                   ownerName: business.owner ? `${business.owner.firstName} ${business.owner.lastName}` : 'N/A',
                   signedAt: business.contract.signedAt,
-                  ipAddress: business.contract.ipAddress,
                   commissionRate: business.contract.commissionRate ?? 0,
                   markupRate: business.contract.markupRate || 9,
                 })}
@@ -102,7 +101,7 @@ function ReviewModal({ business, onClose, onVerify, onReject, onPlanChange }) {
           </div>
           {business.contract?.signed && (
             <p className="text-xs text-gray-500 mt-1.5 ml-6">
-              {formatDate(business.contract.signedAt)} · {business.contract.version} · 0% komision biznes · {business.contract.markupRate ? `${Math.round(business.contract.markupRate * 100)}%` : '9%'} markup
+              {formatDate(business.contract.signedAt)} · {business.contract.version} · 0% komision biznes · {business.contract.markupRate ? `${business.contract.markupRate > 1 ? Math.round(business.contract.markupRate) : Math.round(business.contract.markupRate * 100)}%` : '9%'} markup
             </p>
           )}
         </div>

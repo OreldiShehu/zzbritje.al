@@ -118,7 +118,11 @@ export default function BusinessProfile() {
       fd.append('contractAgreed', 'true');
       return api.post('/businesses', fd);
     },
-    onSuccess: () => { qc.invalidateQueries(['business', 'my']); toast.success(t('business.profile_created')); },
+    onSuccess: () => {
+      qc.invalidateQueries(['business', 'my']);
+      toast.success(t('business.profile_created'));
+      navigate('/business-dashboard/pending');
+    },
     onError: (e) => toast.error(e.response?.data?.message || t('common.error')),
   });
 

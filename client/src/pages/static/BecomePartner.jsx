@@ -7,34 +7,34 @@ import { useState } from 'react';
 const STEPS = [
   { num: '1', title: 'Regjistrohu Falas', desc: 'Krijo llogarinë tënde si biznes. Nuk nevojitet karta krediti dhe nuk ka kosto fillestare.' },
   { num: '2', title: 'Krijo Ofertën', desc: 'Vendos çmimin tënd dhe publiko dealin. Setup i shpejtë brenda pak minutave.' },
-  { num: '3', title: 'Merr Klientë', desc: 'Klientët blejnë voucher-in online dhe vijnë fizikisht tek biznesi juaj.' },
-  { num: '4', title: 'Mblidh të Ardhurat', desc: 'Klienti paguan direkt tek ju kur paraqet voucher-in. Thjeshtë dhe pa ndërmjetës.' },
+  { num: '3', title: 'Merr Klientë', desc: 'Klientët blejnë kuponin online dhe vijnë fizikisht tek biznesi juaj.' },
+  { num: '4', title: 'Mblidh të Ardhurat', desc: 'Klienti paguan direkt tek ju kur paraqet kuponin. Thjeshtë dhe pa ndërmjetës.' },
 ];
 
 const FAQS = [
   {
     q: 'Sa kushton listimi i biznesit?',
-    a: 'Regjistrimi është plotësisht falas dhe përfshin deri në 2 deals aktive dhe 10 vouchers/deal. Plani Pro kushton 1,500 ALL/muaj dhe ju jep 20+ deals mujore, vouchers të pakufizuara dhe prioritet në kërkime.',
+    a: 'Regjistrimi është plotësisht falas dhe përfshin deri në 2 deals aktive dhe 10 kupon/deal. Plani Pro kushton 1,500 ALL/muaj dhe ju jep 20+ deals mujore, kupon të pakufizuara dhe prioritet në kërkime.',
   },
   {
-    q: 'Kur marr paratë nga voucher-et?',
-    a: 'Klienti paguan direkt tek ju kur vjen të përdorë voucher-in fizikisht. Nuk ka pritje dhe nuk ka para që kalojnë nëpër platformë.',
+    q: 'Kur marr paratë nga kupona?',
+    a: 'Klienti paguan direkt tek ju kur vjen të përdorë kuponin fizikisht. Nuk ka pritje dhe nuk ka para që kalojnë nëpër platformë.',
   },
   {
     q: 'Mund të vendos çmimin dhe kushtet që dua?',
-    a: 'Po, ju keni kontroll të plotë mbi çmimin bazë, numrin e voucher-eve, datat e vlefshmërisë dhe kushtet e veçanta të dealit.',
+    a: 'Po, ju keni kontroll të plotë mbi çmimin bazë, numrin e kuponave, datat e vlefshmërisë dhe kushtet e veçanta të dealit.',
   },
   {
-    q: 'Si e verifikoj voucher-in e klientit?',
-    a: 'Platforma ju ofron një skaner QR të integruar në dashboard. Skanoni kodin e klientit dhe sistemi konfirmon menjëherë nëse voucher-i është i vlefshëm.',
+    q: 'Si e verifikoj kuponin e klientit?',
+    a: 'Platforma ju ofron një skaner QR të integruar në dashboard. Skanoni kodin e klientit dhe sistemi konfirmon menjëherë nëse kuponi është i vlefshëm.',
   },
   {
     q: 'Sa kohë duhet për t\'u verifikuar?',
     a: 'Pasi të krijoni profilin, llogaria juaj verifikohet nga ekipi ynë. Do të merrni një njoftim me të gjitha informacionet e nevojshme sapo të verifikohet.',
   },
   {
-    q: 'Mund të vendos "1 voucher max"?',
-    a: 'Po. Gjatë krijimit të dealit mund të aktivizoni opsionin "1 voucher max" dhe klientët e shohin këtë kufizim para blerjes. Ju e kontrolloni gjatë skanimit.',
+    q: 'Mund të vendos "1 kupon max"?',
+    a: 'Po. Gjatë krijimit të dealit mund të aktivizoni opsionin "1 kupon për vizitë" dhe klientët e shohin këtë kufizim para blerjes. Ju e kontrolloni gjatë skanimit.',
   },
 ];
 
@@ -105,12 +105,12 @@ export default function BecomePartner() {
             <ul className="space-y-3 flex-1">
               {[
                 { text: 'Deri në 2 deals aktive', ok: true },
-                { text: 'Deri në 10 vouchers/deal', ok: true },
+                { text: 'Deri në 10 kupon/deal', ok: true },
                 { text: 'Dashboard dhe statistika bazë', ok: true },
                 { text: 'Skaner QR', ok: true },
                 { text: '0% komision biznes · 9% markup nga klienti', ok: true },
                 { text: 'Deals të pakufizuara', ok: false },
-                { text: 'Vouchers të pakufizuara', ok: false },
+                { text: 'Kupon të pakufizuara', ok: false },
                 { text: 'Prioritet në kërkime', ok: false },
               ].map(({ text, ok }) => (
                 <li key={text} className="flex items-center gap-3 text-sm">
@@ -142,7 +142,7 @@ export default function BecomePartner() {
             <ul className="space-y-3 flex-1">
               {[
                 '20+ deals aktive çdo muaj',
-                'Vouchers të pakufizuara',
+                'Kupon të pakufizuara',
                 'Prioritet në rezultatet e kërkimit',
                 'Dashboard i avancuar me analitika',
                 'Skaner QR i dedikuar',
@@ -188,7 +188,7 @@ export default function BecomePartner() {
               <QrCode size={28} className="text-green-600" />
             </div>
             <h3 className="font-bold text-gray-900 text-lg mb-2">Kontroll i Plotë</h3>
-            <p className="text-gray-500 text-sm leading-relaxed">Vendosni çmimin, kufizimet dhe datat. Skanoni voucher-et me QR scanner.</p>
+            <p className="text-gray-500 text-sm leading-relaxed">Vendosni çmimin, kufizimet dhe datat. Skanoni kuponat me QR scanner.</p>
           </div>
         </div>
       </div>
@@ -217,7 +217,7 @@ export default function BecomePartner() {
           {[
             { icon: Users, title: 'Klientë të Rinj', desc: 'Aksesoni menjëherë klientë shqiptarë që kërkojnë oferta aktivisht çdo ditë.' },
             { icon: TrendingUp, title: 'Rritja e Vizitorëve', desc: 'Bizneset partnere shënojnë rritje të dukshme të klientëve të rinj pas listimit.' },
-            { icon: BarChart2, title: 'Dashboard i Plotë', desc: 'Statistika të detajuara: voucher të shitura, të ardhura, vlerësime klientësh.' },
+            { icon: BarChart2, title: 'Dashboard i Plotë', desc: 'Statistika të detajuara: kupon të shitura, të ardhura, vlerësime klientësh.' },
             { icon: Zap, title: 'Setup i Shpejtë', desc: 'Postoni dealin e parë brenda 10 minutave. Pa dokumentacion kompleks.' },
             { icon: Shield, title: 'Pa Rrezik Financiar', desc: 'Zero kosto fillestare. Paguani vetëm kur fitoni — asnjë kosto tjetër.' },
             { icon: Star, title: 'Mbështetje e Dedikuar', desc: 'Ekipi ynë është gjithmonë gati për t\'ju ndihmuar të maksimizoni ofertat.' },
@@ -243,9 +243,9 @@ export default function BecomePartner() {
               'Skaner QR për verifikim të shpejtë',
               'Statistika dhe analitika në kohë reale',
               'Galeri imazhesh për dealin tuaj',
-              'Opsion "1 voucher për tavolinë"',
+              'Opsion "1 kupon për vizitë"',
               'Sistemi i vlerësimeve nga klientët',
-              'Njoftime kur shiten voucher-et',
+              'Njoftime kur shiten kupona',
               'Mbështetje teknike nga ekipi ynë',
             ].map((item) => (
               <div key={item} className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-brand-100">

@@ -53,7 +53,7 @@ export default function CreateDeal() {
     },
     onSuccess: () => {
       qc.invalidateQueries(['business', 'deals']);
-      toast.success('Deal-i u krijua dhe u dërgua për rishikim!');
+      toast.success('Deal-i u aktivizua — është live tani!');
       navigate('/business-dashboard/deals');
     },
     onError: (err) => {
@@ -289,8 +289,8 @@ export default function CreateDeal() {
                 <label className="flex items-center gap-3 p-4 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
                   <input type="checkbox" {...register('onePerTable')} className="w-5 h-5 rounded accent-brand-600" />
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">1 voucher për tavolinë</p>
-                    <p className="text-xs text-gray-400">Çdo tavolinë mund të përdorë vetëm 1 voucher — ju e kontrolloni gjatë skanimi</p>
+                    <p className="text-sm font-semibold text-gray-900">1 kupon për vizitë</p>
+                    <p className="text-xs text-gray-400">Çdo vizitë mund të përdorë vetëm 1 kupon — kontrollohet gjatë skanimit</p>
                   </div>
                 </label>
                 <div>
@@ -358,9 +358,9 @@ export default function CreateDeal() {
                   { label: 'Çmimi Origjinal', value: formatCurrency(values.originalPrice || 0) },
                   { label: 'Çmimi juaj i Deal-it', value: formatCurrency(businessPrice || 0) },
                   { label: 'Klienti paguan', value: formatCurrency(customerPrice) },
-                  { label: 'Ju fitoni / voucher', value: formatCurrency(businessEarning) },
+                  { label: 'Ju fitoni / kupon', value: formatCurrency(businessEarning) },
                   { label: 'Zbritja (klientit)', value: `${savings}%` },
-                  { label: 'Total Voucher', value: values.totalVouchers },
+                  { label: 'Total Kupon', value: values.totalVouchers },
                   { label: 'Max./Klient', value: values.maxPerCustomer },
                   { label: 'Imazhe', value: `${imagePreviews.length} të ngarkuara` },
                 ].map(({ label, value }) => (
@@ -370,9 +370,9 @@ export default function CreateDeal() {
                   </div>
                 ))}
               </div>
-              <div className="mt-5 bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <p className="text-sm font-semibold text-blue-800 mb-1">ℹ️ Deal-i do të shqyrtohet</p>
-                <p className="text-xs text-blue-600">Pasi ta dorëzoni, ekipi ynë do ta shqyrtojë deal-in brenda 24 orësh. Do të njoftoheni me email.</p>
+              <div className="mt-5 bg-green-50 border border-green-200 rounded-xl p-4">
+                <p className="text-sm font-semibold text-green-800 mb-1">✅ Deal-i aktivizohet menjëherë</p>
+                <p className="text-xs text-green-600">Si biznes i verifikuar, deal-i juaj do të bëhet live menjëherë pas dorëzimit dhe do të jetë i dukshëm për klientët.</p>
               </div>
             </div>
             <div className="flex justify-between">

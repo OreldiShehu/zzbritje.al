@@ -49,7 +49,7 @@ export default function BusinessAnalytics() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { icon: TrendingUp, label: 'Të Ardhura', value: formatCurrency(stats.revenue || 0), change: stats.revenueChange, color: 'text-brand-600', bg: 'bg-brand-50' },
-          { icon: Ticket, label: 'Voucher Shitje', value: stats.vouchersSold || 0, change: stats.vouchersChange, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { icon: Ticket, label: 'Kupon Shitje', value: stats.vouchersSold || 0, change: stats.vouchersChange, color: 'text-blue-600', bg: 'bg-blue-50' },
           { icon: Eye, label: 'Shikime', value: (stats.views || 0).toLocaleString(), change: stats.viewsChange, color: 'text-purple-600', bg: 'bg-purple-50' },
           { icon: Star, label: 'Vlerësim Mesatar', value: `${(stats.rating || 0).toFixed(1)}/5`, sub: `${stats.reviews || 0} recensione`, color: 'text-amber-500', bg: 'bg-amber-50' },
         ].map(({ icon: Icon, label, value, change, color, bg, sub }) => (
@@ -69,7 +69,7 @@ export default function BusinessAnalytics() {
 
       {/* Revenue Chart */}
       <div className="card p-6">
-        <h3 className="font-bold text-gray-900 mb-5">Të Ardhurat & Voucherët</h3>
+        <h3 className="font-bold text-gray-900 mb-5">Të Ardhurat & Kupona</h3>
         <ResponsiveContainer width="100%" height={260}>
           <AreaChart data={chartData}>
             <defs>
@@ -86,10 +86,10 @@ export default function BusinessAnalytics() {
             <XAxis dataKey="date" tick={{ fontSize: 11 }} />
             <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
             <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} />
-            <Tooltip formatter={(v, n) => [n === 'revenue' ? formatCurrency(v) : v, n === 'revenue' ? 'Të Ardhura' : 'Voucher']} />
+            <Tooltip formatter={(v, n) => [n === 'revenue' ? formatCurrency(v) : v, n === 'revenue' ? 'Të Ardhura' : 'Kupon']} />
             <Legend />
             <Area yAxisId="left" type="monotone" dataKey="revenue" name="Të Ardhura" stroke="#1a3f8a" strokeWidth={2} fill="url(#rev)" />
-            <Area yAxisId="right" type="monotone" dataKey="vouchers" name="Voucher" stroke="#10b981" strokeWidth={2} fill="url(#vchr)" />
+            <Area yAxisId="right" type="monotone" dataKey="vouchers" name="Kupon" stroke="#10b981" strokeWidth={2} fill="url(#vchr)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>

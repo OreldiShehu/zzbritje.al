@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const STEPS_CUSTOMER = [
   { icon: Search, step: '01', title: 'Gjeni Ofertën', desc: 'Shfletoni qindra oferta nga restorante, spa, hotele dhe shumë biznese të tjera pranë jush.' },
-  { icon: ShoppingCart, step: '02', title: 'Blini Voucher', desc: 'Bëni pagesën e sigurt me kartë ose Stripe. Marrin automatikisht voucher elektronik me QR Code.' },
+  { icon: ShoppingCart, step: '02', title: 'Blini Kupon', desc: 'Bëni pagesën e sigurt me kartë ose Stripe. Merrni automatikisht kupon elektronik me QR Code.' },
   { icon: QrCode, step: '03', title: 'Prezantoni QR', desc: 'Shkoni te biznesi dhe prezantoni QR Code-in nga aplikacioni ose email-i. Biznesi e skanon dhe shërbimi ndodh!' },
   { icon: Star, step: '04', title: 'Lini Recension', desc: 'Ndani eksperiencën tuaj me komunitetin. Çdo recension ju sjell pikë besnikërie për shpërblime të ardhshme.' },
 ];
@@ -28,7 +28,7 @@ export default function HowItWorks() {
       <div className="container-custom py-16 max-w-4xl">
         <div className="text-center mb-10">
           <span className="badge badge-green mb-3">Për Klientët</span>
-          <h2 className="text-3xl font-black text-gray-900">Blerja e Voucher-it — 4 Hapa</h2>
+          <h2 className="text-3xl font-black text-gray-900">Blerja e Kuponit — 4 Hapa</h2>
         </div>
         <div className="relative">
           <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gray-200 -translate-y-1/2" />
@@ -83,11 +83,11 @@ export default function HowItWorks() {
         <h2 className="text-3xl font-black text-gray-900 text-center mb-10">Pyetje të Shpeshta</h2>
         <div className="space-y-3">
           {[
-            { q: 'A mund ta kthej voucher-in nëse ndërroj mendje?', a: 'Po! Keni 14 ditë nga blerja për të kërkuar rimbursim, nëse voucher-i nuk është përdorur akoma.' },
+            { q: 'A mund ta kthej kuponin nëse ndërroj mendje?', a: 'Po! Keni 14 ditë nga blerja për të kërkuar rimbursim, nëse kuponi nuk është përdorur akoma.' },
             { q: 'Si e di se biznesi është i besuar?', a: 'Çdo biznes kalon procesin tonë të verifikimit të dokumenteve dhe identitetit. Shihni insignën "Verifikuar" pranë emrit.' },
-            { q: 'A funksionon edhe pa internet?', a: 'Voucher-i mund të shkarkohet si PDF para se të vizitoni biznesin. Biznesi e skanon QR Code-in offline.' },
+            { q: 'A funksionon edhe pa internet?', a: 'Kuponi mund të shkarkohet si PDF para se të vizitoni biznesin. Biznesi e skanon QR Code-in offline.' },
             { q: 'Sa kursej mesatarisht?', a: 'Klientët tanë kursejnë mesatarisht 45% krahasuar me çmimin e plotë. Disa oferta arrijnë deri në 80% zbritje!' },
-            { q: 'Mund ta ndaj voucher-in me dikë tjetër?', a: 'Jo, voucher-et janë personale dhe lidhen me llogarinë tuaj. Por mund të blini si dhuratë nëse biznesi e lejon.' },
+            { q: 'Mund ta ndaj kuponin me dikë tjetër?', a: 'Jo, kupona janë personale dhe lidhen me llogarinë tuaj. Por mund të blini si dhuratë nëse biznesi e lejon.' },
           ].map(({ q, a }) => (
             <details key={q} className="card group">
               <summary className="p-5 cursor-pointer font-semibold text-gray-900 list-none flex items-center justify-between hover:text-brand-700">

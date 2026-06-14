@@ -47,7 +47,7 @@ export default function BusinessScanner() {
       setCode(data.voucher?.code || '');
       setResult({ type: 'valid', data });
     },
-    onError: (err) => setResult({ type: 'invalid', message: err.response?.data?.message || 'Voucher-i nuk është valid' }),
+    onError: (err) => setResult({ type: 'invalid', message: err.response?.data?.message || 'Kuponi nuk është valid' }),
   });
 
   const redeemMutation = useMutation({
@@ -95,7 +95,7 @@ export default function BusinessScanner() {
   return (
     <div className="max-w-lg mx-auto">
       <div className="mb-5">
-        <h1 className="text-2xl font-bold text-gray-900">Skaner Voucher</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Skaner Kupon</h1>
         <p className="text-gray-500 text-sm">Skanoni QR ose futni kodin manualisht</p>
       </div>
 

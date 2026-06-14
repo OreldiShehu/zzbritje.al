@@ -4,7 +4,7 @@ import { FileText, Download, CheckCircle, X } from 'lucide-react';
 const CONTRACT_VERSION = 'v1.0';
 const PLATFORM_NIPT = 'L91234567C';
 
-function buildContractHTML({ businessName, ownerName, signedAt, ipAddress, commissionRate, markupRate }) {
+function buildContractHTML({ businessName, ownerName, signedAt, commissionRate, markupRate }) {
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Kontratë — ${businessName}</title><style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Times New Roman',Times,serif;background:#fff;color:#111;padding:40px;max-width:800px;margin:0 auto;font-size:13px;line-height:1.8}
@@ -42,7 +42,6 @@ function buildContractHTML({ businessName, ownerName, signedAt, ipAddress, commi
     <p><strong>Partneri Biznes:</strong> ${businessName}</p>
     <p><strong>Përfaqësuesi:</strong> ${ownerName}</p>
     <p><strong>Data e nënshkrimit:</strong> ${signedAt}</p>
-    <p><strong>IP-ja e nënshkrimit:</strong> ${ipAddress}</p>
   </div>
 
   <h2>1. Objekti i Marrëveshjes</h2>
@@ -103,7 +102,6 @@ function buildContractHTML({ businessName, ownerName, signedAt, ipAddress, commi
     <div class="sig-block">
       <p><strong>${businessName}</strong></p>
       <p>Përfaqësuesi: ${ownerName}</p>
-      <p>IP: ${ipAddress}</p>
       <p style="margin-top:8px">Data: ${signedAt} ✓ Nënshkruar dixhitalisht</p>
     </div>
   </div>
@@ -111,26 +109,28 @@ function buildContractHTML({ businessName, ownerName, signedAt, ipAddress, commi
   <p style="margin-top:30px;font-size:11px;color:#888;text-align:center">
     Ky dokument u gjenerua automatikisht nga sistemi Zbritje.al · ${CONTRACT_VERSION} · ${signedAt}
   </p>
-  <script>window.onload=()=>window.print();</script>
   </body></html>`;
 }
 
-export function downloadContract({ businessName, ownerName, signedAt, ipAddress, commissionRate = 0, markupRate = 9 }) {
+export function downloadContract({ businessName, ownerName, signedAt, commissionRate = 0, markupRate = 9 }) {
   const html = buildContractHTML({
     businessName: businessName || 'N/A',
     ownerName: ownerName || 'N/A',
     signedAt: signedAt
       ? new Date(signedAt).toLocaleDateString('sq-AL', { year: 'numeric', month: 'long', day: 'numeric' })
       : new Date().toLocaleDateString('sq-AL', { year: 'numeric', month: 'long', day: 'numeric' }),
-    ipAddress: ipAddress || 'N/A',
-    commissionRate: Math.round(commissionRate * 100),
-    markupRate: Math.round(markupRate * 100),
+    commissionRate,
+    markupRate,
   });
   const blob = new Blob([html], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
-  const win = window.open(url, '_blank');
-  if (win) win.onload = () => URL.revokeObjectURL(url);
-  else URL.revokeObjectURL(url);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `kontrata-zbritje-${(businessName || 'biznes').replace(/\s+/g, '-').toLowerCase()}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 export default function ContractModal({ businessName, ownerName, onAccept, onDecline, onSwitchToCustomer }) {
@@ -185,11 +185,11 @@ export default function ContractModal({ businessName, ownerName, onAccept, onDec
           </section>
 
           <section>
-            <h3 className="font-bold text-gray-900 mb-1">2. Komisioni dhe Pagesa</h3>
+            <h3 className="font-bold text-gray-900 mb-1">2. Tarifa e Platformës</h3>
             <ul className="list-disc list-inside space-y-1">
-              <li>Platforma zbaton komision <strong>5%</strong> mbi çmimin bazë të secilit kupon të shitur.</li>
-              <li>Platforma shton automatikisht <strong>5% markup</strong> mbi çmimin bazë; ky markup paguhet nga klienti dhe i takon platformës.</li>
-              <li>Komisioni faturohet çdo muaj vetëm mbi kupona të shitura faktikisht.</li>
+              <li><strong>Biznesi nuk paguan asnjë komision.</strong> Ju merrni çmimin tuaj bazë të plotë.</li>
+              <li>Platforma shton automatikisht <strong>9% markup</strong> mbi çmimin tuaj bazë; ky markup paguhet ekskluzivisht nga klienti dhe i takon platformës.</li>
+              <li>Klienti paguan: çmimi juaj bazë + 9% markup platformës.</li>
               <li>Nuk ka kosto fikse, abonime mujore, apo tarifa regjistrimi.</li>
               <li>Platforma mund të ndryshojë tarifat me njoftim 30-ditor paraprak.</li>
             </ul>
@@ -302,7 +302,7 @@ export default function ContractModal({ businessName, ownerName, onAccept, onDec
 
               <div className="flex gap-2">
                 <button
-                  onClick={() => downloadContract({ businessName, ownerName, commissionRate: 0, markupRate: 9 })}
+                  onClick={() => downloadContract({ businessName, ownerName })}
                   className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors flex-shrink-0"
                 >
                   <Download size={14} /> Shkarko

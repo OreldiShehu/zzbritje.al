@@ -204,7 +204,7 @@
     "or_email": "ose me email",
     "welcome_user": "Mirë se erdhe, {{name}}!",
     "referral_code": "Kodi i Referimit (opsional)",
-    "customer_desc": "Blejë voucher",
+    "customer_desc": "Blej kupon",
     "business_desc": "Krijo oferta",
     "register_free_btn": "Regjistrohu Falas",
     "login_link_label": "Kyçuni →",
@@ -236,7 +236,7 @@
     "favorites_label": "Të Preferuarat",
     "referrals_label": "Referime",
     "loyalty_progress": "Progresi i Besnikërisë",
-    "recent_vouchers": "Voucherët e Fundit",
+    "recent_vouchers": "Kupona të Fundit",
     "recent_notifications": "Njoftimet e Fundit",
     "see_all": "Të gjitha",
     "no_vouchers_yet": "Nuk keni kupon akoma",
@@ -433,10 +433,10 @@
     "pending": "Në pritje",
     "verified": "Verifikuar",
     "currency": "ALL",
-    "home": "Ballina"
+    "home": "HOME"
   },
   "footer": {
-    "tagline": "Platforma Nr.1 e zbritjeve, voucherëve dhe ofertave në Shqipëri. Kurseni deri 80% në restorantet, hotelet dhe shërbimet më të mira.",
+    "tagline": "Platforma Nr.1 e zbritjeve, kuponave dhe ofertave në Shqipëri. Kurseni deri 80% në restorantet, hotelet dhe shërbimet më të mira.",
     "platform": "Platforma",
     "support": "Mbështetja",
     "legal": "Ligjore",

@@ -66,11 +66,12 @@ export default function AdminUsers() {
         <div className="space-y-2">{Array.from({ length: 10 }).map((_, i) => <div key={i} className="h-14 bg-gray-800 skeleton rounded-xl" />)}</div>
       ) : (
         <div className="bg-gray-800 rounded-2xl border border-gray-700 overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[600px]">
             <thead>
               <tr className="border-b border-gray-700">
-                {COLS.map((h) => (
-                  <th key={h} className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">{h}</th>
+                {COLS.map((h, i) => (
+                  <th key={h} className={`text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3 ${i === 1 || i === 3 ? 'hidden sm:table-cell' : ''}`}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -86,11 +87,11 @@ export default function AdminUsers() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-400">{u.email}</td>
+                  <td className="hidden sm:table-cell px-4 py-3 text-sm text-gray-400">{u.email}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs font-medium px-2 py-1 rounded-full ${ROLE_BADGE[u.role] || 'bg-gray-700 text-gray-400'}`}>{u.role}</span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{formatDate(u.createdAt)}</td>
+                  <td className="hidden sm:table-cell px-4 py-3 text-sm text-gray-500">{formatDate(u.createdAt)}</td>
                   <td className="px-4 py-3">
                     <span className={`flex items-center gap-1 text-xs font-medium w-fit px-2 py-1 rounded-full ${u.isActive ? 'bg-green-900/40 text-green-400' : 'bg-red-900/40 text-red-400'}`}>
                       {u.isActive ? <><CheckCircle size={12} />{t('admin_ui.active')}</> : <><Ban size={12} />{t('admin_ui.blocked')}</>}
@@ -108,6 +109,7 @@ export default function AdminUsers() {
               ))}
             </tbody>
           </table>
+          </div>
           {data?.pagination?.pages > 1 && (
             <div className="flex justify-center gap-2 py-4 border-t border-gray-700">
               <button onClick={() => setPage((p) => p - 1)} disabled={!data.pagination.hasPrev} className="px-4 py-2 rounded-xl border border-gray-600 text-sm text-gray-300 disabled:opacity-40">{t('search.prev')}</button>

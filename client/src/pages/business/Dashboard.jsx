@@ -83,7 +83,7 @@ export default function BusinessDashboard() {
 
   // Per-voucher example using top deal or generic
   const topDeal = stats?.topDeals?.[0];
-  const exampleBusinessPrice = topDeal ? Math.round(topDeal.revenue / Math.max(1, topDeal.soldVouchers)) : 4500;
+  const exampleBusinessPrice = topDeal?.businessPrice || (topDeal ? Math.round((topDeal.revenue / Math.max(1, topDeal.soldVouchers)) / (1 + MARKUP)) : 4500);
   const exampleCustomerPrice = Math.round(exampleBusinessPrice * (1 + MARKUP));
   const exampleMarkup = exampleCustomerPrice - exampleBusinessPrice;
   const examplePlatformTotal = exampleMarkup; // only from customer markup
@@ -100,8 +100,8 @@ export default function BusinessDashboard() {
           className="rounded-2xl p-4 bg-amber-50 border border-amber-200 flex items-center gap-4">
           <Crown size={20} className="text-amber-600 flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-sm text-amber-800">Plan Falas — 2 deals, 10 vouchers max</p>
-            <p className="text-xs text-amber-600 mt-0.5">Kaloni në Pro (1,500 ALL/muaj) për 20+ deals dhe vouchers të pakufizuara.</p>
+            <p className="font-bold text-sm text-amber-800">Plan Falas — 2 deals, 10 kupon max</p>
+            <p className="text-xs text-amber-600 mt-0.5">Kaloni në Pro (1,500 ALL/muaj) për 20+ deals dhe kupon të pakufizuara.</p>
           </div>
           <a href={WA_URL} target="_blank" rel="noopener noreferrer"
             className="flex-shrink-0 flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-3 py-2 rounded-xl transition-colors">
@@ -177,7 +177,7 @@ export default function BusinessDashboard() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
             {[
               { label: 'Fitimi neto', value: formatCurrency(revenue.businessNet || 0) },
-              { label: 'Voucher të shitura', value: vouchersSold },
+              { label: 'Kupon të shitura', value: vouchersSold },
               { label: 'Vizita', value: (stats?.views || 0).toLocaleString() },
               { label: 'Vlerësim', value: `${(business?.averageRating || 0).toFixed(1)} ⭐` },
             ].map(({ label, value }) => (
@@ -209,7 +209,7 @@ export default function BusinessDashboard() {
             </div>
             <div>
               <h3 className="font-bold text-gray-900">Totali i Fitimeve</h3>
-              <p className="text-xs text-gray-500">{vouchersSold} voucher të shitura deri tani</p>
+              <p className="text-xs text-gray-500">{vouchersSold} kupon të shitura deri tani</p>
             </div>
           </div>
 
@@ -246,7 +246,7 @@ export default function BusinessDashboard() {
               <Building2 size={18} className="text-brand-600" />
             </div>
             <div>
-              <h3 className="font-bold text-gray-900">Llogaritja për 1 Voucher</h3>
+              <h3 className="font-bold text-gray-900">Llogaritja për 1 Kupon</h3>
               <p className="text-xs text-gray-500">Shembull bazuar në çmimin tuaj</p>
             </div>
           </div>
@@ -279,8 +279,8 @@ export default function BusinessDashboard() {
             </div>
             <div className="bg-green-50 rounded-xl p-3">
               <p className="text-xs text-green-600 font-medium">Ti merr cash</p>
-              <p className="font-black text-green-700 text-lg">{formatCurrency(exampleCustomerPrice)}</p>
-              <p className="text-xs text-green-500">nga klienti direkt</p>
+              <p className="font-black text-green-700 text-lg">{formatCurrency(exampleBusinessNet)}</p>
+              <p className="text-xs text-green-500">çmimi yt bazë, direkt nga klienti</p>
             </div>
           </div>
         </div>
@@ -333,7 +333,7 @@ export default function BusinessDashboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900 truncate">{deal.title}</p>
-                  <p className="text-xs text-gray-400">{deal.soldVouchers || 0} voucher të shitura</p>
+                  <p className="text-xs text-gray-400">{deal.soldVouchers || 0} kupon të shitura</p>
                 </div>
                 <span className="text-sm font-bold text-brand-600">{formatCurrency(deal.revenue || 0)}</span>
               </div>

@@ -49,6 +49,7 @@ const BusinessVouchers = lazy(() => import('./pages/business/Vouchers'));
 const BusinessAnalytics = lazy(() => import('./pages/business/Analytics'));
 const BusinessProfilePage = lazy(() => import('./pages/business/Profile'));
 const BusinessScanner = lazy(() => import('./pages/business/Scanner'));
+const BusinessPendingVerification = lazy(() => import('./pages/business/PendingVerification'));
 
 // Admin Dashboard
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
@@ -147,6 +148,7 @@ export default function App() {
           <Route path="analytics" element={<SuspenseWrapper><BusinessAnalytics /></SuspenseWrapper>} />
           <Route path="profile" element={<SuspenseWrapper><BusinessProfilePage /></SuspenseWrapper>} />
           <Route path="scanner" element={<SuspenseWrapper><BusinessScanner /></SuspenseWrapper>} />
+          <Route path="pending" element={<SuspenseWrapper><BusinessPendingVerification /></SuspenseWrapper>} />
         </Route>
 
         {/* Admin Dashboard */}

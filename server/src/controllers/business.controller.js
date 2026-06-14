@@ -59,11 +59,11 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
       message: `Profili juaj u krijua me sukses. Ja çfarë duhet të dini:\n\n` +
         `📌 Si funksionon platforma:\n` +
         `• Ju krijoni deal-e me çmimin tuaj bazë\n` +
-        `• Klientët blejnë voucher-in online dhe vijnë fizikisht tek ju\n` +
-        `• Klienti paguan direkt tek ju kur paraqet voucher-in\n\n` +
-        `💰 Komisioni:\n` +
-        `• Platforma mban një komision të vogël nga çmimi juaj bazë\n` +
-        `• Komisioni faturohet mujor — vetëm nga voucher-et e shitura\n` +
+        `• Klientët blejnë kuponin online dhe vijnë fizikisht tek ju\n` +
+        `• Klienti paguan direkt tek ju kur paraqet kuponin\n\n` +
+        `💰 Tarifa e platformës:\n` +
+        `• Platforma shton 9% markup mbi çmimin tuaj bazë — paguhet nga klienti\n` +
+        `• Ju merrni çmimin tuaj bazë të plotë, pa asnjë zbritje\n` +
         `• Nuk ka kosto fikse apo abonime mujore\n\n` +
         `✅ Hapat e ardhshëm:\n` +
         `1. Plotësoni profilin e biznesit tuaj (logo, adresë, telefon)\n` +
@@ -200,7 +200,7 @@ exports.getBusinessStats = catchAsync(async (req, res, next) => {
       { $match: { business: business._id, paymentStatus: 'completed', createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
       { $group: { _id: null, businessNet: { $sum: '$businessAmount' } } },
     ]),
-    Deal.find({ business: business._id }).sort({ soldVouchers: -1 }).limit(5).select('title soldVouchers revenue averageRating images').lean(),
+    Deal.find({ business: business._id }).sort({ soldVouchers: -1 }).limit(5).select('title soldVouchers revenue businessPrice discountedPrice averageRating images').lean(),
   ]);
 
   const allTime = allTimeAgg[0] || {};
