@@ -100,8 +100,6 @@ function NearbyDealsSection() {
     );
   };
 
-  if (locationDenied) return null;
-
   return (
     <section className="py-12 bg-white border-b border-gray-100">
       <div className="container-custom">
@@ -119,7 +117,18 @@ function NearbyDealsSection() {
           )}
         </div>
 
-        {!userLocation && (
+        {locationDenied && (
+          <div className="flex flex-col items-center justify-center py-10 gap-3 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+            <MapPin size={32} className="text-gray-300" />
+            <div>
+              <p className="font-semibold text-gray-700">Vendndodhja u bllokua</p>
+              <p className="text-sm text-gray-400 mt-1">Lejo aksesin tek vendndodhja në cilësimet e shfletuesit dhe rifresko faqen.</p>
+            </div>
+            <Link to="/search" className="btn-secondary text-sm py-2 px-4">Shfleto të gjitha deal-et →</Link>
+          </div>
+        )}
+
+        {!userLocation && !locationDenied && (
           <div className="flex flex-col items-center justify-center py-10 gap-4 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
             <MapPin size={32} className="text-brand-400" />
             <div>
