@@ -9,6 +9,9 @@ const { paymentRateLimiter } = require('../middleware/rateLimit.middleware');
 router.post('/paypal/create-order', protect, paymentRateLimiter, paymentController.createPayPalOrder);
 router.post('/paypal/capture-order/:orderId', protect, paymentRateLimiter, paymentController.capturePayPalOrder);
 
+// Admin
+router.get('/admin', protect, restrictTo('admin', 'superadmin'), paymentController.getAdminTransactions);
+
 // Transactions
 router.get('/transactions', protect, paymentController.getMyTransactions);
 router.get('/transactions/:id', protect, paymentController.getTransactionDetails);

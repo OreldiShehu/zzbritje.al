@@ -12,6 +12,7 @@ router.get('/validate/:code', protect, restrictTo('business', 'admin'), voucherC
 router.get('/business/all', protect, restrictTo('business'), voucherController.getBusinessVouchers);
 router.get('/business', protect, restrictTo('business'), voucherController.getBusinessVouchers);
 router.post('/redeem', protect, restrictTo('business', 'admin'), voucherController.redeemVoucher);
+router.post('/:code/confirm-visit', protect, restrictTo('customer'), voucherController.confirmVisit);
 router.get('/:code', protect, voucherController.getVoucher);
 
 module.exports = router;

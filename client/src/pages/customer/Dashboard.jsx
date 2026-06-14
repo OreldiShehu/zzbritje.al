@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Ticket, Bell, ArrowRight, QrCode, MapPin, Phone, Calendar } from 'lucide-react';
+import { Ticket, Bell, ArrowRight, QrCode, MapPin, Phone, Calendar, Info } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../api/axios';
 import { formatCurrency, formatDate, getImageUrl } from '../../utils/formatters';
@@ -65,9 +65,9 @@ function VoucherCard({ v }) {
       {/* Code + QR */}
       <div className={`flex items-center justify-between gap-4 px-4 py-3 border-t ${isActive ? 'border-brand-100 bg-brand-50/50' : 'border-gray-200'}`}>
         <div>
-          <p className="text-xs text-gray-400 mb-0.5">Kodi i Voucher-it</p>
+          <p className="text-xs text-gray-400 mb-0.5">Kodi i Kuponit</p>
           <p className="font-mono font-bold text-brand-700 text-sm tracking-widest">{v.code}</p>
-          <p className="text-xs text-gray-400 mt-1">Çmimi i paguar: <span className="font-semibold text-gray-700">{formatCurrency(v.paidPrice)}</span></p>
+          <p className="text-xs text-gray-400 mt-1">Paguani pranë biznesit: <span className="font-semibold text-brand-600">{formatCurrency(v.paidPrice)}</span></p>
         </div>
         {v.qrCodeImage && isActive && (
           <img src={v.qrCodeImage} alt="QR" className="w-16 h-16 rounded-lg border border-brand-200" />
@@ -78,6 +78,16 @@ function VoucherCard({ v }) {
           </div>
         )}
       </div>
+
+      {/* Redemption instructions */}
+      {isActive && (
+        <div className="border-t border-blue-100 bg-blue-50 px-4 py-2.5 flex items-start gap-2">
+          <Info size={13} className="text-blue-400 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-blue-700">
+            <span className="font-semibold">Si ta përdorni:</span> Tregojini kuponin kamarierit/stafit · Ata e konfirmojnë · Paguani <span className="font-semibold">{formatCurrency(v.paidPrice)}</span> pranë tyre
+          </p>
+        </div>
+      )}
     </div>
   );
 }

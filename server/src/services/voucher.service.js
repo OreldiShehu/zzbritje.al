@@ -36,13 +36,13 @@ async function createVoucherPurchase({ dealId, userId, quantity, paymentMethod, 
 
   // Revenue split:
   // Customer pays: discountedPrice (businessPrice + 7% markup)
-  // Platform keeps: platformMarkup + 20% of businessPrice
-  // Business gets: businessPrice × 80%
-  const businessPrice = deal.businessPrice || deal.discountedPrice;
+  // Platform keeps: platformMarkup (7% of businessPrice)
+  // Business gets: businessPrice in full (0% commission)
+  const businessPrice = deal.businessPrice || Math.round(deal.discountedPrice / 1.09);
   const customerPrice = deal.discountedPrice;
   const platformMarkup = deal.platformMarkup || 0;
-  const commissionAmount = businessPrice * deal.commissionRate * quantity;
-  const businessAmount = (businessPrice * (1 - deal.commissionRate)) * quantity;
+  const commissionAmount = 0;
+  const businessAmount = businessPrice * quantity;
   const subtotal = customerPrice * quantity;
   const total = subtotal;
 
@@ -55,8 +55,8 @@ async function createVoucherPurchase({ dealId, userId, quantity, paymentMethod, 
     subtotal,
     total,
     currency: deal.currency,
-    commissionRate: deal.commissionRate,
-    commissionAmount,
+    commissionRate: 0,
+    commissionAmount: 0,
     businessAmount,
     platformMarkup: platformMarkup * quantity,
     quantity,
@@ -81,8 +81,8 @@ async function createVoucherPurchase({ dealId, userId, quantity, paymentMethod, 
       originalPrice: deal.originalPrice,
       paidPrice: customerPrice,
       discountAmount: deal.savingsAmount,
-      commissionAmount: businessPrice * deal.commissionRate,
-      businessEarning: businessPrice * (1 - deal.commissionRate),
+      commissionAmount: 0,
+      businessEarning: businessPrice,
       expiresAt,
       status: 'active',
     };

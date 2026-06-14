@@ -2,13 +2,74 @@ import { useState } from 'react';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { ShoppingCart, Shield, CheckCircle, ArrowLeft, Tag, Clock, Ticket, Banknote, CreditCard } from 'lucide-react';
+import { ShoppingCart, Shield, CheckCircle, ArrowLeft, Tag, Clock, Ticket, Banknote, CreditCard, LogIn, Loader } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons, FUNDING } from '@paypal/react-paypal-js';
 import api from '../api/axios';
 import { useAuthStore } from '../store/authStore';
 import { formatCurrency, formatDate, getImageUrl } from '../utils/formatters';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
+
+function LoginModal({ onSuccess }) {
+  const { setAuth } = useAuthStore();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [pending, setPending] = useState(false);
+  const [err, setErr] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setPending(true);
+    setErr('');
+    try {
+      const res = await api.post('/auth/login', { email, password });
+      const { user, accessToken } = res.data;
+      setAuth(user, accessToken);
+      onSuccess();
+    } catch (error) {
+      setErr(error.response?.data?.message || 'Kredencialet e pasakta. Provoni përsëri.');
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4">
+      <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden">
+        <div className="bg-brand-gradient p-6 text-white text-center">
+          <LogIn size={32} className="mx-auto mb-2" />
+          <h2 className="text-xl font-black">Kyçuni për të vazhduar</h2>
+          <p className="text-blue-100 text-sm mt-1">Duhet të jeni të kyçur për të blerë</p>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {err && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{err}</p>}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+              required autoFocus
+              className="input-field w-full" placeholder="email@juaj.al" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Fjalëkalimi</label>
+            <input
+              type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+              required
+              className="input-field w-full" placeholder="••••••••" />
+          </div>
+          <button type="submit" disabled={pending}
+            className="btn-primary w-full py-3 flex items-center justify-center gap-2">
+            {pending ? <Loader size={18} className="animate-spin" /> : <><LogIn size={18} /> Kyçuni</>}
+          </button>
+          <p className="text-center text-sm text-gray-500">
+            Nuk keni llogari?{' '}
+            <Link to="/register" className="text-brand-600 font-semibold hover:underline">Regjistrohu</Link>
+          </p>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
 
@@ -19,7 +80,8 @@ export default function Checkout() {
   const qty = parseInt(searchParams.get('qty') || '1', 10);
   const dealId = searchParams.get('dealId');
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [agreed, setAgreed] = useState(false);
   const [cashPending, setCashPending] = useState(false);
@@ -111,6 +173,9 @@ export default function Checkout() {
 
   return (
     <div className="bg-gray-50 min-h-screen py-8">
+      {(showLoginModal || !isAuthenticated) && (
+        <LoginModal onSuccess={() => setShowLoginModal(false)} />
+      )}
       <div className="container-custom max-w-4xl">
         <Link to={`/deals/${deal.slug}`} className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6">
           <ArrowLeft size={16} />{t('checkout.back')}

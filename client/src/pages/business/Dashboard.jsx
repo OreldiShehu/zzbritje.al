@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { useAuthStore } from '../../store/authStore';
 import {
   TrendingUp, Ticket, Eye, Star, ArrowRight, Plus,
   AlertCircle, CheckCircle, Clock, Banknote, Building2, Info, Crown,
@@ -50,6 +53,18 @@ function EarningsRow({ label, value, sub, highlight, deduct, info }) {
 
 export default function BusinessDashboard() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { setAuth } = useAuthStore();
+
+  const switchMutation = useMutation({
+    mutationFn: () => api.patch('/auth/switch-to-customer'),
+    onSuccess: (res) => {
+      setAuth(res.data.data, null);
+      toast.success('Mirë se vini si klient! Tani mund të gëzoni deal-et tona.');
+      navigate('/');
+    },
+    onError: () => toast.error('Ndodhi një gabim. Provo përsëri.'),
+  });
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ['business', 'stats'],
@@ -64,17 +79,15 @@ export default function BusinessDashboard() {
   const isVerified = business?.verificationStatus === 'verified';
   const isPending = business?.verificationStatus === 'pending' || business?.verificationStatus === 'under_review';
 
-  const MARKUP = stats?.markupRate || 0.07;
-  const COMMISSION = stats?.commissionRate || 0.10;
+  const MARKUP = stats?.markupRate || 0.09;
 
   // Per-voucher example using top deal or generic
   const topDeal = stats?.topDeals?.[0];
-  const exampleBusinessPrice = topDeal ? Math.round(topDeal.revenue / Math.max(1, topDeal.soldVouchers) / (1 - COMMISSION)) : 4500;
+  const exampleBusinessPrice = topDeal ? Math.round(topDeal.revenue / Math.max(1, topDeal.soldVouchers)) : 4500;
   const exampleCustomerPrice = Math.round(exampleBusinessPrice * (1 + MARKUP));
   const exampleMarkup = exampleCustomerPrice - exampleBusinessPrice;
-  const exampleCommission = Math.round(exampleBusinessPrice * COMMISSION);
-  const examplePlatformTotal = exampleMarkup + exampleCommission;
-  const exampleBusinessNet = exampleBusinessPrice - exampleCommission;
+  const examplePlatformTotal = exampleMarkup; // only from customer markup
+  const exampleBusinessNet = exampleBusinessPrice; // business keeps 100%
 
   const revenue = stats?.revenue || {};
   const vouchersSold = revenue.vouchersSold || stats?.vouchers?.total || 0;
@@ -125,9 +138,18 @@ export default function BusinessDashboard() {
               Na njoftoni
             </a>
           ) : (
-            <Link to="/business-dashboard/profile" className="btn-primary text-xs py-2 px-4 flex-shrink-0">
-              {t('business.complete_profile')}
-            </Link>
+            <div className="flex flex-col gap-2 flex-shrink-0">
+              <Link to="/business-dashboard/profile" className="btn-primary text-xs py-2 px-4 text-center whitespace-nowrap">
+                {t('business.complete_profile')}
+              </Link>
+              <button
+                onClick={() => { if (window.confirm('Doni të vazhdoni si klient dhe të gëzoni deal-et tona?')) switchMutation.mutate(); }}
+                disabled={switchMutation.isPending}
+                className="text-xs text-red-500 hover:text-red-700 underline text-center whitespace-nowrap transition-colors"
+              >
+                Vazhdo si Klient →
+              </button>
+            </div>
           )}
         </motion.div>
       )}
@@ -193,32 +215,26 @@ export default function BusinessDashboard() {
 
           <EarningsRow
             label="Klientët paguan (cash tek ti)"
-            info="Çmimi që klientët paguan direkt tek biznesi juaj"
+            info="Çmimi i plotë që klientët paguan direkt tek biznesi juaj"
             value={formatCurrency(revenue.totalCollected || 0)}
           />
           <EarningsRow
-            label="Platforma merr (markup 7%)"
-            info="Shtesa 7% e çmimit tënd — i mbledhur nga klienti"
-            value={formatCurrency((revenue.totalCollected || 0) - (revenue.commissionPaid || 0) - (revenue.businessNet || 0))}
-            deduct
-          />
-          <EarningsRow
-            label="Platforma merr (komision 10%)"
-            info="10% e çmimit tuaj bazë — paguhet platformës"
-            value={formatCurrency(revenue.commissionPaid || 0)}
+            label={`Markup platformës (${Math.round(MARKUP * 100)}%)`}
+            info="9% shtesa mbi çmimin tuaj — paguhet nga klienti, jo nga ju"
+            value={formatCurrency(revenue.markupAmount || 0)}
             deduct
           />
           <EarningsRow
             label="Fitimi juaj neto"
-            info="Shuma që ju mbetet pas të gjitha zbritjeve"
+            info="Ju mbani çmimin tuaj bazë të plotë — 0% komision"
             value={formatCurrency(revenue.businessNet || 0)}
             highlight
           />
 
-          <div className="mt-4 flex items-start gap-2 p-3 bg-blue-50 rounded-xl">
-            <Info size={14} className="text-blue-500 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-blue-700">
-              <strong>Si funksionon cash:</strong> Klienti paguan çmimin e plotë direkt tek biznesi juaj kur paraqet voucherin. Platforma lëshon faturë mujore për komisionin.
+          <div className="mt-4 flex items-start gap-2 p-3 bg-green-50 rounded-xl">
+            <Info size={14} className="text-green-600 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-green-700">
+              <strong>0% komision nga biznesi.</strong> Klienti paguan çmimin tuaj + 9% markup platformës. Ju merrni çmimin tuaj të plotë.
             </p>
           </div>
         </div>
@@ -249,13 +265,8 @@ export default function BusinessDashboard() {
             <p className="text-base font-black text-brand-700">{formatCurrency(exampleCustomerPrice)}</p>
           </div>
           <EarningsRow
-            label={`− Komision platformës (${Math.round(COMMISSION * 100)}%)`}
-            info="10% e çmimit tuaj bazë, i zbritur nga fitimi juaj"
-            value={formatCurrency(exampleCommission)}
-            deduct
-          />
-          <EarningsRow
-            label="Ti fiton neto"
+            label="Ti fiton neto (0% komision)"
+            info="Ju mbani çmimin tuaj bazë të plotë — biznesi nuk paguan komision"
             value={formatCurrency(exampleBusinessNet)}
             highlight
           />
@@ -264,7 +275,7 @@ export default function BusinessDashboard() {
             <div className="bg-red-50 rounded-xl p-3">
               <p className="text-xs text-red-500 font-medium">Platforma merr gjithsej</p>
               <p className="font-black text-red-600 text-lg">{formatCurrency(examplePlatformTotal)}</p>
-              <p className="text-xs text-red-400">({exampleMarkup} markup + {exampleCommission} komision)</p>
+              <p className="text-xs text-red-400">{exampleMarkup} L markup (9% nga klienti)</p>
             </div>
             <div className="bg-green-50 rounded-xl p-3">
               <p className="text-xs text-green-600 font-medium">Ti merr cash</p>

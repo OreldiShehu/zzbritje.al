@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Upload, X, Image, Plus, ChevronRight, Info, Crown, Clock } from 'lucide-react';
 import api from '../../api/axios';
 import { DEAL_TYPES, CITIES } from '../../utils/constants';
+import { formatCurrency } from '../../utils/formatters';
 import toast from 'react-hot-toast';
 
 const WA_NUMBER = '355692866668';
@@ -92,13 +93,12 @@ export default function CreateDeal() {
     if (valid) setStep((s) => s + 1);
   };
 
-  const MARKUP_RATE = 0.07;
-  const COMMISSION_RATE = 0.10;
+  const MARKUP_RATE = 0.09;
   const businessPrice = Number(values.businessPrice) || 0;
   const customerPrice = businessPrice ? Math.round(businessPrice * (1 + MARKUP_RATE)) : 0;
   const platformMarkup = customerPrice - businessPrice;
-  const businessEarning = Math.round(businessPrice * (1 - COMMISSION_RATE));
-  const platformTotal = platformMarkup + Math.round(businessPrice * COMMISSION_RATE);
+  const businessEarning = businessPrice; // business keeps full price, pays 0% commission
+  const platformTotal = platformMarkup; // platform earns only from customer markup
   const savings = values.originalPrice && customerPrice
     ? ((values.originalPrice - customerPrice) / values.originalPrice * 100).toFixed(0)
     : 0;
@@ -244,7 +244,7 @@ export default function CreateDeal() {
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">Çmimi juaj i Deal-it (ALL) *</label>
                     <input type="number" {...register('businessPrice', { required: true, min: 1, valueAsNumber: true })}
                       className={`input-field ${errors.businessPrice ? 'input-error' : ''}`} placeholder="4500" />
-                    <p className="text-xs text-gray-400 mt-1">Çmimi që dëshironi — platforma shton 7%</p>
+                    <p className="text-xs text-gray-400 mt-1">Çmimi që dëshironi — platforma shton 5%</p>
                   </div>
                 </div>
 
@@ -254,18 +254,18 @@ export default function CreateDeal() {
                     <div className="grid grid-cols-3 gap-3 text-center">
                       <div className="bg-white rounded-lg p-3 border border-brand-100">
                         <p className="text-xs text-gray-500 mb-1">Klienti paguan</p>
-                        <p className="font-black text-lg text-gray-900">{customerPrice.toLocaleString()} L</p>
-                        <p className="text-xs text-gray-400">({businessPrice.toLocaleString()} + 7%)</p>
+                        <p className="font-black text-lg text-gray-900">{formatCurrency(customerPrice)}</p>
+                        <p className="text-xs text-gray-400">({formatCurrency(businessPrice)} + 9% markup)</p>
                       </div>
                       <div className="bg-white rounded-lg p-3 border border-green-200">
                         <p className="text-xs text-gray-500 mb-1">Ju fitoni</p>
-                        <p className="font-black text-lg text-green-700">{businessEarning.toLocaleString()} L</p>
-                        <p className="text-xs text-gray-400">pas komisionit 10%</p>
+                        <p className="font-black text-lg text-green-700">{formatCurrency(businessEarning)}</p>
+                        <p className="text-xs text-gray-400">çmimi juaj i plotë — 0% komision</p>
                       </div>
                       <div className="bg-white rounded-lg p-3 border border-amber-200">
                         <p className="text-xs text-gray-500 mb-1">Platforma merr</p>
-                        <p className="font-black text-lg text-amber-700">{platformTotal.toLocaleString()} L</p>
-                        <p className="text-xs text-gray-400">markup + komision</p>
+                        <p className="font-black text-lg text-amber-700">{formatCurrency(platformTotal)}</p>
+                        <p className="text-xs text-gray-400">9% nga klienti</p>
                       </div>
                     </div>
                     {savings > 0 && (
@@ -355,10 +355,10 @@ export default function CreateDeal() {
                 {[
                   { label: 'Titulli', value: values.title },
                   { label: 'Qyteti', value: values.city },
-                  { label: 'Çmimi Origjinal', value: `${(values.originalPrice || 0).toLocaleString()} ALL` },
-                  { label: 'Çmimi juaj i Deal-it', value: `${(businessPrice || 0).toLocaleString()} ALL` },
-                  { label: 'Klienti paguan', value: `${customerPrice.toLocaleString()} ALL` },
-                  { label: 'Ju fitoni / voucher', value: `${businessEarning.toLocaleString()} ALL` },
+                  { label: 'Çmimi Origjinal', value: formatCurrency(values.originalPrice || 0) },
+                  { label: 'Çmimi juaj i Deal-it', value: formatCurrency(businessPrice || 0) },
+                  { label: 'Klienti paguan', value: formatCurrency(customerPrice) },
+                  { label: 'Ju fitoni / voucher', value: formatCurrency(businessEarning) },
                   { label: 'Zbritja (klientit)', value: `${savings}%` },
                   { label: 'Total Voucher', value: values.totalVouchers },
                   { label: 'Max./Klient', value: values.maxPerCustomer },

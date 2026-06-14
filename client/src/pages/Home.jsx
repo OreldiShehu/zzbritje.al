@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Star, ArrowRight } from 'lucide-react';
+import { Star, ArrowRight, MapPin } from 'lucide-react';
 import api from '../api/axios';
 import HeroSection from '../components/home/HeroSection';
 import CategorySection from '../components/home/CategorySection';
@@ -65,6 +65,98 @@ function TopRatedRow({ deal, rank }) {
   );
 }
 
+function NearbyDealsSection() {
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationDenied, setLocationDenied] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
+
+  const { data: nearbyDeals, isLoading: nearbyLoading } = useQuery({
+    queryKey: ['deals', 'nearby', userLocation?.lat, userLocation?.lng],
+    queryFn: () => api.get(`/deals/nearby?lat=${userLocation.lat}&lng=${userLocation.lng}&radius=5&limit=8`).then((r) => r.data.data),
+    enabled: !!userLocation,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => {}
+    );
+  }, []);
+
+  const requestLocation = () => {
+    if (!navigator.geolocation) return;
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocationLoading(false);
+      },
+      () => {
+        setLocationDenied(true);
+        setLocationLoading(false);
+      }
+    );
+  };
+
+  if (locationDenied) return null;
+
+  return (
+    <section className="py-12 bg-white border-b border-gray-100">
+      <div className="container-custom">
+        <div className="flex items-end justify-between mb-6">
+          <div>
+            <span className="text-green-600 font-semibold text-sm uppercase tracking-wider flex items-center gap-1">
+              <MapPin size={14} /> Pranë jush
+            </span>
+            <h2 className="section-title mt-1">Deals pranë jush</h2>
+          </div>
+          {userLocation && nearbyDeals?.length > 0 && (
+            <Link to="/search?nearby=true" className="hidden md:flex items-center gap-1.5 btn-secondary text-sm py-2">
+              Shiko të gjitha <ArrowRight size={14} />
+            </Link>
+          )}
+        </div>
+
+        {!userLocation && (
+          <div className="flex flex-col items-center justify-center py-10 gap-4 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+            <MapPin size={32} className="text-brand-400" />
+            <div>
+              <p className="font-semibold text-gray-900">Gjeni oferta pranë jush</p>
+              <p className="text-sm text-gray-500 mt-1">Aktivizoni vendndodhjen për të parë deal-et më të afërta</p>
+            </div>
+            <button onClick={requestLocation} disabled={locationLoading} className="btn-primary flex items-center gap-2">
+              {locationLoading
+                ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                : <MapPin size={16} />}
+              {locationLoading ? 'Po gjendet vendndodhja...' : 'Aktivizo vendndodhjen'}
+            </button>
+          </div>
+        )}
+
+        {userLocation && nearbyLoading && <DealGridSkeleton count={4} />}
+
+        {userLocation && !nearbyLoading && nearbyDeals?.length === 0 && (
+          <p className="text-sm text-gray-400 text-center py-8">
+            Nuk u gjetën deal-e brenda 5km. Shiko <Link to="/search" className="text-brand-600 underline">të gjitha deal-et</Link>.
+          </p>
+        )}
+
+        {nearbyDeals?.length > 0 && (
+          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide snap-x snap-mandatory -mx-4 px-4">
+            {nearbyDeals.map((deal) => (
+              <div key={deal._id} className="flex-shrink-0 w-64 snap-start">
+                <DealCard deal={deal} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   const { t } = useTranslation();
 
@@ -112,6 +204,9 @@ export default function Home() {
   return (
     <div className="overflow-hidden">
       <HeroSection />
+
+      {/* Nearby Deals */}
+      <NearbyDealsSection />
 
       {/* Categories */}
       <section className="py-16 bg-white">

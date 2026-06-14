@@ -110,21 +110,32 @@ exports.createDeal = catchAsync(async (req, res, next) => {
     return next(new AppError(`PLAN_LIMIT_VOUCHERS:Plani falas lejon maksimumi ${voucherLimit} vouchers për deal. Kaloni në Pro për vouchers të pakufizuara.`, 400));
   }
 
-  const images = req.files?.map((f, i) => ({
-    url: f.path,
-    publicId: f.filename,
-    isMain: i === 0,
-  })) || [];
+  const images = (req.files || [])
+    .filter((f) => f.path)
+    .map((f, i) => ({ url: f.path, publicId: f.filename || '', isMain: i === 0 }));
 
-  const deal = await Deal.create({
-    ...req.body,
-    business: business._id,
-    createdBy: req.user.id,
-    city: req.body.city || business.city,
-    images,
-    status: 'active',
-    commissionRate: business.commissionRate,
-  });
+  let deal;
+  try {
+    deal = await Deal.create({
+      ...req.body,
+      business: business._id,
+      createdBy: req.user.id,
+      city: req.body.city || business.city,
+      images,
+      status: 'active',
+      commissionRate: 0,
+    });
+  } catch (err) {
+    console.error('[createDeal] Deal.create failed:', err.name, err.message, JSON.stringify(err.errors || {}));
+    if (err.name === 'ValidationError') {
+      const msgs = Object.values(err.errors).map((e) => e.message).join(', ');
+      return next(new AppError(`Validimi dështoi: ${msgs}`, 400));
+    }
+    if (err.code === 11000) {
+      return next(new AppError('Një deal me këtë titull tashmë ekziston. Ndryshoni titullin.', 409));
+    }
+    return next(new AppError(`Gabim gjatë krijimit: ${err.message}`, 500));
+  }
 
   await Business.findByIdAndUpdate(business._id, { $inc: { totalDeals: 1, activeDeals: 1 } });
 

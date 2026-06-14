@@ -106,9 +106,20 @@ const businessSchema = new mongoose.Schema({
   establishedYear: { type: Number },
   employeeCount: { type: String, enum: ['1-10', '11-50', '51-200', '201-500', '500+'] },
 
-  // Commission
-  commissionRate: { type: Number, default: 0.10 },
+  // Commission (business pays 0% — platform earns from 7% customer markup only)
+  commissionRate: { type: Number, default: 0 },
   commissionOverride: { type: Boolean, default: false },
+
+  // Contract
+  contract: {
+    signed: { type: Boolean, default: false },
+    signedAt: { type: Date },
+    signedByUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    ipAddress: { type: String },
+    version: { type: String, default: 'v1.0' },
+    commissionRate: { type: Number },
+    markupRate: { type: Number },
+  },
 }, {
   timestamps: true,
   toJSON: { virtuals: true },

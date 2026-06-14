@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -7,15 +7,24 @@ import { useTranslation } from 'react-i18next';
 import api from '../../api/axios';
 import { CITIES } from '../../utils/constants';
 import toast from 'react-hot-toast';
+import ContractModal from '../../components/ContractModal';
+import { useAuthStore } from '../../store/authStore';
+import { useNavigate } from 'react-router-dom';
+
+const MapPicker = lazy(() => import('../../components/common/MapPicker'));
 
 export default function BusinessProfile() {
   const { t } = useTranslation();
   const qc = useQueryClient();
+  const { user, setAuth } = useAuthStore();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('info');
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
+  const [showContract, setShowContract] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState(null);
 
   const { data: business, isLoading } = useQuery({
     queryKey: ['business', 'my'],
@@ -45,6 +54,8 @@ export default function BusinessProfile() {
       });
       setLogoPreview(business.logo);
       setCoverPreview(business.coverImage);
+      const coords = business.location?.coordinates;
+      if (coords?.length === 2) setEditMapPos([coords[1], coords[0]]); // GeoJSON is [lng, lat]
     }
   }, [business, reset]);
 
@@ -70,6 +81,10 @@ export default function BusinessProfile() {
     if (instagram != null) fd.append('socialLinks.instagram', instagram);
     if (logoFile) fd.append('logo', logoFile);
     if (coverFile) fd.append('coverImage', coverFile);
+    if (editMapPos) {
+      fd.append('lat', editMapPos[0]);
+      fd.append('lng', editMapPos[1]);
+    }
     updateMutation.mutate(fd);
   };
 
@@ -86,6 +101,8 @@ export default function BusinessProfile() {
 
   const [createLogoFile, setCreateLogoFile] = useState(null);
   const [createLogoPreview, setCreateLogoPreview] = useState(null);
+  const [createMapPos, setCreateMapPos] = useState(null); // [lat, lng]
+  const [editMapPos, setEditMapPos] = useState(null); // [lat, lng]
 
   const createMutation = useMutation({
     mutationFn: (data) => {
@@ -94,11 +111,38 @@ export default function BusinessProfile() {
       Object.entries(rest).forEach(([k, v]) => { if (v != null && v !== '') fd.append(k, v); });
       if (instagram) fd.append('socialLinks.instagram', instagram);
       if (createLogoFile) fd.append('logo', createLogoFile);
+      if (createMapPos) {
+        fd.append('lat', createMapPos[0]);
+        fd.append('lng', createMapPos[1]);
+      }
+      fd.append('contractAgreed', 'true');
       return api.post('/businesses', fd);
     },
     onSuccess: () => { qc.invalidateQueries(['business', 'my']); toast.success(t('business.profile_created')); },
     onError: (e) => toast.error(e.response?.data?.message || t('common.error')),
   });
+
+  const handleCreateSubmit = (data) => {
+    if (!createLogoFile) { toast.error('Foto e biznesit është e detyrueshme.'); return; }
+    setPendingFormData(data);
+    setShowContract(true);
+  };
+
+  const handleContractAccept = () => {
+    setShowContract(false);
+    createMutation.mutate(pendingFormData);
+  };
+
+  const handleSwitchToCustomer = async () => {
+    try {
+      const res = await api.patch('/auth/switch-to-customer');
+      setAuth(res.data.data, null);
+      toast.success('Mirë se vini si klient! Tani mund të gëzoni deal-et tona.');
+      navigate('/');
+    } catch {
+      toast.error('Ndodhi një gabim. Provo përsëri.');
+    }
+  };
 
   if (isLoading) return <div className="h-64 card skeleton" />;
 
@@ -110,10 +154,7 @@ export default function BusinessProfile() {
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('business.create_profile')}</h2>
         <p className="text-gray-500 mb-6">{t('business.create_profile_subtitle')}</p>
-        <form onSubmit={handleSubmit((d) => {
-          if (!createLogoFile) { toast.error('Foto e biznesit është e detyrueshme.'); return; }
-          createMutation.mutate(d);
-        })} className="text-left space-y-4">
+        <form onSubmit={handleSubmit(handleCreateSubmit)} className="text-left space-y-4">
 
           {/* Logo upload — mandatory */}
           <div>
@@ -175,6 +216,20 @@ export default function BusinessProfile() {
           </div>
           <div>
             <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1">
+              <MapPin size={14} className="text-brand-500" /> Vendndodhja në hartë <span className="text-gray-400 font-normal text-xs ml-1">(opsionale)</span>
+            </label>
+            <p className="text-xs text-gray-400 mb-2">Kliko në hartë për të vendosur vendndodhjen e saktë të biznesit</p>
+            <Suspense fallback={<div className="h-48 bg-gray-100 rounded-xl animate-pulse" />}>
+              <MapPicker position={createMapPos} onChange={setCreateMapPos} height="190px" />
+            </Suspense>
+            {createMapPos && (
+              <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                <CheckCircle size={12} /> Vendndodhja u vendos: {createMapPos[0].toFixed(4)}, {createMapPos[1].toFixed(4)}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1">
               <Instagram size={14} className="text-pink-500" /> Instagram
             </label>
             <div className="relative">
@@ -187,6 +242,16 @@ export default function BusinessProfile() {
           </button>
         </form>
       </div>
+
+      {showContract && (
+        <ContractModal
+          businessName={pendingFormData?.name || 'Biznesi juaj'}
+          ownerName={`${user?.firstName || ''} ${user?.lastName || ''}`.trim()}
+          onAccept={handleContractAccept}
+          onDecline={() => setShowContract(false)}
+          onSwitchToCustomer={handleSwitchToCustomer}
+        />
+      )}
     </div>
   );
 
@@ -246,6 +311,19 @@ export default function BusinessProfile() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('business.address')}</label>
                 <input {...register('address')} className="input-field" placeholder="Rruga, nr. ndërtesës" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
+                  <MapPin size={14} className="text-brand-500" /> Vendndodhja në hartë <span className="text-gray-400 font-normal text-xs ml-1">(opsionale — kliko për të ndryshuar)</span>
+                </label>
+                <Suspense fallback={<div className="h-48 bg-gray-100 rounded-xl animate-pulse" />}>
+                  <MapPicker position={editMapPos} onChange={setEditMapPos} height="190px" />
+                </Suspense>
+                {editMapPos && (
+                  <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                    <CheckCircle size={12} /> {editMapPos[0].toFixed(4)}, {editMapPos[1].toFixed(4)}
+                  </p>
+                )}
               </div>
               <div className="md:col-span-2">
                 <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">

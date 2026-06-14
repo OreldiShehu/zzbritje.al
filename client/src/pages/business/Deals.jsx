@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Edit, Trash2, Eye, ToggleLeft, ToggleRight, MoreVertical, Tag } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Tag, Lock, Zap } from 'lucide-react';
 import api from '../../api/axios';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import toast from 'react-hot-toast';
+
+const WA_ADMIN = '355692866668';
+const FREE_DEAL_LIMIT = 2;
 
 const STATUS_BADGE = {
   active: 'badge-green',
@@ -22,9 +25,22 @@ export default function BusinessDeals() {
   const [status, setStatus] = useState('');
   const qc = useQueryClient();
 
+  const { data: business } = useQuery({
+    queryKey: ['my-business'],
+    queryFn: () => api.get('/business/my').then((r) => r.data.data),
+    staleTime: 5 * 60 * 1000,
+  });
+
   const { data, isLoading } = useQuery({
     queryKey: ['business', 'deals', status, page],
     queryFn: () => api.get(`/deals/business/my?status=${status}&page=${page}&limit=12`).then((r) => r.data),
+  });
+
+  const { data: activeDealsData } = useQuery({
+    queryKey: ['business', 'active-deals-count'],
+    queryFn: () => api.get('/deals/business/my?status=active&limit=5').then((r) => r.data),
+    enabled: !!business && business.plan === 'free',
+    staleTime: 2 * 60 * 1000,
   });
 
   const deleteMutation = useMutation({
@@ -34,18 +50,49 @@ export default function BusinessDeals() {
   });
 
   const deals = data?.data || [];
+  const activeCount = activeDealsData?.pagination?.total || 0;
+  const atFreeLimit = business?.plan === 'free' && activeCount >= FREE_DEAL_LIMIT;
+  const waUpgradeUrl = `https://wa.me/${WA_ADMIN}?text=${encodeURIComponent(`Përshëndetje! Biznesi "${business?.name}" ka arritur limitin e planit Falas dhe dëshiron të kalojë në Pro.`)}`;
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Deal-et e Mi</h1>
           <p className="text-gray-500 text-sm">{data?.pagination?.total || 0} deal gjithsej</p>
         </div>
-        <Link to="/business-dashboard/deals/create" className="btn-primary flex items-center gap-2">
-          <Plus size={18} />Krijo Deal
-        </Link>
+        {atFreeLimit ? (
+          <div className="flex items-center gap-2">
+            <span className="hidden sm:block text-xs font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+              {activeCount}/{FREE_DEAL_LIMIT} deals aktive
+            </span>
+            <button disabled className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-100 text-gray-400 text-sm font-medium cursor-not-allowed">
+              <Lock size={15} /> Krijo Deal
+            </button>
+          </div>
+        ) : (
+          <Link to="/business-dashboard/deals/create" className="btn-primary flex items-center gap-2">
+            <Plus size={18} /> Krijo Deal
+          </Link>
+        )}
       </div>
+
+      {atFreeLimit && (
+        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <Zap size={20} className="text-amber-500 flex-shrink-0 mt-0.5 sm:mt-0" />
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-amber-800 text-sm">Keni arritur limitin e planit Falas</p>
+            <p className="text-amber-700 text-xs mt-0.5">
+              Plani Falas lejon maksimumi <strong>{FREE_DEAL_LIMIT} deals aktive</strong> dhe <strong>10 vouchers/deal</strong>.
+              Kaloni në <strong>Pro</strong> për deals dhe vouchers të pakufizuara.
+            </p>
+          </div>
+          <a href={waUpgradeUrl} target="_blank" rel="noopener noreferrer"
+            className="flex-shrink-0 flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-colors whitespace-nowrap">
+            ⬆ Kalon në Pro
+          </a>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide">

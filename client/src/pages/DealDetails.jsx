@@ -297,10 +297,20 @@ export default function DealDetails() {
                       <div className="flex items-center gap-1"><Star size={14} className="text-amber-400" fill="currentColor" />{deal.business.averageRating.toFixed(1)}</div>
                     )}
                   </div>
-                  <div className="flex gap-3 mt-3">
+                  <div className="flex flex-wrap gap-3 mt-3">
                     {deal.business?.phone && <a href={`tel:${deal.business.phone}`} className="flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700"><Phone size={14} />{deal.business.phone}</a>}
                     {deal.business?.website && <a href={deal.business.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700"><Globe size={14} />Website</a>}
                     {deal.business?.socialLinks?.instagram && <a href={`https://instagram.com/${deal.business.socialLinks.instagram}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm text-pink-600 hover:text-pink-700"><Instagram size={14} />@{deal.business.socialLinks.instagram}</a>}
+                    {(deal.business?.address || deal.business?.city) && (
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([deal.business?.address, deal.business?.city].filter(Boolean).join(', '))}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        <MapPin size={14} />Hap në Google Maps
+                      </a>
+                    )}
                   </div>
                 </div>
                 <Link to={`/business/${deal.business?.slug}`} className="btn-secondary text-xs py-2 px-3">{t('common.view')} →</Link>

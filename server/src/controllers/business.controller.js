@@ -15,15 +15,36 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
   const existing = await Business.findOne({ owner: req.user.id });
   if (existing) return next(new AppError('You already have a business profile.', 409));
 
+  if (!req.body.contractAgreed || req.body.contractAgreed === 'false') {
+    return next(new AppError('Duhet të pranoni kontratën e platformës para se të vazhdoni.', 400));
+  }
+
   const logo = req.files?.logo?.[0]?.path || null;
   if (!logo) return next(new AppError('Foto e biznesit është e detyrueshme.', 400));
+
+  const commissionRate = 0; // Business pays 0% — platform earns from 7% customer markup
+
+  if (req.body.lat && req.body.lng) {
+    req.body.location = { type: 'Point', coordinates: [parseFloat(req.body.lng), parseFloat(req.body.lat)] };
+    delete req.body.lat;
+    delete req.body.lng;
+  }
 
   const business = await Business.create({
     ...req.body,
     owner: req.user.id,
     logo,
-    commissionRate: parseFloat(process.env.PLATFORM_COMMISSION_RATE) || 0.20,
+    commissionRate,
     verificationStatus: 'pending',
+    contract: {
+      signed: true,
+      signedAt: new Date(),
+      signedByUser: req.user.id,
+      ipAddress: req.ip || req.headers['x-forwarded-for'] || 'unknown',
+      version: 'v1.0',
+      commissionRate,
+      markupRate: 0.09,
+    },
   });
 
   await User.findByIdAndUpdate(req.user.id, { businessId: business._id });
@@ -73,11 +94,13 @@ exports.updateMyBusiness = catchAsync(async (req, res, next) => {
   const restricted = ['commissionRate', 'verificationStatus', 'plan', 'stripeAccountId'];
   restricted.forEach((f) => delete req.body[f]);
 
-  if (req.files?.logo) {
-    req.body.logo = req.files.logo[0].path;
-  }
-  if (req.files?.coverImage) {
-    req.body.coverImage = req.files.coverImage[0].path;
+  if (req.files?.logo) req.body.logo = req.files.logo[0].path;
+  if (req.files?.coverImage) req.body.coverImage = req.files.coverImage[0].path;
+
+  if (req.body.lat && req.body.lng) {
+    req.body.location = { type: 'Point', coordinates: [parseFloat(req.body.lng), parseFloat(req.body.lat)] };
+    delete req.body.lat;
+    delete req.body.lng;
   }
 
   const updated = await Business.findByIdAndUpdate(business._id, req.body, { new: true, runValidators: true })
@@ -167,7 +190,7 @@ exports.getBusinessStats = catchAsync(async (req, res, next) => {
     ]),
     Transaction.aggregate([
       { $match: { business: business._id, paymentStatus: 'completed' } },
-      { $group: { _id: null, businessNet: { $sum: '$businessAmount' }, totalCollected: { $sum: '$subtotal' }, commissionPaid: { $sum: '$commissionAmount' }, vouchersSold: { $sum: '$quantity' } } },
+      { $group: { _id: null, businessNet: { $sum: '$businessAmount' }, totalCollected: { $sum: '$subtotal' }, commissionPaid: { $sum: '$commissionAmount' }, markupAmount: { $sum: '$platformMarkup' }, vouchersSold: { $sum: '$quantity' } } },
     ]),
     Transaction.aggregate([
       { $match: { business: business._id, paymentStatus: 'completed', createdAt: { $gte: startOfMonth } } },
@@ -195,10 +218,11 @@ exports.getBusinessStats = catchAsync(async (req, res, next) => {
       business: { name: business.name, verificationStatus: business.verificationStatus, averageRating: business.averageRating, plan: business.plan },
       vouchers: { total: totalVouchers, redeemed: redeemedVouchers, active: activeVouchers },
       revenue: {
-        businessNet: allTime.businessNet || 0,      // what business actually earns (after commission)
-        totalCollected: allTime.totalCollected || 0, // total cash collected from customers
-        commissionPaid: allTime.commissionPaid || 0, // total paid to platform as commission
-        platformFee: (allTime.totalCollected || 0) - (allTime.businessNet || 0), // markup + commission total
+        businessNet: allTime.businessNet || 0,
+        totalCollected: allTime.totalCollected || 0,
+        commissionPaid: allTime.commissionPaid || 0,
+        markupAmount: allTime.markupAmount || 0,
+        platformFee: (allTime.markupAmount || 0) + (allTime.commissionPaid || 0),
         vouchersSold: allTime.vouchersSold || 0,
         thisMonth: thisMonthNet,
         thisMonthCollected: thisMonthData.totalCollected || 0,
@@ -210,8 +234,8 @@ exports.getBusinessStats = catchAsync(async (req, res, next) => {
       views: business.profileViews || 0,
       chartData,
       topDeals,
-      commissionRate: business.commissionRate || 0.10,
-      markupRate: 0.07,
+      commissionRate: 0,
+      markupRate: 0.09,
     },
   });
 });

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Users, Store, Tag, FolderOpen, BarChart3, CreditCard,
-  LifeBuoy, Shield, Settings, LogOut, Menu, X, Zap,
+  LifeBuoy, Shield, Settings, LogOut, Menu, X, Zap, Banknote,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
@@ -15,6 +15,7 @@ const navItems = [
   { to: '/admin/deals', icon: Tag, label: 'Deal-et' },
   { to: '/admin/categories', icon: FolderOpen, label: 'Kategoritë' },
   { to: '/admin/analytics', icon: BarChart3, label: 'Analitikë' },
+  { to: '/admin/finances', icon: Banknote, label: 'Financat' },
   { to: '/admin/payments', icon: CreditCard, label: 'Pagesat' },
   { to: '/admin/support', icon: LifeBuoy, label: 'Suport' },
   { to: '/admin/audit-logs', icon: Shield, label: 'Audit Logs' },

@@ -52,6 +52,10 @@ const voucherSchema = new mongoose.Schema({
   giftMessage: { type: String },
   giftSentAt: { type: Date },
 
+  // Customer-side visit confirmation
+  customerConfirmed: { type: Boolean, default: false },
+  customerConfirmedAt: { type: Date },
+
   // Review status
   hasReview: { type: Boolean, default: false },
   review: { type: mongoose.Schema.Types.ObjectId, ref: 'Review' },

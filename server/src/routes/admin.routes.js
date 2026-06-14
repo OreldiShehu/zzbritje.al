@@ -32,9 +32,14 @@ router.post('/categories', adminController.createCategory);
 router.patch('/categories/:id', adminController.updateCategory);
 router.delete('/categories/:id', adminController.deleteCategory);
 
-// Commission
+// Commission & Finances
 router.patch('/commission', adminController.updateCommissionSettings);
 router.get('/commission-tracker', adminController.getCommissionTracker);
+router.get('/finances', adminController.getCommissionTracker);
+router.get('/finances/:id', adminController.getBusinessFinances);
+router.patch('/businesses/:id/collect', adminController.markCollected);
+router.post('/reset-commission-rates', adminController.resetCommissionRates);
+router.post('/backfill-deal-prices', adminController.backfillDealPrices);
 
 // Featured
 router.patch('/feature/:type/:id', adminController.toggleFeatured);

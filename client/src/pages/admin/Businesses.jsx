@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Building, CheckCircle, XCircle, Eye, ExternalLink, Crown } from 'lucide-react';
+import { Search, Building, CheckCircle, XCircle, Eye, ExternalLink, Crown, FileText, Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/axios';
 import { formatDate } from '../../utils/formatters';
 import toast from 'react-hot-toast';
+import { downloadContract } from '../../components/ContractModal';
 
 const STATUS_BADGE = {
   pending: 'bg-amber-900/50 text-amber-400',
@@ -73,6 +74,38 @@ function ReviewModal({ business, onClose, onVerify, onReject, onPlanChange }) {
               placeholder={t('admin_ui.rejection_placeholder')} />
           </div>
         )}
+
+        {/* Contract */}
+        <div className="mb-4 p-3 bg-gray-700/50 rounded-xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText size={15} className={business.contract?.signed ? 'text-green-400' : 'text-amber-400'} />
+              <span className="text-sm font-semibold text-gray-200">Kontrata</span>
+              {business.contract?.signed
+                ? <span className="text-xs bg-green-900/50 text-green-400 px-2 py-0.5 rounded-full">Firmosur ✓</span>
+                : <span className="text-xs bg-amber-900/50 text-amber-400 px-2 py-0.5 rounded-full">Pa Firmë</span>}
+            </div>
+            {business.contract?.signed && (
+              <button
+                onClick={() => downloadContract({
+                  businessName: business.businessName || business.name,
+                  ownerName: business.owner ? `${business.owner.firstName} ${business.owner.lastName}` : 'N/A',
+                  signedAt: business.contract.signedAt,
+                  ipAddress: business.contract.ipAddress,
+                  commissionRate: business.contract.commissionRate ?? 0,
+                  markupRate: business.contract.markupRate || 9,
+                })}
+                className="flex items-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 bg-brand-900/20 hover:bg-brand-900/40 px-2.5 py-1.5 rounded-lg transition-colors">
+                <Download size={12} /> Shkarko
+              </button>
+            )}
+          </div>
+          {business.contract?.signed && (
+            <p className="text-xs text-gray-500 mt-1.5 ml-6">
+              {formatDate(business.contract.signedAt)} · {business.contract.version} · 0% komision biznes · {business.contract.markupRate ? `${Math.round(business.contract.markupRate * 100)}%` : '9%'} markup
+            </p>
+          )}
+        </div>
 
         {/* Plan toggle */}
         <div className="mb-4 flex items-center justify-between p-3 bg-gray-700/50 rounded-xl">
@@ -194,9 +227,12 @@ export default function AdminBusinesses() {
                 <div className="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center flex-shrink-0"><Building size={20} className="text-gray-500" /></div>
               )}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
+                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                   <p className="font-semibold text-gray-100 truncate">{b.businessName}</p>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${STATUS_BADGE[b.verificationStatus] || 'bg-gray-700 text-gray-400'}`}>{STATUS_LABEL[b.verificationStatus] || b.verificationStatus}</span>
+                  {b.contract?.signed
+                    ? <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-900/40 text-green-400 flex-shrink-0 flex items-center gap-1"><FileText size={10} />Kontratë ✓</span>
+                    : <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-amber-900/30 text-amber-500 flex-shrink-0 flex items-center gap-1"><FileText size={10} />Pa Kontratë</span>}
                 </div>
                 <p className="text-xs text-gray-500">{b.city} · {b.owner?.email} · {formatDate(b.createdAt)}</p>
               </div>

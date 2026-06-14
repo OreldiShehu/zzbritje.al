@@ -2,8 +2,9 @@ import { formatDistance, format, parseISO } from 'date-fns';
 import { sq } from 'date-fns/locale';
 
 export const formatCurrency = (amount, currency = 'ALL') => {
-  if (currency === 'ALL') return `${Math.round(amount).toLocaleString('sq-AL')} L`;
-  return new Intl.NumberFormat('sq-AL', { style: 'currency', currency }).format(amount);
+  const rounded = Math.ceil((amount || 0) / 100) * 100;
+  if (currency === 'ALL') return `${rounded.toLocaleString('sq-AL')} L`;
+  return new Intl.NumberFormat('sq-AL', { style: 'currency', currency }).format(rounded);
 };
 
 export const formatDiscount = (percentage) => `-${Math.round(percentage)}%`;

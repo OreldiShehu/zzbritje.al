@@ -19,8 +19,8 @@ const dealSchema = new mongoose.Schema({
   },
   originalPrice: { type: Number, required: true, min: 0 },
   businessPrice: { type: Number, required: true, min: 0 }, // price business sets (before platform markup)
-  discountedPrice: { type: Number, min: 0 },               // customer-facing price = businessPrice * 1.07 (auto)
-  platformMarkup: { type: Number, default: 0 },            // 7% of businessPrice (auto)
+  discountedPrice: { type: Number, min: 0 },               // customer-facing price = businessPrice * 1.09 (auto)
+  platformMarkup: { type: Number, default: 0 },            // 9% of businessPrice, paid by customer
   discountPercentage: { type: Number, min: 0, max: 100 },
   currency: { type: String, default: 'ALL' },
   savingsAmount: { type: Number },
@@ -97,9 +97,9 @@ const dealSchema = new mongoose.Schema({
   metaTitle: { type: String },
   metaDescription: { type: String },
 
-  // Commission
-  commissionRate: { type: Number, default: 0.10 },
-  commissionAmount: { type: Number },
+  // Commission (business pays 0% — platform earns only from customer markup)
+  commissionRate: { type: Number, default: 0 },
+  commissionAmount: { type: Number, default: 0 },
 
   // Highlight / badge
   highlightBadge: { type: String },
@@ -123,7 +123,7 @@ dealSchema.index({ averageRating: -1 });
 dealSchema.index({ createdAt: -1 });
 dealSchema.index({ title: 'text', description: 'text', tags: 'text' });
 
-const PLATFORM_MARKUP_RATE = 0.07; // 7% added on top of businessPrice
+const PLATFORM_MARKUP_RATE = 0.09; // 9% added on top of businessPrice (paid by customer, business pays 0%)
 
 dealSchema.pre('save', function (next) {
   if (this.isModified('title') || !this.slug) {
@@ -143,8 +143,8 @@ dealSchema.pre('save', function (next) {
   );
   this.savingsAmount = this.originalPrice - this.discountedPrice;
   this.remainingVouchers = this.totalVouchers - this.soldVouchers;
-  // Commission is 20% of businessPrice (not including platform markup)
-  this.commissionAmount = (this.businessPrice || this.discountedPrice) * this.commissionRate;
+  this.commissionRate = 0;
+  this.commissionAmount = 0;
 
   // Auto-expire check
   if (this.remainingVouchers <= 0) this.status = 'sold_out';

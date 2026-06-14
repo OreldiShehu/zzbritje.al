@@ -2,12 +2,15 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, Tag, Ticket, BarChart2, Store, QrCode, LogOut, Menu, X, ChevronRight, Plus, AlertTriangle,
+  LayoutDashboard, Tag, Ticket, BarChart2, Store, QrCode, LogOut, Menu, X, ChevronRight, Plus, AlertTriangle, Lock,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../api/axios';
 import toast from 'react-hot-toast';
+
+const WA_ADMIN = '355692866668';
+const FREE_DEAL_LIMIT = 2;
 
 const navItems = [
   { to: '/business-dashboard', icon: LayoutDashboard, label: 'Ballina', end: true },
@@ -30,6 +33,17 @@ export default function BusinessLayout() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: activeDealsData } = useQuery({
+    queryKey: ['business', 'active-deals-count'],
+    queryFn: () => api.get('/deals/business/my?status=active&limit=5').then((r) => r.data),
+    enabled: !!business && business.plan === 'free',
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const activeCount = activeDealsData?.pagination?.total || 0;
+  const atFreeLimit = business?.plan === 'free' && activeCount >= FREE_DEAL_LIMIT;
+  const waUpgradeUrl = `https://wa.me/${WA_ADMIN}?text=${encodeURIComponent(`Përshëndetje! Biznesi "${business?.name}" ka arritur limitin e planit Falas dhe dëshiron të kalojë në Pro.`)}`;
+
   const isUnverified = business && business.verificationStatus !== 'verified';
 
   const handleLogout = async () => {
@@ -50,9 +64,21 @@ export default function BusinessLayout() {
             <p className="text-xs text-brand-600">Zbritje.al Partner</p>
           </div>
         </div>
-        <NavLink to="/business-dashboard/deals/create" className="btn-primary w-full mt-4 text-sm py-2.5 flex items-center justify-center gap-2">
-          <Plus size={16} /> Krijo Deal
-        </NavLink>
+        {atFreeLimit ? (
+          <div className="mt-4 space-y-2">
+            <div className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gray-100 text-gray-400 text-sm font-medium cursor-not-allowed select-none">
+              <Lock size={15} /> Krijo Deal
+            </div>
+            <a href={waUpgradeUrl} target="_blank" rel="noopener noreferrer"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-bold transition-colors">
+              ⬆ Kalon në Pro
+            </a>
+          </div>
+        ) : (
+          <NavLink to="/business-dashboard/deals/create" className="btn-primary w-full mt-4 text-sm py-2.5 flex items-center justify-center gap-2">
+            <Plus size={16} /> Krijo Deal
+          </NavLink>
+        )}
       </div>
 
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">

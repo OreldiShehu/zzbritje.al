@@ -97,7 +97,8 @@ exports.login = catchAsync(async (req, res, next) => {
 
   if (user.isBlocked) return next(new AppError('Account suspended. Contact support.', 403));
   if (!user.isActive) return next(new AppError('Account deactivated.', 401));
-  if (!user.isEmailVerified && !['admin', 'superadmin'].includes(user.role)) return next(new AppError('Ju lutemi verifikoni email-in tuaj para se të hyni.', 403));
+  // Email verification disabled until custom domain is set up in Resend
+  // if (!user.isEmailVerified && !['admin', 'superadmin'].includes(user.role)) return next(new AppError('Ju lutemi verifikoni email-in tuaj para se të hyni.', 403));
 
   // Reset login attempts on success
   if (user.loginAttempts > 0) {
@@ -148,9 +149,13 @@ exports.resendVerificationEmail = catchAsync(async (req, res, next) => {
   const verifyToken = user.generateEmailVerificationToken();
   await user.save({ validateBeforeSave: false });
 
-  const emailData = templates.welcome(user);
-  emailData.html = emailData.html.replace('${user._verifyToken}', verifyToken);
-  await sendEmail({ to: user.email, ...emailData });
+  try {
+    const emailData = templates.welcome(user);
+    emailData.html = emailData.html.replace('${user._verifyToken}', verifyToken);
+    await sendEmail({ to: user.email, ...emailData });
+  } catch (err) {
+    console.error('Resend verification email failed:', err?.message || err);
+  }
 
   res.status(200).json({ success: true, message: 'Email-i i verifikimit u dërgua. Kontrolloni kutinë postare.' });
 });
@@ -234,6 +239,21 @@ exports.facebookCallback = catchAsync(async (req, res) => {
   const { accessToken, refreshToken } = generateTokens(req.user._id);
   setTokenCookies(res, accessToken, refreshToken);
   res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${accessToken}`);
+});
+
+exports.switchToCustomer = catchAsync(async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.user.id,
+    { role: 'customer', businessId: null },
+    { new: true, runValidators: false }
+  ).select('-password');
+
+  await createAuditLog({
+    actor: req.user, action: 'switch_to_customer', resource: 'User', resourceId: req.user.id, req,
+    description: `User ${req.user.email} switched from business to customer`,
+  });
+
+  res.status(200).json({ success: true, message: 'Llogaria u konvertua në klient me sukses.', data: user });
 });
 
 exports.getMe = catchAsync(async (req, res) => {

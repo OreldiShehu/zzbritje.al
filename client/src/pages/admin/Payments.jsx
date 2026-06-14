@@ -8,9 +8,11 @@ import toast from 'react-hot-toast';
 const STATUS_MAP = {
   completed: { label: 'Kompletuar', cls: 'bg-green-900/50 text-green-400' },
   pending: { label: 'Pending', cls: 'bg-amber-900/50 text-amber-400' },
+  processing: { label: 'Duke procesuar', cls: 'bg-blue-900/50 text-blue-400' },
   failed: { label: 'Dështuar', cls: 'bg-red-900/50 text-red-400' },
-  refunded: { label: 'Rimbursuar', cls: 'bg-blue-900/50 text-blue-400' },
-  partial_refund: { label: 'Rimbursim Pjesor', cls: 'bg-purple-900/50 text-purple-400' },
+  refunded: { label: 'Rimbursuar', cls: 'bg-purple-900/50 text-purple-400' },
+  partially_refunded: { label: 'Rimbursim Pjesor', cls: 'bg-orange-900/50 text-orange-400' },
+  disputed: { label: 'Kontestuar', cls: 'bg-red-900/50 text-red-400' },
 };
 
 export default function AdminPayments() {
@@ -21,7 +23,7 @@ export default function AdminPayments() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin', 'transactions', search, status, page],
-    queryFn: () => api.get(`/payments/admin?search=${search}&status=${status}&page=${page}&limit=25`).then((r) => r.data),
+    queryFn: () => api.get(`/payments/admin?search=${encodeURIComponent(search)}&status=${status}&page=${page}&limit=25`).then((r) => r.data),
   });
 
   const refundMutation = useMutation({
@@ -66,7 +68,9 @@ export default function AdminPayments() {
         <select value={status} onChange={(e) => setStatus(e.target.value)}
           className="bg-gray-700 border border-gray-600 rounded-xl px-3 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-brand-500">
           <option value="">Të gjitha</option>
-          {Object.entries(STATUS_MAP).map(([v, { label }]) => <option key={v} value={v}>{label}</option>)}
+          {Object.entries(STATUS_MAP).map(([v, { label }]) => (
+            <option key={v} value={v}>{label}</option>
+          ))}
         </select>
       </div>
 
@@ -86,19 +90,19 @@ export default function AdminPayments() {
               </thead>
               <tbody>
                 {transactions.map((tx) => {
-                  const s = STATUS_MAP[tx.status] || STATUS_MAP.pending;
+                  const s = STATUS_MAP[tx.paymentStatus] || STATUS_MAP.pending;
                   return (
                     <tr key={tx._id} className="border-b border-gray-700/50 hover:bg-gray-700/20 transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs text-brand-400">{tx.invoiceNumber}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-brand-400">{tx.invoiceNumber || '—'}</td>
                       <td className="px-4 py-3 text-sm text-gray-300">{tx.user?.firstName} {tx.user?.lastName}</td>
                       <td className="px-4 py-3 text-sm text-gray-400 max-w-[120px] truncate">{tx.deal?.title}</td>
-                      <td className="px-4 py-3 font-bold text-gray-100">{formatCurrency(tx.amount)}</td>
+                      <td className="px-4 py-3 font-bold text-gray-100">{formatCurrency(tx.total || 0)}</td>
                       <td className="px-4 py-3 text-sm text-green-400">{formatCurrency(tx.commissionAmount || 0)}</td>
-                      <td className="px-4 py-3 text-xs text-gray-500 capitalize">{tx.paymentProvider}</td>
+                      <td className="px-4 py-3 text-xs text-gray-500 capitalize">{tx.paymentMethod || '—'}</td>
                       <td className="px-4 py-3 text-xs text-gray-500">{formatDate(tx.createdAt)}</td>
                       <td className="px-4 py-3"><span className={`text-xs px-2 py-1 rounded-full font-medium ${s.cls}`}>{s.label}</span></td>
                       <td className="px-4 py-3">
-                        {tx.status === 'completed' && (
+                        {tx.paymentStatus === 'completed' && (
                           <button onClick={() => { const r = prompt('Arsyeja e rimbursimit:'); if (r) refundMutation.mutate({ id: tx._id, reason: r }); }}
                             className="text-xs bg-blue-900/30 text-blue-400 hover:bg-blue-900/50 px-2 py-1.5 rounded-lg flex items-center gap-1">
                             <RefreshCw size={12} />Rimburso

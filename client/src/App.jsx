@@ -61,6 +61,7 @@ const AdminPayments = lazy(() => import('./pages/admin/Payments'));
 const AdminSupport = lazy(() => import('./pages/admin/Support'));
 const AdminAuditLogs = lazy(() => import('./pages/admin/AuditLogs'));
 const AdminSettings = lazy(() => import('./pages/admin/Settings'));
+const AdminFinances = lazy(() => import('./pages/admin/Finances'));
 
 // Static pages
 const About = lazy(() => import('./pages/static/About'));
@@ -105,7 +106,7 @@ export default function App() {
           <Route path="/city/:city" element={<SuspenseWrapper><CityPage /></SuspenseWrapper>} />
           <Route path="/businesses" element={<SuspenseWrapper><Businesses /></SuspenseWrapper>} />
           <Route path="/business/:slug" element={<SuspenseWrapper><BusinessProfile /></SuspenseWrapper>} />
-          <Route path="/checkout/:dealId" element={<ProtectedRoute allowedRoles={['customer', 'business', 'admin', 'superadmin']}><SuspenseWrapper><Checkout /></SuspenseWrapper></ProtectedRoute>} />
+          <Route path="/checkout/:dealId" element={<SuspenseWrapper><Checkout /></SuspenseWrapper>} />
           <Route path="/about" element={<SuspenseWrapper><About /></SuspenseWrapper>} />
           <Route path="/how-it-works" element={<SuspenseWrapper><HowItWorks /></SuspenseWrapper>} />
           <Route path="/privacy" element={<SuspenseWrapper><Privacy /></SuspenseWrapper>} />
@@ -160,6 +161,7 @@ export default function App() {
           <Route path="support" element={<SuspenseWrapper><AdminSupport /></SuspenseWrapper>} />
           <Route path="audit-logs" element={<SuspenseWrapper><AdminAuditLogs /></SuspenseWrapper>} />
           <Route path="settings" element={<SuspenseWrapper><AdminSettings /></SuspenseWrapper>} />
+          <Route path="finances" element={<SuspenseWrapper><AdminFinances /></SuspenseWrapper>} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

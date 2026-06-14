@@ -327,31 +327,234 @@ exports.toggleFeatured = catchAsync(async (req, res, next) => {
 });
 
 exports.getCommissionTracker = catchAsync(async (req, res) => {
-  const businesses = await Business.find({ isActive: true, totalVouchersSold: { $gt: 0 } })
-    .select('name slug logo city totalVouchersSold totalVouchersRedeemed confirmedRevenue commissionOwed platformCommissionPaid commissionRate updatedAt')
-    .sort({ commissionOwed: -1 })
+  // Pull commission from Transaction data — total owed = 5% business commission + 5% client markup
+  const txStats = await Transaction.aggregate([
+    { $match: { paymentStatus: 'completed' } },
+    {
+      $group: {
+        _id: '$business',
+        commissionFromSales: { $sum: { $add: ['$commissionAmount', { $ifNull: ['$platformMarkup', 0] }] } },
+        totalRevenue: { $sum: '$total' },
+        vouchersSold: { $sum: '$quantity' },
+      },
+    },
+  ]);
+
+  const txMap = {};
+  txStats.forEach((t) => { txMap[t._id.toString()] = t; });
+
+  const businessIds = txStats.map((t) => t._id);
+  const businesses = await Business.find({ _id: { $in: businessIds } })
+    .select('name slug logo city plan commissionRate platformCommissionPaid totalVouchersRedeemed updatedAt')
     .lean();
 
-  const data = businesses.map((b) => ({
-    _id: b._id,
-    name: b.name,
-    slug: b.slug,
-    logo: b.logo,
-    city: b.city,
-    vouchersSold: b.totalVouchersSold || 0,
-    vouchersRedeemed: b.totalVouchersRedeemed || 0,
-    confirmedRevenue: b.confirmedRevenue || 0,
-    commissionOwed: b.commissionOwed || 0,
-    commissionPaid: b.platformCommissionPaid || 0,
-    commissionPending: Math.max(0, (b.commissionOwed || 0) - (b.platformCommissionPaid || 0)),
-    commissionRate: b.commissionRate || 0.10,
-  }));
+  const data = businesses.map((b) => {
+    const tx = txMap[b._id.toString()] || {};
+    const commissionFromSales = tx.commissionFromSales || 0;
+    const collected = b.platformCommissionPaid || 0;
+    const commissionPending = Math.max(0, commissionFromSales - collected);
+    return {
+      _id: b._id,
+      name: b.name,
+      slug: b.slug,
+      logo: b.logo,
+      city: b.city,
+      plan: b.plan || 'free',
+      commissionRate: b.commissionRate ?? 0,
+      vouchersSold: tx.vouchersSold || 0,
+      vouchersRedeemed: b.totalVouchersRedeemed || 0,
+      totalRevenue: tx.totalRevenue || 0,
+      commissionFromSales,
+      commissionPaid: collected,
+      commissionPending,
+    };
+  }).sort((a, b) => b.commissionPending - a.commissionPending);
 
   const totals = data.reduce((acc, b) => ({
-    commissionOwed: acc.commissionOwed + b.commissionOwed,
+    commissionFromSales: acc.commissionFromSales + b.commissionFromSales,
     commissionPaid: acc.commissionPaid + b.commissionPaid,
     commissionPending: acc.commissionPending + b.commissionPending,
-  }), { commissionOwed: 0, commissionPaid: 0, commissionPending: 0 });
+  }), { commissionFromSales: 0, commissionPaid: 0, commissionPending: 0 });
 
   res.status(200).json({ success: true, data, totals });
+});
+
+exports.getBusinessFinances = catchAsync(async (req, res, next) => {
+  const business = await Business.findById(req.params.id)
+    .select('name slug city phone email plan commissionRate platformCommissionPaid totalVouchersRedeemed');
+  if (!business) return next(new AppError('Business not found.', 404));
+
+  // Commission from Transaction data (all sales, not just redeemed)
+  const txAgg = await Transaction.aggregate([
+    { $match: { business: business._id, paymentStatus: 'completed' } },
+    {
+      $group: {
+        _id: null,
+        commissionFromSales: { $sum: { $add: ['$commissionAmount', { $ifNull: ['$platformMarkup', 0] }] } },
+        totalRevenue: { $sum: '$total' },
+        vouchersSold: { $sum: '$quantity' },
+      },
+    },
+  ]);
+  const txData = txAgg[0] || { commissionFromSales: 0, totalRevenue: 0, vouchersSold: 0 };
+  const collected = business.platformCommissionPaid || 0;
+  const commissionDue = Math.max(0, txData.commissionFromSales - collected);
+
+  // Per-deal financials from Transaction (includes both commission + markup)
+  const txByDeal = await Transaction.aggregate([
+    { $match: { business: business._id, paymentStatus: 'completed' } },
+    {
+      $group: {
+        _id: '$deal',
+        totalCommission: { $sum: { $add: ['$commissionAmount', { $ifNull: ['$platformMarkup', 0] }] } },
+        totalPaidPrice: { $sum: '$total' },
+        soldCount: { $sum: '$quantity' },
+        commissionRate: { $first: '$commissionRate' },
+      },
+    },
+  ]);
+
+  // Voucher status counts per deal (active vs redeemed)
+  const vouchers = await Voucher.find({ business: business._id, status: { $in: ['active', 'redeemed'] } })
+    .populate('deal', 'title commissionRate')
+    .lean();
+
+  const statusMap = {};
+  vouchers.forEach((v) => {
+    const dealId = v.deal?._id?.toString() || 'unknown';
+    if (!statusMap[dealId]) statusMap[dealId] = { dealTitle: v.deal?.title || 'Deal i fshirë', activeCount: 0, redeemedCount: 0 };
+    if (v.status === 'redeemed') statusMap[dealId].redeemedCount++;
+    else statusMap[dealId].activeCount++;
+  });
+
+  const dealMap = {};
+  txByDeal.forEach((t) => {
+    const dealId = t._id?.toString() || 'unknown';
+    const s = statusMap[dealId] || { dealTitle: 'Deal i fshirë', activeCount: 0, redeemedCount: 0 };
+    dealMap[dealId] = {
+      dealId,
+      dealTitle: s.dealTitle,
+      commissionRate: 0.09, // 7% markup from customer (business pays 0%)
+      soldCount: t.soldCount,
+      activeCount: s.activeCount,
+      redeemedCount: s.redeemedCount,
+      totalPaidPrice: t.totalPaidPrice,
+      totalCommission: t.totalCommission,
+    };
+  });
+
+  res.status(200).json({
+    success: true,
+    data: {
+      business: {
+        _id: business._id,
+        name: business.name,
+        city: business.city,
+        phone: business.phone,
+        email: business.email,
+        plan: business.plan,
+        commissionRate: business.commissionRate ?? 0,
+      },
+      summary: {
+        vouchersSold: txData.vouchersSold,
+        vouchersRedeemed: business.totalVouchersRedeemed || 0,
+        totalRevenue: txData.totalRevenue,
+        commissionFromSales: txData.commissionFromSales,
+        commissionCollected: collected,
+        commissionDue,
+      },
+      dealBreakdown: Object.values(dealMap),
+    },
+  });
+});
+
+exports.markCollected = catchAsync(async (req, res, next) => {
+  const business = await Business.findById(req.params.id);
+  if (!business) return next(new AppError('Business not found.', 404));
+
+  // Calculate outstanding from Transaction data — total = 5% commission + 5% markup
+  const txAgg = await Transaction.aggregate([
+    { $match: { business: business._id, paymentStatus: 'completed' } },
+    { $group: { _id: null, commissionFromSales: { $sum: { $add: ['$commissionAmount', { $ifNull: ['$platformMarkup', 0] }] } } } },
+  ]);
+  const commissionFromSales = txAgg[0]?.commissionFromSales || 0;
+  const alreadyCollected = business.platformCommissionPaid || 0;
+  const amount = Math.max(0, commissionFromSales - alreadyCollected);
+
+  if (amount <= 0) return next(new AppError('Nuk ka komision për t\'u mbledhur.', 400));
+
+  business.platformCommissionPaid = alreadyCollected + amount;
+  business.commissionOwed = 0;
+  await business.save();
+
+  await createAuditLog({
+    actor: req.user, action: 'collect_commission', resource: 'Business',
+    resourceId: business._id, req,
+    description: `Collected ${Math.round(amount)} ALL commission from ${business.name}`,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: `Komisioni prej ${Math.round(amount)} ALL u shënua si i mbledhur.`,
+    data: { collected: amount, totalCollected: business.platformCommissionPaid },
+  });
+});
+
+exports.backfillDealPrices = catchAsync(async (req, res) => {
+  // Find deals where platformMarkup is 0 or missing (meaning businessPrice was never properly separated)
+  const deals = await Deal.find({
+    $or: [{ platformMarkup: 0 }, { platformMarkup: { $exists: false } }, { businessPrice: { $exists: false } }],
+  }).lean();
+
+  const ops = deals
+    .filter((d) => d.discountedPrice > 0)
+    .map((d) => {
+      const businessPrice = Math.round(d.discountedPrice / 1.05);
+      const platformMarkup = d.discountedPrice - businessPrice;
+      return {
+        updateOne: {
+          filter: { _id: d._id },
+          update: { $set: { businessPrice, platformMarkup } },
+        },
+      };
+    });
+
+  const result = ops.length > 0 ? await Deal.bulkWrite(ops) : { modifiedCount: 0 };
+
+  await createAuditLog({
+    actor: req.user, action: 'backfill_deal_prices', resource: 'Deal', req,
+    description: `Backfilled businessPrice and platformMarkup on ${result.modifiedCount} deals`,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: `${result.modifiedCount} deal-e u përditësuan me çmimin bazë të saktë.`,
+    data: { dealsUpdated: result.modifiedCount },
+  });
+});
+
+exports.resetCommissionRates = catchAsync(async (req, res) => {
+  // Business commission = 0, platform earns 7% markup from customer
+  const bizResult = await Business.updateMany(
+    { commissionOverride: { $ne: true } },
+    { $set: { commissionRate: 0 } }
+  );
+  const dealResult = await Deal.updateMany(
+    { businessPrice: { $gt: 0 } },
+    [{ $set: {
+      commissionRate: 0,
+      commissionAmount: 0,
+      platformMarkup: { $round: [{ $multiply: ['$businessPrice', 0.09] }, 0] },
+      discountedPrice: { $add: ['$businessPrice', { $round: [{ $multiply: ['$businessPrice', 0.09] }, 0] }] },
+    }}]
+  );
+  await createAuditLog({
+    actor: req.user, action: 'reset_commission_rates', resource: 'Business', req,
+    description: `Reset ${bizResult.modifiedCount} businesses to 0% commission, ${dealResult.modifiedCount} deals to 7% markup`,
+  });
+  res.status(200).json({
+    success: true,
+    message: `${bizResult.modifiedCount} biznese (0% komision) dhe ${dealResult.modifiedCount} deal-e (7% markup) u përditësuan.`,
+    data: { businessesUpdated: bizResult.modifiedCount, dealsUpdated: dealResult.modifiedCount },
+  });
 });

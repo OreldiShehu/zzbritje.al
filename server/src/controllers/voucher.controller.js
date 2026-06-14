@@ -40,8 +40,11 @@ exports.purchaseVoucher = catchAsync(async (req, res, next) => {
   }
   const total = subtotal - walletUsed;
 
-  const commissionAmount = total * deal.commissionRate;
-  const businessAmount = total - commissionAmount;
+  // Business pays 0% commission — platform earns only from 7% customer markup
+  const basePrice = deal.businessPrice || Math.round(deal.discountedPrice / 1.09);
+  const txPlatformMarkup = (deal.platformMarkup || 0) * quantity;
+  const commissionAmount = 0;
+  const businessAmount = basePrice * quantity;
 
   // Create transaction
   const transaction = await Transaction.create({
@@ -54,9 +57,10 @@ exports.purchaseVoucher = catchAsync(async (req, res, next) => {
     walletUsed,
     total,
     currency: deal.currency,
-    commissionRate: deal.commissionRate,
-    commissionAmount,
+    commissionRate: 0,
+    commissionAmount: 0,
     businessAmount,
+    platformMarkup: txPlatformMarkup,
     quantity,
     pointsEarned: calculateLoyaltyPoints(total),
     paymentStatus: 'completed',
@@ -80,8 +84,8 @@ exports.purchaseVoucher = catchAsync(async (req, res, next) => {
       originalPrice: deal.originalPrice,
       paidPrice: deal.discountedPrice,
       discountAmount: deal.savingsAmount,
-      commissionAmount: deal.discountedPrice * deal.commissionRate,
-      businessEarning: deal.discountedPrice * (1 - deal.commissionRate),
+      commissionAmount: 0,
+      businessEarning: basePrice,
       expiresAt,
       status: 'active',
       ...(isGift && {
@@ -323,6 +327,53 @@ exports.getVoucherPublicInfo = catchAsync(async (req, res, next) => {
         name: `${voucher.user?.firstName} ${voucher.user?.lastName}`.trim(),
       },
     },
+  });
+});
+
+exports.confirmVisit = catchAsync(async (req, res, next) => {
+  const { code } = req.params;
+
+  const voucher = await Voucher.findOne({ code })
+    .populate('deal', 'title')
+    .populate('user', 'firstName lastName email');
+
+  if (!voucher) return next(new AppError('Kuponi nuk u gjet.', 404));
+  if (!voucher.user._id.equals(req.user.id)) {
+    return next(new AppError('Nuk jeni i autorizuar për këtë kupon.', 403));
+  }
+  if (voucher.status === 'redeemed') {
+    return next(new AppError('Ky kupon është tashmë i përdorur.', 400));
+  }
+  if (voucher.status !== 'active' || new Date() > voucher.expiresAt) {
+    return next(new AppError('Ky kupon nuk është më i vlefshëm.', 400));
+  }
+  if (voucher.customerConfirmed) {
+    return next(new AppError('Vizita është konfirmuar tashmë.', 400));
+  }
+
+  voucher.status = 'redeemed';
+  voucher.redeemedAt = new Date();
+  voucher.customerConfirmed = true;
+  voucher.customerConfirmedAt = new Date();
+  await voucher.save();
+
+  await Business.findByIdAndUpdate(voucher.business, {
+    $inc: {
+      confirmedRevenue: voucher.businessEarning || 0,
+      commissionOwed: voucher.commissionAmount || 0,
+      totalVouchersRedeemed: 1,
+    },
+  });
+
+  await createAuditLog({
+    actor: req.user, action: 'customer_confirm_visit', resource: 'Voucher',
+    resourceId: voucher._id, req,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: 'Vizita u konfirmua me sukses!',
+    data: { code: voucher.code, confirmedAt: voucher.customerConfirmedAt },
   });
 });
 

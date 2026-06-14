@@ -199,6 +199,48 @@ exports.processRefund = catchAsync(async (req, res, next) => {
   res.status(200).json({ success: true, message: `Refund of ${refundAmount} ALL processed.` });
 });
 
+exports.getAdminTransactions = catchAsync(async (req, res) => {
+  const { page = 1, limit = 25, status, search } = req.query;
+  const { skip } = paginate(null, page, limit);
+
+  const filter = {};
+  if (status) filter.paymentStatus = status;
+  if (search) {
+    filter.$or = [
+      { invoiceNumber: { $regex: search, $options: 'i' } },
+    ];
+  }
+
+  const [transactions, total, summaryAgg] = await Promise.all([
+    Transaction.find(filter)
+      .sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit))
+      .populate('user', 'firstName lastName email')
+      .populate('deal', 'title')
+      .populate('business', 'name')
+      .lean(),
+    Transaction.countDocuments(filter),
+    Transaction.aggregate([
+      { $match: { paymentStatus: 'completed' } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: '$total' },
+          commission: { $sum: '$commissionAmount' },
+          refunds: { $sum: '$refundAmount' },
+        },
+      },
+    ]),
+  ]);
+
+  const summary = summaryAgg[0] || { total: 0, commission: 0, refunds: 0 };
+
+  res.status(200).json({
+    success: true,
+    summary,
+    ...buildPaginatedResponse(transactions, total, page, limit),
+  });
+});
+
 exports.getMyTransactions = catchAsync(async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
   const { skip } = paginate(null, page, limit);

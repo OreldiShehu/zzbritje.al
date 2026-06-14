@@ -108,7 +108,7 @@ export default function BecomePartner() {
                 { text: 'Deri në 10 vouchers/deal', ok: true },
                 { text: 'Dashboard dhe statistika bazë', ok: true },
                 { text: 'Skaner QR', ok: true },
-                { text: 'Komision 10%', ok: true },
+                { text: '0% komision biznes · 9% markup nga klienti', ok: true },
                 { text: 'Deals të pakufizuara', ok: false },
                 { text: 'Vouchers të pakufizuara', ok: false },
                 { text: 'Prioritet në kërkime', ok: false },
