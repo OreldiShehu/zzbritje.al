@@ -7,6 +7,9 @@ const AuditLog = require('../models/AuditLog');
 const SupportTicket = require('../models/SupportTicket');
 const Category = require('../models/Category');
 const Notification = require('../models/Notification');
+const Review = require('../models/Review');
+const Favorite = require('../models/Favorite');
+const Referral = require('../models/Referral');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const { paginate, buildPaginatedResponse, createAuditLog } = require('../utils/helpers');
@@ -556,5 +559,55 @@ exports.resetCommissionRates = catchAsync(async (req, res) => {
     success: true,
     message: `${bizResult.modifiedCount} biznese (0% komision) dhe ${dealResult.modifiedCount} deal-e (7% markup) u përditësuan.`,
     data: { businessesUpdated: bizResult.modifiedCount, dealsUpdated: dealResult.modifiedCount },
+  });
+});
+
+exports.resetTestData = catchAsync(async (req, res) => {
+  const ADMIN_EMAIL = 'oreldishehu007@gmail.com';
+
+  const [
+    usersDeleted,
+    businessesDeleted,
+    dealsDeleted,
+    vouchersDeleted,
+    transactionsDeleted,
+    reviewsDeleted,
+    notificationsDeleted,
+    favoritesDeleted,
+    referralsDeleted,
+    ticketsDeleted,
+    auditLogsDeleted,
+  ] = await Promise.all([
+    User.deleteMany({ email: { $ne: ADMIN_EMAIL } }),
+    Business.deleteMany({}),
+    Deal.deleteMany({}),
+    Voucher.deleteMany({}),
+    Transaction.deleteMany({}),
+    Review.deleteMany({}),
+    Notification.deleteMany({}),
+    Favorite.deleteMany({}),
+    Referral.deleteMany({}),
+    SupportTicket.deleteMany({}),
+    AuditLog.deleteMany({}),
+  ]);
+
+  console.log(`[resetTestData] Wiped: ${usersDeleted.deletedCount} users, ${businessesDeleted.deletedCount} businesses, ${dealsDeleted.deletedCount} deals, ${vouchersDeleted.deletedCount} vouchers`);
+
+  res.status(200).json({
+    success: true,
+    message: 'Të gjitha të dhënat e testit u fshinë. Vetëm admini mbeti.',
+    data: {
+      users: usersDeleted.deletedCount,
+      businesses: businessesDeleted.deletedCount,
+      deals: dealsDeleted.deletedCount,
+      vouchers: vouchersDeleted.deletedCount,
+      transactions: transactionsDeleted.deletedCount,
+      reviews: reviewsDeleted.deletedCount,
+      notifications: notificationsDeleted.deletedCount,
+      favorites: favoritesDeleted.deletedCount,
+      referrals: referralsDeleted.deletedCount,
+      tickets: ticketsDeleted.deletedCount,
+      auditLogs: auditLogsDeleted.deletedCount,
+    },
   });
 });

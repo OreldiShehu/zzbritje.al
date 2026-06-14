@@ -51,4 +51,7 @@ router.patch('/tickets/:id/assign', adminController.assignTicket);
 // Audit
 router.get('/audit-logs', adminController.getAuditLogs);
 
+// Danger Zone
+router.post('/reset-test-data', adminController.resetTestData);
+
 module.exports = router;
