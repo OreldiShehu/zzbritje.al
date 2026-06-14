@@ -562,8 +562,12 @@ exports.resetCommissionRates = catchAsync(async (req, res) => {
   });
 });
 
-exports.resetTestData = catchAsync(async (req, res) => {
-  const ADMIN_EMAIL = 'oreldishehu007@gmail.com';
+exports.resetTestData = catchAsync(async (req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+    return next(new AppError('This endpoint is disabled in production.', 403));
+  }
+
+  const ADMIN_EMAIL = process.env.ADMIN_EMAIL || req.user.email;
 
   const [
     usersDeleted,
