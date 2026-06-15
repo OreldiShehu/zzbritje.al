@@ -244,7 +244,7 @@ export default function CreateDeal() {
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">Çmimi juaj i Deal-it (ALL) *</label>
                     <input type="number" {...register('businessPrice', { required: true, min: 1, valueAsNumber: true })}
                       className={`input-field ${errors.businessPrice ? 'input-error' : ''}`} placeholder="4500" />
-                    <p className="text-xs text-gray-400 mt-1">Çmimi që dëshironi — platforma shton 5%</p>
+                    <p className="text-xs text-gray-400 mt-1">Çmimi që dëshironi — platforma shton 9% markup</p>
                   </div>
                 </div>
 

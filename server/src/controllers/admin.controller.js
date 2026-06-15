@@ -196,6 +196,42 @@ exports.deleteCategory = catchAsync(async (req, res, next) => {
   res.status(200).json({ success: true, message: 'Category deleted.' });
 });
 
+exports.seedDefaultCategories = catchAsync(async (req, res) => {
+  const DEFAULT_CATEGORIES = [
+    { name: 'Restorante', nameAl: 'Restorante', icon: '🍽️', color: '#ef4444', order: 1, isFeatured: true },
+    { name: 'Kafene & Bar', nameAl: 'Kafene & Bar', icon: '☕', color: '#92400e', order: 2, isFeatured: true },
+    { name: 'Bukuri & Spa', nameAl: 'Bukuri & Spa', icon: '💆', color: '#ec4899', order: 3, isFeatured: true },
+    { name: 'Sporte & Fitnese', nameAl: 'Sporte & Fitnese', icon: '💪', color: '#3b82f6', order: 4, isFeatured: true },
+    { name: 'Argetim & Kulturë', nameAl: 'Argetim & Kulturë', icon: '🎭', color: '#8b5cf6', order: 5, isFeatured: true },
+    { name: 'Hotele & Akomodim', nameAl: 'Hotele & Akomodim', icon: '🏨', color: '#0ea5e9', order: 6, isFeatured: true },
+    { name: 'Mode & Veshje', nameAl: 'Mode & Veshje', icon: '👗', color: '#f59e0b', order: 7, isFeatured: true },
+    { name: 'Elektronikë', nameAl: 'Elektronikë', icon: '📱', color: '#64748b', order: 8, isFeatured: false },
+    { name: 'Shëndet & Mirëqenie', nameAl: 'Shëndet & Mirëqenie', icon: '🏥', color: '#10b981', order: 9, isFeatured: true },
+    { name: 'Arsim & Kursime', nameAl: 'Arsim & Kursime', icon: '📚', color: '#6366f1', order: 10, isFeatured: false },
+    { name: 'Fëmijë & Familje', nameAl: 'Fëmijë & Familje', icon: '👨‍👩‍👧', color: '#f97316', order: 11, isFeatured: true },
+    { name: 'Automjete & Transport', nameAl: 'Automjete & Transport', icon: '🚗', color: '#475569', order: 12, isFeatured: false },
+    { name: 'Imobiliare', nameAl: 'Imobiliare', icon: '🏠', color: '#84cc16', order: 13, isFeatured: false },
+    { name: 'Teknologji & IT', nameAl: 'Teknologji & IT', icon: '💻', color: '#06b6d4', order: 14, isFeatured: false },
+    { name: 'Marketing & Media', nameAl: 'Marketing & Media', icon: '📢', color: '#a855f7', order: 15, isFeatured: false },
+    { name: 'Ushqim & Blerje', nameAl: 'Ushqim & Blerje', icon: '🛒', color: '#22c55e', order: 16, isFeatured: true },
+    { name: 'Pastrim & Shtëpi', nameAl: 'Pastrim & Shtëpi', icon: '🏡', color: '#14b8a6', order: 17, isFeatured: false },
+    { name: 'Foto & Video', nameAl: 'Foto & Video', icon: '📷', color: '#f43f5e', order: 18, isFeatured: false },
+    { name: 'Kafshë Shtëpiake', nameAl: 'Kafshë Shtëpiake', icon: '🐾', color: '#fb923c', order: 19, isFeatured: false },
+    { name: 'Turizëm & Udhëtime', nameAl: 'Turizëm & Udhëtime', icon: '✈️', color: '#38bdf8', order: 20, isFeatured: true },
+  ];
+
+  let created = 0;
+  let skipped = 0;
+  for (const cat of DEFAULT_CATEGORIES) {
+    const exists = await Category.findOne({ name: cat.name });
+    if (exists) { skipped++; continue; }
+    await Category.create(cat);
+    created++;
+  }
+
+  res.status(200).json({ success: true, message: `Created ${created} categories, skipped ${skipped} existing.` });
+});
+
 // COMMISSION
 exports.updateCommissionSettings = catchAsync(async (req, res, next) => {
   const { businessId, commissionRate } = req.body;

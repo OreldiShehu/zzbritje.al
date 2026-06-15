@@ -132,6 +132,7 @@ exports.createDeal = catchAsync(async (req, res, next) => {
       images,
       status: 'active',
       commissionRate: 0,
+      views: Math.floor(Math.random() * 71) + 30,
     });
   } catch (err) {
     console.error('[createDeal] Deal.create failed:', err.name, err.message, JSON.stringify(err.errors || {}));

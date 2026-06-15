@@ -82,9 +82,13 @@ export default function DealCard({ deal, featured = false }) {
 
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-            <span className="badge bg-red-500 text-white font-bold text-sm shadow-sm">
-              -{Math.round(deal.discountPercentage)}%
-            </span>
+            {deal.dealType === 'fixed_discount' ? (
+              <span className="badge bg-red-500 text-white font-bold text-sm shadow-sm">Fikse</span>
+            ) : (
+              <span className="badge bg-red-500 text-white font-bold text-sm shadow-sm">
+                -{Math.round(deal.discountPercentage)}%
+              </span>
+            )}
             {deal.dealType === 'flash' && (
               <span className="badge bg-orange-500 text-white flex items-center gap-1"><Zap size={10} /> {t('deal.flash')}</span>
             )}
@@ -177,7 +181,7 @@ export default function DealCard({ deal, featured = false }) {
           {deal.onePerTable && (
             <div className="mb-2">
               <span className="inline-flex items-center gap-1 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">
-                1 voucher / tavolinë
+                1 kupon / vizitë
               </span>
             </div>
           )}

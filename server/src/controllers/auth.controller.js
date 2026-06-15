@@ -6,6 +6,8 @@ const { generateTokens, setTokenCookies, verifyRefreshToken } = require('../midd
 const { sendEmail, templates } = require('../utils/email');
 const { sendSms } = require('../utils/sms');
 const { createAuditLog } = require('../utils/helpers');
+const Notification = require('../models/Notification');
+const { emitToAdmin } = require('../config/socket');
 
 const sendTokenResponse = (user, statusCode, res) => {
   const { accessToken, refreshToken } = generateTokens(user._id);
@@ -74,6 +76,28 @@ exports.register = catchAsync(async (req, res, next) => {
   }
 
   await createAuditLog({ actor: user, action: 'register', resource: 'User', resourceId: user._id, description: 'New user registration', req });
+
+  // Notify admins about new registration
+  try {
+    const adminUsers = await User.find({ role: { $in: ['admin', 'superadmin'] } }).select('_id').lean();
+    const roleLabel = role === 'business' ? 'Biznes' : 'Klient';
+    const adminNotifications = await Promise.all(
+      adminUsers.map((admin) =>
+        Notification.create({
+          user: admin._id,
+          type: 'system',
+          title: `${roleLabel} i Ri u Regjistrua`,
+          message: `${user.firstName} ${user.lastName} (${user.email}) u regjistrua si ${roleLabel.toLowerCase()}.`,
+          actionUrl: role === 'business' ? '/admin/businesses' : '/admin/users',
+          actionLabel: 'Shiko',
+          priority: 'medium',
+        })
+      )
+    );
+    adminNotifications.forEach((n) => {
+      try { emitToAdmin('notification', n); } catch {}
+    });
+  } catch {}
 
   sendTokenResponse(user, 201, res);
 });

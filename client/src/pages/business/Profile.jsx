@@ -37,7 +37,9 @@ export default function BusinessProfile() {
     staleTime: 10 * 60 * 1000,
   });
 
-  const { register, handleSubmit, reset } = useForm();
+  const { register, handleSubmit, reset } = useForm({
+    defaultValues: { email: user?.email || '' },
+  });
 
   useEffect(() => {
     if (business) {
@@ -61,7 +63,11 @@ export default function BusinessProfile() {
 
   const updateMutation = useMutation({
     mutationFn: (fd) => api.patch('/businesses/my', fd),
-    onSuccess: () => { qc.invalidateQueries(['business', 'my']); toast.success(t('business.profile_updated')); },
+    onSuccess: () => {
+      qc.invalidateQueries(['business', 'my']);
+      toast.success(t('business.profile_updated'));
+      navigate('/business-dashboard');
+    },
     onError: () => toast.error(t('common.error')),
   });
 

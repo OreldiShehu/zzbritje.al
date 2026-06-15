@@ -5,7 +5,7 @@ const Notification = require('../models/Notification');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const { paginate, buildPaginatedResponse, createAuditLog } = require('../utils/helpers');
-const { emitToUser } = require('../config/socket');
+const { emitToUser, emitToAdmin } = require('../config/socket');
 
 exports.createBusiness = catchAsync(async (req, res, next) => {
   if (req.user.role !== 'business') {
@@ -73,6 +73,28 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
       isRead: false,
     });
     try { emitToUser(req.user.id.toString(), 'notification', notification); } catch {}
+  } catch {}
+
+  // Notify all admin users about the new business
+  try {
+    const adminUsers = await User.find({ role: { $in: ['admin', 'superadmin'] } }).select('_id').lean();
+    const adminNotifications = await Promise.all(
+      adminUsers.map((admin) =>
+        Notification.create({
+          user: admin._id,
+          type: 'system',
+          title: 'Biznes i Ri Regjistrohet',
+          message: `"${business.name}" nga ${req.user.firstName} ${req.user.lastName} (${req.user.email}) kërkon verifikim.`,
+          business: business._id,
+          actionUrl: '/admin/businesses',
+          actionLabel: 'Shiko & Verifiko',
+          priority: 'high',
+        })
+      )
+    );
+    adminNotifications.forEach((n) => {
+      try { emitToAdmin('notification', n); } catch {}
+    });
   } catch {}
 
   res.status(201).json({ success: true, data: business, message: 'Business profile created successfully.' });
@@ -200,7 +222,7 @@ exports.getBusinessStats = catchAsync(async (req, res, next) => {
       { $match: { business: business._id, paymentStatus: 'completed', createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
       { $group: { _id: null, businessNet: { $sum: '$businessAmount' } } },
     ]),
-    Deal.find({ business: business._id }).sort({ soldVouchers: -1 }).limit(5).select('title soldVouchers revenue businessPrice discountedPrice averageRating images').lean(),
+    Deal.find({ business: business._id }).sort({ soldVouchers: -1 }).limit(5).select('title soldVouchers revenue businessPrice discountedPrice averageRating images views').lean(),
   ]);
 
   const allTime = allTimeAgg[0] || {};
@@ -233,7 +255,10 @@ exports.getBusinessStats = catchAsync(async (req, res, next) => {
       },
       views: business.profileViews || 0,
       chartData,
-      topDeals,
+      topDeals: topDeals.map((d) => ({
+        ...d,
+        conversionRate: d.views > 0 ? Math.round((d.soldVouchers / d.views) * 100) : 0,
+      })),
       commissionRate: 0,
       markupRate: 0.09,
     },

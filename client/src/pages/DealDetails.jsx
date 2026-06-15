@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Star, MapPin, Share2, Clock, CheckCircle,
   Phone, Globe, ChevronLeft, ChevronRight, Shield, Zap,
-  AlertCircle, Users, Eye, Instagram, Send, Banknote, CreditCard, X,
+  AlertCircle, Users, Eye, Instagram, Send, Banknote, CreditCard, X, Trash2,
 } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons, FUNDING } from '@paypal/react-paypal-js';
 import { Helmet } from 'react-helmet-async';
@@ -110,6 +110,15 @@ export default function DealDetails() {
       setReviewRating(5);
       qc.invalidateQueries(['reviews', 'deal', data?._id]);
       qc.invalidateQueries(['vouchers', 'my', data?._id]);
+    },
+    onError: (err) => toast.error(err.response?.data?.message || 'Ndodhi një gabim.'),
+  });
+
+  const deleteReviewMutation = useMutation({
+    mutationFn: (reviewId) => api.delete(`/reviews/${reviewId}`),
+    onSuccess: () => {
+      toast.success('Vlerësimi u fshi.');
+      qc.invalidateQueries(['reviews', 'deal', data?._id]);
     },
     onError: (err) => toast.error(err.response?.data?.message || 'Ndodhi një gabim.'),
   });
@@ -370,11 +379,14 @@ export default function DealDetails() {
                   onChange={(e) => setReviewBody(e.target.value)}
                   rows={3}
                   placeholder="Shkruaj përvojën tënde me këtë deal..."
-                  className="input-field resize-none mb-3"
+                  className="input-field resize-none mb-1"
                 />
+                <p className={`text-xs mb-3 ${reviewBody.trim().length < 5 ? 'text-red-400' : 'text-gray-400'}`}>
+                  {reviewBody.trim().length}/5 karaktere minimum
+                </p>
                 <button
                   onClick={() => reviewMutation.mutate()}
-                  disabled={!reviewBody.trim() || reviewMutation.isPending}
+                  disabled={reviewBody.trim().length < 5 || reviewMutation.isPending}
                   className="btn-primary flex items-center gap-2 text-sm"
                 >
                   {reviewMutation.isPending
@@ -403,7 +415,19 @@ export default function DealDetails() {
                             {Array.from({ length: review.rating }).map((_, i) => <Star key={i} size={12} className="text-amber-400" fill="currentColor" />)}
                           </div>
                         </div>
-                        <span className="ml-auto text-xs text-gray-400">{formatDate(review.createdAt)}</span>
+                        <div className="ml-auto flex items-center gap-2">
+                          <span className="text-xs text-gray-400">{formatDate(review.createdAt)}</span>
+                          {isBusiness && (
+                            <button
+                              onClick={() => { if (window.confirm('Fshi këtë vlerësim?')) deleteReviewMutation.mutate(review._id); }}
+                              disabled={deleteReviewMutation.isPending}
+                              className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Fshi vlerësimin"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <p className="text-sm text-gray-700">{review.body}</p>
                       {review.businessResponse && (

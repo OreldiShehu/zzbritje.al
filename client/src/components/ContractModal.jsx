@@ -203,7 +203,6 @@ export default function ContractModal({ businessName, ownerName, onAccept, onDec
               <li>Të mos diskriminojë klientët me kupon krahasuar me klientët e tjerë.</li>
               <li>Të njoftojë platformën menjëherë për çdo ndryshim të rëndësishëm në biznes.</li>
               <li>Të japë informacion të saktë dhe jo mashtrues në profil dhe deal-e.</li>
-              <li>Të paguajë komisionin e faturuar brenda 15 ditësh nga data e faturës.</li>
             </ul>
           </section>
 

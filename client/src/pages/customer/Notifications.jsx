@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Bell, Check, Trash2, CheckCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { formatRelativeTime } from '../../utils/formatters';
 import toast from 'react-hot-toast';
@@ -10,16 +11,22 @@ const NOTIF_ICONS = {
   voucher_purchased: '🎫',
   voucher_redeemed: '✅',
   deal_approved: '🚀',
+  deal_rejected: '❌',
   deal_expiring: '⏰',
   review_received: '⭐',
   referral_signup: '🎁',
   loyalty_level_up: '🏆',
   wallet_credit: '💰',
   welcome: '👋',
+  business_verified: '✅',
+  business_rejected: '❌',
+  system: '🔔',
+  admin_message: '📢',
 };
 
 export default function CustomerNotifications() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
 
   const { data, isLoading } = useQuery({
@@ -66,7 +73,11 @@ export default function CustomerNotifications() {
           {notifications.map((n, i) => (
             <motion.div key={n._id}
               initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}
-              className={`card p-4 flex items-start gap-4 transition-all ${!n.isRead ? 'border-brand-200 bg-brand-50/40' : 'hover:bg-gray-50'}`}>
+              onClick={() => {
+                if (!n.isRead) markMutation.mutate(n._id);
+                if (n.actionUrl) navigate(n.actionUrl);
+              }}
+              className={`card p-4 flex items-start gap-4 transition-all ${!n.isRead ? 'border-brand-200 bg-brand-50/40' : 'hover:bg-gray-50'} ${n.actionUrl ? 'cursor-pointer' : ''}`}>
               <div className="w-11 h-11 bg-white rounded-full border border-gray-200 flex items-center justify-center text-xl flex-shrink-0 shadow-sm">
                 {NOTIF_ICONS[n.type] || '🔔'}
               </div>

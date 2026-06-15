@@ -29,6 +29,7 @@ router.delete('/deals/:id', adminController.deleteDeal);
 
 // Categories
 router.post('/categories', adminController.createCategory);
+router.post('/categories/seed-defaults', adminController.seedDefaultCategories);
 router.patch('/categories/:id', adminController.updateCategory);
 router.delete('/categories/:id', adminController.deleteCategory);
 

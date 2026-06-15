@@ -27,8 +27,8 @@ export default function BusinessLayout() {
   const navigate = useNavigate();
 
   const { data: business } = useQuery({
-    queryKey: ['my-business'],
-    queryFn: () => api.get('/business/my').then((r) => r.data.data),
+    queryKey: ['business', 'my'],
+    queryFn: () => api.get('/businesses/my').then((r) => r.data.data),
     staleTime: 5 * 60 * 1000,
   });
 
@@ -100,7 +100,7 @@ export default function BusinessLayout() {
       </nav>
 
       <div className="p-4 border-t border-gray-100">
-        <NavLink to="/" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900">
+        <NavLink to="/" className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold transition-colors">
           ← Kthehu te Platforma
         </NavLink>
         <button onClick={handleLogout} className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 font-medium transition-colors mt-1">

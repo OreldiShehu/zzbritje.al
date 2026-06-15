@@ -6,9 +6,11 @@ import QRCode from 'react-qr-code';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/axios';
 import { formatCurrency, formatDate, formatCountdown } from '../../utils/formatters';
+import { useAuthStore } from '../../store/authStore';
 
 function VoucherCard({ voucher }) {
   const { t } = useTranslation();
+  const { user } = useAuthStore();
   const [showQR, setShowQR] = useState(false);
   const qrRef = useRef(null);
 
@@ -18,6 +20,8 @@ function VoucherCard({ voucher }) {
       const qrSvg = svgEl ? svgEl.outerHTML : '';
       const dealImg = voucher.deal?.images?.[0]?.url || '';
       const businessName = voucher.deal?.business?.name || '';
+      const customerName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '';
+      const customerPhone = user?.phone || '';
       const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Kupon ${voucher.code}</title><style>
         *{box-sizing:border-box;margin:0;padding:0}
         body{font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
@@ -54,6 +58,8 @@ function VoucherCard({ voucher }) {
         <div class="body">
           <div class="title">${voucher.deal?.title || ''}</div>
           <div class="biz">${businessName}</div>
+          ${customerName ? `<div class="row"><span class="label">Emri</span><span class="val">${customerName}</span></div>` : ''}
+          ${customerPhone ? `<div class="row"><span class="label">Telefoni</span><span class="val">${customerPhone}</span></div>` : ''}
           <div class="row"><span class="label">Paguani pranë biznesit</span><span class="val green">${formatCurrency(voucher.paidPrice)}</span></div>
           <div class="row"><span class="label">Skadon më</span><span class="val">${formatDate(voucher.expiresAt)}</span></div>
           <div class="row"><span class="label">Statusi</span><span class="val">${voucher.status === 'active' ? '✓ Aktiv' : voucher.status === 'redeemed' ? 'Përdorur' : 'Skaduar'}</span></div>

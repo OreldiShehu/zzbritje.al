@@ -12,5 +12,6 @@ router.post('/:id/respond', protect, restrictTo('business'), reviewController.re
 router.post('/:id/vote', protect, reviewController.voteReview);
 router.post('/:id/flag', protect, reviewController.flagReview);
 router.patch('/:id/moderate', protect, restrictTo('admin'), reviewController.moderateReview);
+router.delete('/:id', protect, restrictTo('business'), reviewController.deleteReview);
 
 module.exports = router;

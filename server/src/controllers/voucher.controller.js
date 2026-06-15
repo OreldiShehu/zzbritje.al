@@ -150,6 +150,38 @@ exports.purchaseVoucher = catchAsync(async (req, res, next) => {
 
   emitToUser(user._id.toString(), 'notification', notification);
 
+  // Notify gift recipient if applicable
+  if (isGift && giftRecipientEmail) {
+    try {
+      const recipient = await User.findOne({ email: giftRecipientEmail }).select('_id firstName email').lean();
+      if (recipient) {
+        const giftNotification = await Notification.create({
+          user: recipient._id,
+          type: 'voucher_purchased',
+          title: 'Keni marrë një dhuratë! 🎁',
+          message: `${user.firstName} ${user.lastName} ju dërgoi një kupon dhuratë për "${deal.title}"${giftMessage ? `: ${giftMessage}` : ''}.`,
+          deal: deal._id,
+          voucher: vouchers[0]._id,
+          priority: 'high',
+        });
+        emitToUser(recipient._id.toString(), 'notification', giftNotification);
+        try {
+          await sendEmail({
+            to: giftRecipientEmail,
+            subject: `🎁 ${user.firstName} ${user.lastName} ju dërgoi një dhuratë — Zbritje.al`,
+            html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+              <h2>Ju keni marrë një dhuratë! 🎁</h2>
+              <p><strong>${user.firstName} ${user.lastName}</strong> ju dërgoi një kupon dhuratë për <strong>${deal.title}</strong>.</p>
+              ${giftMessage ? `<p style="background:#f3f4f6;padding:12px;border-radius:8px;font-style:italic">"${giftMessage}"</p>` : ''}
+              <p>Kodi i kuponit: <strong style="font-family:monospace;font-size:18px">${vouchers[0].code}</strong></p>
+              <p>Hyni në llogarinë tuaj Zbritje.al për të parë kuponin.</p>
+            </div>`,
+          });
+        } catch {}
+      }
+    } catch {}
+  }
+
   await createAuditLog({
     actor: req.user, action: 'purchase_voucher', resource: 'Voucher',
     resourceId: vouchers[0]._id, req, description: `Purchased ${quantity} voucher(s) for "${deal.title}"`,

@@ -132,3 +132,19 @@ exports.moderateReview = catchAsync(async (req, res, next) => {
   if (!review) return next(new AppError('Review not found.', 404));
   res.status(200).json({ success: true, data: review });
 });
+
+exports.deleteReview = catchAsync(async (req, res, next) => {
+  const review = await Review.findById(req.params.id);
+  if (!review) return next(new AppError('Review not found.', 404));
+
+  const Business = require('../models/Business');
+  const business = await Business.findOne({ owner: req.user.id });
+  if (!business || !review.business.equals(business._id)) {
+    return next(new AppError('Not authorized.', 403));
+  }
+
+  await Review.findByIdAndDelete(req.params.id);
+  await Voucher.findByIdAndUpdate(review.voucher, { hasReview: false, review: null });
+
+  res.status(200).json({ success: true, message: 'Review deleted.' });
+});

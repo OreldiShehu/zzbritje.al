@@ -10,7 +10,7 @@ const reviewSchema = new mongoose.Schema({
   // Rating
   rating: { type: Number, required: true, min: 1, max: 5 },
   title: { type: String, maxlength: 100 },
-  body: { type: String, required: true, minlength: 20, maxlength: 2000 },
+  body: { type: String, required: true, minlength: 5, maxlength: 2000 },
 
   // Detailed ratings
   detailedRatings: {
