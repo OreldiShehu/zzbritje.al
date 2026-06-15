@@ -100,7 +100,8 @@ app.use(passport.initialize());
 // Stripe webhook (must come before JSON parser for raw body)
 app.use('/api/v1/payments/webhook', express.raw({ type: 'application/json' }));
 
-// Health check
+// Root + health check
+app.get('/', (req, res) => res.status(200).json({ status: 'ok', platform: 'Zbritje.al API', version: '1.0.0' }));
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'healthy',
