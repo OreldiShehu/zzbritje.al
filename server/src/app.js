@@ -8,7 +8,6 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const path = require('path');
-const passport = require('passport');
 
 const { globalRateLimiter } = require('./middleware/rateLimit.middleware');
 const errorHandler = require('./middleware/errorHandler.middleware');
@@ -28,9 +27,6 @@ const notificationRoutes = require('./routes/notification.routes');
 const categoryRoutes = require('./routes/category.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const cronRoutes = require('./routes/cron.routes');
-
-// Passport config
-require('./config/passport');
 
 const app = express();
 
@@ -93,9 +89,6 @@ app.use(hpp({ whitelist: ['sort', 'fields', 'page', 'limit', 'category', 'city']
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 }
-
-// Passport
-app.use(passport.initialize());
 
 // Stripe webhook (must come before JSON parser for raw body)
 app.use('/api/v1/payments/webhook', express.raw({ type: 'application/json' }));
