@@ -55,7 +55,9 @@ export default function AdminLayout() {
       </nav>
 
       <div className="p-4 border-t border-white/10">
-        <NavLink to="/" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-400 hover:text-white">← Kthehu</NavLink>
+        <NavLink to="/" className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold transition-colors">
+          ← Kthehu te Platforma
+        </NavLink>
         <button onClick={handleLogout} className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-red-400 hover:bg-red-900/30 font-medium transition-colors mt-1">
           <LogOut size={18} /> <span>Çkyçu</span>
         </button>
