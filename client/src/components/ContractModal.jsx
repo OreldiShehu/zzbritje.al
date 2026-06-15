@@ -87,7 +87,7 @@ function buildContractHTML({ businessName, ownerName, signedAt, commissionRate, 
   <p>Palët do të përpiqen të zgjidhin çdo mosmarrëveshje miqësisht. Nëse kjo nuk arrihet brenda 30 ditësh, mosmarrëveshja do t'i dërgohet gjykatës kompetente të Tiranës sipas legjislacionit shqiptar.</p>
 
   <h2>9. Anulimi i Kontratës</h2>
-  <p>Secila palë mund të anulojë këtë marrëveshje me njoftim me shkrim 30 ditë paraprak. Detyrimet e prapambetura (komisione, kupona aktive) mbeten në fuqi deri në likuidimin e plotë.</p>
+  <p>Secila palë mund të anulojë këtë marrëveshje me njoftim me shkrim 30 ditë paraprak. Kupona aktivë të lëshuara mbeten të vlefshme deri në skadimin e tyre natyror.</p>
 
   <h2>10. Dispozita të Fundit</h2>
   <p>Kjo marrëveshje hyn në fuqi në datën e nënshkrimit dixhital të saj dhe zëvendëson çdo marrëveshje paraprake midis palëve. Platforma ruan të drejtën e ndryshimit të kushteve me njoftim paraprak.</p>
@@ -233,7 +233,7 @@ export default function ContractModal({ businessName, ownerName, onAccept, onDec
 
           <section>
             <h3 className="font-bold text-gray-900 mb-1">8. Anulimi i Kontratës</h3>
-            <p>Secila palë mund të anulojë me njoftim me shkrim 30 ditë paraprak. Detyrimet e prapambetura mbeten në fuqi deri në likuidim të plotë.</p>
+            <p>Secila palë mund të anulojë me njoftim me shkrim 30 ditë paraprak. Kupona aktivë të lëshuara mbeten të vlefshme deri në skadimin e tyre natyror.</p>
           </section>
 
           <section>

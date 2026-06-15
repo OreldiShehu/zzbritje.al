@@ -58,7 +58,7 @@ function VoucherCard({ v }) {
       {/* One per table notice */}
       {v.deal?.onePerTable && (
         <div className="px-4 py-2 bg-amber-50 border-t border-amber-100 text-xs text-amber-700 font-medium flex items-center gap-2">
-          <span>⚠️</span> 1 voucher për tavolinë
+          <span>⚠️</span> 1 kupon / vizitë
         </div>
       )}
 
@@ -121,7 +121,7 @@ export default function CustomerDashboard() {
           />
           <div>
             <p className="font-bold text-xl">Mirë se erdhe, {user?.firstName}!</p>
-            <p className="text-blue-100 text-sm mt-0.5">Këtu gjeni të gjitha voucher-at tuaja</p>
+            <p className="text-blue-100 text-sm mt-0.5">Këtu gjeni të gjitha kupona-t tuaja</p>
           </div>
         </div>
       </motion.div>
@@ -129,7 +129,7 @@ export default function CustomerDashboard() {
       {/* Vouchers */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-bold text-gray-900 text-lg">Voucher-at e Mia</h2>
+          <h2 className="font-bold text-gray-900 text-lg">Kupona-t e Mia</h2>
           <Link to="/dashboard/vouchers" className="text-sm text-brand-600 font-medium flex items-center gap-1">
             Të gjitha <ArrowRight size={14} />
           </Link>
@@ -144,7 +144,7 @@ export default function CustomerDashboard() {
         ) : (
           <div className="card p-10 text-center text-gray-400">
             <Ticket size={36} className="mx-auto mb-3 opacity-30" />
-            <p className="font-medium text-gray-500">Nuk keni blerë asnjë voucher akoma</p>
+            <p className="font-medium text-gray-500">Nuk keni blerë asnjë kupon akoma</p>
             <Link to="/search" className="btn-primary text-sm py-2 px-5 mt-4 inline-flex">Shfleto oferta</Link>
           </div>
         )}
