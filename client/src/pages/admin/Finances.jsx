@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Banknote, Download, CheckCircle, ChevronRight, X, Loader, AlertCircle, Building2, RefreshCw } from 'lucide-react';
+import { Banknote, Download, ChevronRight, X, Loader, Building2, RefreshCw } from 'lucide-react';
 import api from '../../api/axios';
 import { formatCurrency } from '../../utils/formatters';
 import toast from 'react-hot-toast';
@@ -44,7 +44,7 @@ function downloadReceipt(biz) {
         <div style="font-size:12px;color:#bfdbfe">Tiranë, Shqipëri</div>
       </div>
       <div class="header-right">
-        <div style="font-size:16px;font-weight:700;color:#fff">FATURË KOMISIONI</div>
+        <div style="font-size:16px;font-weight:700;color:#fff">RAPORT SHITJESH</div>
         <div style="margin-top:6px">Data: ${formatReceiptDate()}</div>
         <div>Plan: ${business.plan?.toUpperCase() || 'FREE'}</div>
       </div>
@@ -62,16 +62,16 @@ function downloadReceipt(biz) {
 
       <h2>Detajet sipas Deal-eve</h2>
       <table>
-        <thead><tr><th>Deal</th><th style="text-align:center">Kupona</th><th style="text-align:right">Total</th><th style="text-align:right">Komision</th></tr></thead>
+        <thead><tr><th>Deal</th><th style="text-align:center">Kupona</th><th style="text-align:right">Total nga Klienti</th><th style="text-align:right">Markup (9%)</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
 
       <div class="totals">
         <div class="total-row"><span>Kupona të shitura:</span><span>${summary.vouchersSold}</span></div>
         <div class="total-row"><span>Kupona të konfirmuara:</span><span>${summary.vouchersRedeemed}</span></div>
-        <div class="total-row"><span>Komision nga shitjet:</span><span>${formatCurrency(summary.commissionFromSales)}</span></div>
-        <div class="total-row"><span>Komision i mbledhur:</span><span>${formatCurrency(summary.commissionCollected)}</span></div>
-        <div class="total-row final"><span>KOMISION PËR T'U MBLEDHUR:</span><span>${formatCurrency(summary.commissionDue)}</span></div>
+        <div class="total-row"><span>Markup i platformës (9%):</span><span>${formatCurrency(summary.commissionFromSales)}</span></div>
+        <div class="total-row"><span>Total paguar nga klientët:</span><span>${formatCurrency(summary.totalRevenue || 0)}</span></div>
+        <div class="total-row final"><span>MARKUP TOTAL I PLATFORMËS:</span><span>${formatCurrency(summary.commissionFromSales)}</span></div>
       </div>
     </div>
     <div class="footer">
@@ -135,17 +135,17 @@ function BusinessModal({ businessId, onClose }) {
                 <p className="text-2xl font-black text-blue-800">{data.summary.vouchersSold}</p>
                 <p className="text-xs text-blue-400 mt-0.5">{data.summary.vouchersRedeemed} konfirmuar</p>
               </div>
-              <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-center">
-                <p className="text-xs text-amber-500 mb-1">Komision për t'u Mbledhur</p>
-                <p className="text-2xl font-black text-amber-800">{formatCurrency(data.summary.commissionDue)}</p>
+              <div className="bg-green-50 border border-green-100 rounded-xl p-4 text-center">
+                <p className="text-xs text-green-500 mb-1">Markup i Platformës (9%)</p>
+                <p className="text-2xl font-black text-green-800">{formatCurrency(data.summary.commissionFromSales)}</p>
               </div>
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-center">
-                <p className="text-xs text-gray-400 mb-1">Komision nga Shitjet</p>
-                <p className="text-xl font-black text-gray-700">{formatCurrency(data.summary.commissionFromSales)}</p>
+                <p className="text-xs text-gray-400 mb-1">Total nga Klientët</p>
+                <p className="text-xl font-black text-gray-700">{formatCurrency(data.summary.totalRevenue || 0)}</p>
               </div>
-              <div className="bg-green-50 border border-green-100 rounded-xl p-4 text-center">
-                <p className="text-xs text-green-500 mb-1">Komision i Mbledhur</p>
-                <p className="text-xl font-black text-green-700">{formatCurrency(data.summary.commissionCollected)}</p>
+              <div className="bg-brand-50 border border-brand-100 rounded-xl p-4 text-center">
+                <p className="text-xs text-brand-500 mb-1">Kupona të Konfirmuara</p>
+                <p className="text-xl font-black text-brand-700">{data.summary.vouchersRedeemed}</p>
               </div>
             </div>
 
@@ -173,34 +173,13 @@ function BusinessModal({ businessId, onClose }) {
               </div>
             )}
 
-            {/* Commission due alert */}
-            {data.summary.commissionDue > 0 && (
-              <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
-                <AlertCircle size={18} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-bold text-amber-800">Komision për t'u mbledhur</p>
-                  <p className="text-sm text-amber-700">{formatCurrency(data.summary.commissionDue)} duhet të mblidhet nga ky biznes.</p>
-                </div>
-              </div>
-            )}
-
             {/* Actions */}
             <div className="flex gap-3">
               <button
                 onClick={() => downloadReceipt(data)}
                 className="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors text-sm">
-                <Download size={16} /> Shkarko Faturën
+                <Download size={16} /> Shkarko Raportin
               </button>
-              {data.summary.commissionDue > 0 && (
-                <button
-                  onClick={() => collectMutation.mutate()}
-                  disabled={collectMutation.isPending}
-                  className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-colors text-sm">
-                  {collectMutation.isPending
-                    ? <Loader size={16} className="animate-spin" />
-                    : <><CheckCircle size={16} /> Shëno si të Mbledhur</>}
-                </button>
-              )}
             </div>
           </div>
         ) : null}
@@ -241,18 +220,18 @@ export default function AdminFinances() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Financat</h1>
-          <p className="text-gray-500 text-sm mt-1">Komisioni i detyruar nga çdo biznes (bazuar në shitje)</p>
+          <p className="text-gray-500 text-sm mt-1">Markup i platformës nga çdo shitje — biznesi paguan 0%, 9% shtohet mbi çmimin e klientit</p>
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => { if (window.confirm('Rikalkulo businessPrice (7% markup) për të gjithë deal-et?')) backfillMutation.mutate(); }}
+            onClick={() => { if (window.confirm('Rikalkulo çmimet (9% markup) për të gjithë deal-et?')) backfillMutation.mutate(); }}
             disabled={backfillMutation.isPending}
             className="flex items-center gap-2 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-3 py-2 rounded-xl transition-colors">
             {backfillMutation.isPending ? <Loader size={14} className="animate-spin" /> : <Banknote size={14} />}
             Fix 9% Markup
           </button>
           <button
-            onClick={() => { if (window.confirm('Vendosni të gjithë bizneset: 0% komision, 7% markup?')) resetRatesMutation.mutate(); }}
+            onClick={() => { if (window.confirm('Vendosni të gjithë bizneset: 0% komision, 9% markup?')) resetRatesMutation.mutate(); }}
             disabled={resetRatesMutation.isPending}
             className="flex items-center gap-2 text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold px-3 py-2 rounded-xl transition-colors">
             {resetRatesMutation.isPending ? <Loader size={14} className="animate-spin" /> : <RefreshCw size={14} />}
@@ -264,16 +243,19 @@ export default function AdminFinances() {
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-4">
         <div className="card p-5 text-center">
-          <p className="text-xs text-gray-400 mb-1">Nga Shitjet</p>
+          <p className="text-xs text-gray-400 mb-1">Markup i Fituar</p>
           <p className="text-2xl font-black text-brand-600">{formatCurrency(totals.commissionFromSales || 0)}</p>
+          <p className="text-xs text-gray-400 mt-1">9% nga çmimi i klientit</p>
         </div>
         <div className="card p-5 text-center">
-          <p className="text-xs text-gray-400 mb-1">Për t'u Mbledhur</p>
-          <p className="text-2xl font-black text-amber-600">{formatCurrency(totals.commissionPending || 0)}</p>
+          <p className="text-xs text-gray-400 mb-1">Komision nga Bizneset</p>
+          <p className="text-2xl font-black text-green-600">0 L</p>
+          <p className="text-xs text-gray-400 mt-1">Biznesi paguan 0%</p>
         </div>
         <div className="card p-5 text-center">
-          <p className="text-xs text-gray-400 mb-1">I Mbledhur</p>
-          <p className="text-2xl font-black text-green-600">{formatCurrency(totals.commissionPaid || 0)}</p>
+          <p className="text-xs text-gray-400 mb-1">Total i Fituar</p>
+          <p className="text-2xl font-black text-brand-600">{formatCurrency(totals.commissionFromSales || 0)}</p>
+          <p className="text-xs text-gray-400 mt-1">vetëm markup 9%</p>
         </div>
       </div>
 
@@ -303,14 +285,12 @@ export default function AdminFinances() {
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-gray-900 truncate">{b.name}</p>
                   <p className="text-xs text-gray-400">
-                    {b.city} · {b.vouchersSold} shitura · {b.vouchersRedeemed} konfirmuar · 7% markup
+                    {b.city} · {b.vouchersSold} shitura · {b.vouchersRedeemed} konfirmuar · 9% markup
                   </p>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  {b.commissionPending > 0
-                    ? <p className="font-bold text-amber-600">{formatCurrency(b.commissionPending)}</p>
-                    : <p className="font-bold text-green-600 text-sm">✓ Paguar</p>}
-                  <p className="text-xs text-gray-400">markup platformës</p>
+                  <p className="font-bold text-brand-600">{formatCurrency(b.commissionFromSales)}</p>
+                  <p className="text-xs text-gray-400">markup i fituar</p>
                 </div>
                 <ChevronRight size={16} className="text-gray-300 flex-shrink-0" />
               </button>

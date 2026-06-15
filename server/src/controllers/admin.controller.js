@@ -473,7 +473,7 @@ exports.getBusinessFinances = catchAsync(async (req, res, next) => {
     dealMap[dealId] = {
       dealId,
       dealTitle: s.dealTitle,
-      commissionRate: 0.09, // 7% markup from customer (business pays 0%)
+      commissionRate: 0.09, // 9% markup from customer (business pays 0%)
       soldCount: t.soldCount,
       activeCount: s.activeCount,
       redeemedCount: s.redeemedCount,
