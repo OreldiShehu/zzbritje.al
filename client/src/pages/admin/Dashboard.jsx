@@ -58,7 +58,7 @@ export default function AdminDashboard() {
         <KpiCard icon={Building} label={t('admin.businesses_label')} value={(stats?.summary?.totalBusinesses || 0).toLocaleString()} sub={`${stats?.summary?.pendingBusinesses || 0} ${t('common.pending')}`} color="text-purple-400" bg="bg-purple-900/30" to="/admin/businesses" />
         <KpiCard icon={Tag} label={t('admin.active_deals')} value={(stats?.summary?.activeDeals || 0).toLocaleString()} sub={`${stats?.summary?.totalDeals || 0} total`} color="text-amber-400" bg="bg-amber-900/30" to="/admin/deals" />
         <KpiCard icon={Ticket} label="Kupona Total" value={(stats?.summary?.totalVouchers || 0).toLocaleString()} color="text-brand-400" bg="bg-brand-900/30" />
-        <KpiCard icon={DollarSign} label="Markup i mbledhur (9%)" value={formatCurrency(stats?.summary?.platformRevenue || 0)} sub="nga kupona të shitura" color="text-green-400" bg="bg-green-900/30" to="/admin/payments" />
+        <KpiCard icon={DollarSign} label="Markup i mbledhur (15%)" value={formatCurrency(stats?.summary?.platformRevenue || 0)} sub="nga kupona të shitura" color="text-green-400" bg="bg-green-900/30" to="/admin/payments" />
         <KpiCard icon={Banknote} label="Markup në pritje" value={formatCurrency(commissionData?.totals?.commissionPending || 0)} sub="nga kupona të konfirmuara" color="text-amber-400" bg="bg-amber-900/30" to="/admin/finances" />
         <KpiCard icon={AlertCircle} label={t('admin.tickets')} value={stats?.summary?.openTickets || 0} color="text-red-400" bg="bg-red-900/30" to="/admin/support" />
         <KpiCard icon={CheckCircle} label={t('admin.verified')} value={(stats?.summary?.totalBusinesses || 0) - (stats?.summary?.pendingBusinesses || 0)} color="text-cyan-400" bg="bg-cyan-900/30" />
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
         <div className="flex items-start justify-between mb-5 flex-wrap gap-3">
           <div className="min-w-0">
             <h3 className="font-bold text-gray-100 flex items-center gap-2"><Banknote size={18} className="text-green-400 flex-shrink-0" /> Markup i Platformës</h3>
-            <p className="text-xs text-gray-500 mt-0.5">9% markup nga çdo kupon i shitur</p>
+            <p className="text-xs text-gray-500 mt-0.5">15% markup nga çdo kupon i shitur</p>
           </div>
           {commissionData?.totals && (
             <div className="text-right flex-shrink-0">
@@ -106,7 +106,7 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-3 gap-3 mb-5">
             <div className="bg-gray-700 rounded-xl p-3 text-center">
               <p className="text-sm font-black text-gray-100">{formatCurrency(commissionData.totals.commissionFromSales)}</p>
-              <p className="text-xs text-gray-400">Markup total (9%)</p>
+              <p className="text-xs text-gray-400">Markup total (15%)</p>
             </div>
             <div className="bg-gray-700 rounded-xl p-3 text-center">
               <p className="text-sm font-black text-green-400">{formatCurrency(commissionData.totals.commissionPaid)}</p>
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="text-sm font-bold text-amber-400">{formatCurrency(b.commissionPending)}</p>
-                  <p className="text-xs text-gray-500">markup 9%</p>
+                  <p className="text-xs text-gray-500">markup 15%</p>
                 </div>
               </div>
             ))}

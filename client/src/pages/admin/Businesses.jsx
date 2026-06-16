@@ -92,7 +92,7 @@ function ReviewModal({ business, onClose, onVerify, onReject, onPlanChange }) {
                   ownerName: business.owner ? `${business.owner.firstName} ${business.owner.lastName}` : 'N/A',
                   signedAt: business.contract.signedAt,
                   commissionRate: business.contract.commissionRate ?? 0,
-                  markupRate: business.contract.markupRate || 9,
+                  markupRate: business.contract.markupRate || 15,
                 })}
                 className="flex items-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 bg-brand-900/20 hover:bg-brand-900/40 px-2.5 py-1.5 rounded-lg transition-colors">
                 <Download size={12} /> Shkarko
@@ -101,7 +101,7 @@ function ReviewModal({ business, onClose, onVerify, onReject, onPlanChange }) {
           </div>
           {business.contract?.signed && (
             <p className="text-xs text-gray-500 mt-1.5 ml-6">
-              {formatDate(business.contract.signedAt)} · {business.contract.version} · 0% komision biznes · {business.contract.markupRate ? `${business.contract.markupRate > 1 ? Math.round(business.contract.markupRate) : Math.round(business.contract.markupRate * 100)}%` : '9%'} markup
+              {formatDate(business.contract.signedAt)} · {business.contract.version} · 0% komision biznes · {business.contract.markupRate ? `${business.contract.markupRate > 1 ? Math.round(business.contract.markupRate) : Math.round(business.contract.markupRate * 100)}%` : '15%'} markup
             </p>
           )}
         </div>

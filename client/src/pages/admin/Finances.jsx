@@ -56,20 +56,20 @@ function downloadReceipt(biz) {
         <div class="info-item"><label>Qyteti</label><p>${business.city || '—'}</p></div>
         <div class="info-item"><label>Telefon</label><p>${business.phone || '—'}</p></div>
         <div class="info-item"><label>Email</label><p>${business.email || '—'}</p></div>
-        <div class="info-item"><label>Tarifa platformës</label><p>9% markup nga klienti (biznesi 0%)</p></div>
+        <div class="info-item"><label>Tarifa platformës</label><p>15% markup nga klienti (biznesi 0%)</p></div>
         <div class="info-item"><label>Kupona të shitura</label><p>${summary.vouchersSold}</p></div>
       </div>
 
       <h2>Detajet sipas Deal-eve</h2>
       <table>
-        <thead><tr><th>Deal</th><th style="text-align:center">Kupona</th><th style="text-align:right">Total nga Klienti</th><th style="text-align:right">Markup (9%)</th></tr></thead>
+        <thead><tr><th>Deal</th><th style="text-align:center">Kupona</th><th style="text-align:right">Total nga Klienti</th><th style="text-align:right">Markup (15%)</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
 
       <div class="totals">
         <div class="total-row"><span>Kupona të shitura:</span><span>${summary.vouchersSold}</span></div>
         <div class="total-row"><span>Kupona të konfirmuara:</span><span>${summary.vouchersRedeemed}</span></div>
-        <div class="total-row"><span>Markup i platformës (9%):</span><span>${formatCurrency(summary.commissionFromSales)}</span></div>
+        <div class="total-row"><span>Markup i platformës (15%):</span><span>${formatCurrency(summary.commissionFromSales)}</span></div>
         <div class="total-row"><span>Total paguar nga klientët:</span><span>${formatCurrency(summary.totalRevenue || 0)}</span></div>
         <div class="total-row final"><span>MARKUP TOTAL I PLATFORMËS:</span><span>${formatCurrency(summary.commissionFromSales)}</span></div>
       </div>
@@ -136,7 +136,7 @@ function BusinessModal({ businessId, onClose }) {
                 <p className="text-xs text-blue-400 mt-0.5">{data.summary.vouchersRedeemed} konfirmuar</p>
               </div>
               <div className="bg-green-50 border border-green-100 rounded-xl p-4 text-center">
-                <p className="text-xs text-green-500 mb-1">Markup i Platformës (9%)</p>
+                <p className="text-xs text-green-500 mb-1">Markup i Platformës (15%)</p>
                 <p className="text-2xl font-black text-green-800">{formatCurrency(data.summary.commissionFromSales)}</p>
               </div>
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-center">
@@ -165,7 +165,7 @@ function BusinessModal({ businessId, onClose }) {
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-brand-600">{formatCurrency(d.totalCommission)}</p>
-                        <p className="text-xs text-gray-400">9% markup nga klienti</p>
+                        <p className="text-xs text-gray-400">15% markup nga klienti</p>
                       </div>
                     </div>
                   ))}
@@ -226,25 +226,25 @@ export default function AdminFinances() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Financat</h1>
-          <p className="text-gray-500 text-sm mt-1">Markup i platformës nga çdo shitje — biznesi paguan 0%, 9% shtohet mbi çmimin e klientit</p>
+          <p className="text-gray-500 text-sm mt-1">Markup i platformës nga çdo shitje — biznesi paguan 0%, 15% shtohet mbi çmimin e klientit</p>
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => { if (window.confirm('Korrekto 9% markup-in për të GJITHA transaksionet e vjetra? Kjo rregullon shifrat 0 L.')) backfillTxMutation.mutate(); }}
+            onClick={() => { if (window.confirm('Korrekto 15% markup-in për të GJITHA transaksionet e vjetra? Kjo rregullon shifrat 0 L.')) backfillTxMutation.mutate(); }}
             disabled={backfillTxMutation.isPending}
             className="flex items-center gap-2 text-xs bg-green-50 hover:bg-green-100 text-green-700 font-semibold px-3 py-2 rounded-xl transition-colors border border-green-200">
             {backfillTxMutation.isPending ? <Loader size={14} className="animate-spin" /> : <Banknote size={14} />}
-            Fix Transaksionet (9%)
+            Fix Transaksionet (15%)
           </button>
           <button
-            onClick={() => { if (window.confirm('Rikalkulo çmimet (9% markup) për të gjithë deal-et?')) backfillMutation.mutate(); }}
+            onClick={() => { if (window.confirm('Rikalkulo çmimet (15% markup) për të gjithë deal-et?')) backfillMutation.mutate(); }}
             disabled={backfillMutation.isPending}
             className="flex items-center gap-2 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-3 py-2 rounded-xl transition-colors">
             {backfillMutation.isPending ? <Loader size={14} className="animate-spin" /> : <Banknote size={14} />}
             Fix Deal Çmimet
           </button>
           <button
-            onClick={() => { if (window.confirm('Vendosni të gjithë bizneset: 0% komision, 9% markup?')) resetRatesMutation.mutate(); }}
+            onClick={() => { if (window.confirm('Vendosni të gjithë bizneset: 0% komision, 15% markup?')) resetRatesMutation.mutate(); }}
             disabled={resetRatesMutation.isPending}
             className="flex items-center gap-2 text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold px-3 py-2 rounded-xl transition-colors">
             {resetRatesMutation.isPending ? <Loader size={14} className="animate-spin" /> : <RefreshCw size={14} />}
@@ -258,7 +258,7 @@ export default function AdminFinances() {
         <div className="card p-5 text-center">
           <p className="text-xs text-gray-400 mb-1">Markup i Fituar</p>
           <p className="text-2xl font-black text-brand-600">{formatCurrency(totals.commissionFromSales || 0)}</p>
-          <p className="text-xs text-gray-400 mt-1">9% nga çmimi i klientit</p>
+          <p className="text-xs text-gray-400 mt-1">15% nga çmimi i klientit</p>
         </div>
         <div className="card p-5 text-center">
           <p className="text-xs text-gray-400 mb-1">Komision nga Bizneset</p>
@@ -268,7 +268,7 @@ export default function AdminFinances() {
         <div className="card p-5 text-center">
           <p className="text-xs text-gray-400 mb-1">Total i Fituar</p>
           <p className="text-2xl font-black text-brand-600">{formatCurrency(totals.commissionFromSales || 0)}</p>
-          <p className="text-xs text-gray-400 mt-1">vetëm markup 9%</p>
+          <p className="text-xs text-gray-400 mt-1">vetëm markup 15%</p>
         </div>
       </div>
 
@@ -298,7 +298,7 @@ export default function AdminFinances() {
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-gray-900 truncate">{b.name}</p>
                   <p className="text-xs text-gray-400">
-                    {b.city} · {b.vouchersSold} shitura · {b.vouchersRedeemed} konfirmuar · 9% markup
+                    {b.city} · {b.vouchersSold} shitura · {b.vouchersRedeemed} konfirmuar · 15% markup
                   </p>
                 </div>
                 <div className="text-right flex-shrink-0">

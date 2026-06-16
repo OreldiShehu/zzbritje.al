@@ -225,7 +225,7 @@ exports.getAdminTransactions = catchAsync(async (req, res) => {
         $group: {
           _id: null,
           total: { $sum: '$total' },
-          commission: { $sum: '$commissionAmount' },
+          commission: { $sum: { $max: [{ $subtract: [{ $ifNull: ['$total', 0] }, { $ifNull: ['$businessAmount', 0] }] }, 0] } },
           refunds: { $sum: '$refundAmount' },
         },
       },

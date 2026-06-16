@@ -43,7 +43,7 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
       ipAddress: req.ip || req.headers['x-forwarded-for'] || 'unknown',
       version: 'v1.0',
       commissionRate,
-      markupRate: 0.09,
+      markupRate: 0.15,
     },
   });
 
@@ -62,7 +62,7 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
         `• Klientët blejnë kuponin online dhe vijnë fizikisht tek ju\n` +
         `• Klienti paguan direkt tek ju kur paraqet kuponin\n\n` +
         `💰 Tarifa e platformës:\n` +
-        `• Platforma shton 9% markup mbi çmimin tuaj bazë — paguhet nga klienti\n` +
+        `• Platforma shton 15% markup mbi çmimin tuaj bazë — paguhet nga klienti\n` +
         `• Ju merrni çmimin tuaj bazë të plotë, pa asnjë komision\n` +
         `• Plani Falas: 2 deals aktive + 10 kupon/deal, pa kosto mujore\n` +
         `• Plani Pro (1,500 ALL/muaj): deals dhe kupon të pakufizuara\n\n` +
@@ -261,7 +261,7 @@ exports.getBusinessStats = catchAsync(async (req, res, next) => {
         conversionRate: d.views > 0 ? Math.round((d.soldVouchers / d.views) * 100) : 0,
       })),
       commissionRate: 0,
-      markupRate: 0.09,
+      markupRate: 0.15,
     },
   });
 });

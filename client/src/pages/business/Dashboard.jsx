@@ -79,7 +79,7 @@ export default function BusinessDashboard() {
   const isVerified = business?.verificationStatus === 'verified';
   const isPending = business?.verificationStatus === 'pending' || business?.verificationStatus === 'under_review';
 
-  const MARKUP = stats?.markupRate || 0.09;
+  const MARKUP = stats?.markupRate || 0.15;
 
   // Per-voucher example using top deal or generic
   const topDeal = stats?.topDeals?.[0];
@@ -220,7 +220,7 @@ export default function BusinessDashboard() {
           />
           <EarningsRow
             label={`Markup platformës (${Math.round(MARKUP * 100)}%)`}
-            info="9% shtesa mbi çmimin tuaj — paguhet nga klienti, jo nga ju"
+            info="15% shtesa mbi çmimin tuaj — paguhet nga klienti, jo nga ju"
             value={formatCurrency(revenue.markupAmount || 0)}
             deduct
           />
@@ -234,7 +234,7 @@ export default function BusinessDashboard() {
           <div className="mt-4 flex items-start gap-2 p-3 bg-green-50 rounded-xl">
             <Info size={14} className="text-green-600 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-green-700">
-              <strong>0% komision nga biznesi.</strong> Klienti paguan çmimin tuaj + 9% markup platformës. Ju merrni çmimin tuaj të plotë.
+              <strong>0% komision nga biznesi.</strong> Klienti paguan çmimin tuaj + 15% markup platformës. Ju merrni çmimin tuaj të plotë.
             </p>
           </div>
         </div>
@@ -275,7 +275,7 @@ export default function BusinessDashboard() {
             <div className="bg-red-50 rounded-xl p-3">
               <p className="text-xs text-red-500 font-medium">Platforma merr gjithsej</p>
               <p className="font-black text-red-600 text-lg">{formatCurrency(examplePlatformTotal)}</p>
-              <p className="text-xs text-red-400">{exampleMarkup} L markup (9% nga klienti)</p>
+              <p className="text-xs text-red-400">{exampleMarkup} L markup (15% nga klienti)</p>
             </div>
             <div className="bg-green-50 rounded-xl p-3">
               <p className="text-xs text-green-600 font-medium">Ti merr cash</p>

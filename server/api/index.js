@@ -19,8 +19,8 @@ const runCommissionMigration = async () => {
         $set: {
           commissionRate: 0,
           commissionAmount: 0,
-          platformMarkup: { $round: [{ $multiply: ['$businessPrice', 0.09] }, 0] },
-          discountedPrice: { $add: ['$businessPrice', { $round: [{ $multiply: ['$businessPrice', 0.09] }, 0] }] },
+          platformMarkup: { $round: [{ $multiply: ['$businessPrice', 0.15] }, 0] },
+          discountedPrice: { $add: ['$businessPrice', { $round: [{ $multiply: ['$businessPrice', 0.15] }, 0] }] },
         },
       }]
     );
@@ -30,7 +30,7 @@ const runCommissionMigration = async () => {
     );
 
     if (bRes.modifiedCount || dRes.modifiedCount) {
-      console.log(`[migration] 9% markup / 0% commission: ${bRes.modifiedCount} businesses, ${dRes.modifiedCount} deals updated`);
+      console.log(`[migration] 15% markup / 0% commission: ${bRes.modifiedCount} businesses, ${dRes.modifiedCount} deals updated`);
     }
     commissionMigrationDone = true;
   } catch (err) {

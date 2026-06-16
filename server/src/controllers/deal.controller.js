@@ -123,9 +123,9 @@ exports.createDeal = catchAsync(async (req, res, next) => {
   const origPrice = parseFloat(req.body.originalPrice);
   const bizPrice = parseFloat(req.body.businessPrice);
   if (dealTypeSafe !== 'fixed_discount' && origPrice > 0 && bizPrice > 0) {
-    const customerPriceSafe = Math.round(bizPrice * 1.09);
+    const customerPriceSafe = Math.round(bizPrice * 1.15);
     if (customerPriceSafe >= origPrice) {
-      return next(new AppError('Çmimi i klientit (çmimi juaj + 9%) nuk mund të jetë më i lartë se çmimi origjinal. Rishikoni çmimet.', 400));
+      return next(new AppError('Çmimi i klientit (çmimi juaj + 15%) nuk mund të jetë më i lartë se çmimi origjinal. Rishikoni çmimet.', 400));
     }
   }
 

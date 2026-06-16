@@ -41,7 +41,7 @@ exports.purchaseVoucher = catchAsync(async (req, res, next) => {
   const total = subtotal - walletUsed;
 
   // Business pays 0% commission — platform earns only from 7% customer markup
-  const basePrice = deal.businessPrice || Math.round(deal.discountedPrice / 1.09);
+  const basePrice = deal.businessPrice || Math.round(deal.discountedPrice / 1.15);
   const txPlatformMarkup = (deal.platformMarkup || 0) * quantity;
   const commissionAmount = 0;
   const businessAmount = basePrice * quantity;

@@ -48,7 +48,7 @@ export default function AdminPayments() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         {[
           { label: 'Të Ardhura Totale', value: formatCurrency(summary.total || 0), icon: DollarSign, color: 'text-green-400', bg: 'bg-green-900/20' },
-          { label: 'Markup Platformës (9%)', value: formatCurrency(summary.commission || 0), icon: DollarSign, color: 'text-brand-400', bg: 'bg-brand-900/20' },
+          { label: 'Markup Platformës (15%)', value: formatCurrency(summary.commission || 0), icon: DollarSign, color: 'text-brand-400', bg: 'bg-brand-900/20' },
           { label: 'Rimbursimet', value: formatCurrency(summary.refunds || 0), icon: RefreshCw, color: 'text-red-400', bg: 'bg-red-900/20' },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className={`${bg} border border-gray-700 rounded-2xl p-4 flex items-center gap-3`}>
@@ -83,7 +83,7 @@ export default function AdminPayments() {
             <table className="w-full min-w-[700px]">
               <thead>
                 <tr className="border-b border-gray-700">
-                  {['Invoice', 'Klienti', 'Deal', 'Shuma', 'Markup (9%)', 'Metoda', 'Data', 'Statusi', 'Veprime'].map((h) => (
+                  {['Invoice', 'Klienti', 'Deal', 'Shuma', 'Markup (15%)', 'Metoda', 'Data', 'Statusi', 'Veprime'].map((h) => (
                     <th key={h} className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">{h}</th>
                   ))}
                 </tr>
@@ -97,7 +97,7 @@ export default function AdminPayments() {
                       <td className="px-4 py-3 text-sm text-gray-300">{tx.user?.firstName} {tx.user?.lastName}</td>
                       <td className="px-4 py-3 text-sm text-gray-400 max-w-[120px] truncate">{tx.deal?.title}</td>
                       <td className="px-4 py-3 font-bold text-gray-100">{formatCurrency(tx.total || 0)}</td>
-                      <td className="px-4 py-3 text-sm text-green-400">{formatCurrency(tx.platformMarkup || 0)}</td>
+                      <td className="px-4 py-3 text-sm text-green-400">{formatCurrency(Math.max((tx.total || 0) - (tx.businessAmount || 0), 0))}</td>
                       <td className="px-4 py-3 text-xs text-gray-500 capitalize">{tx.paymentMethod || '—'}</td>
                       <td className="px-4 py-3 text-xs text-gray-500">{formatDate(tx.createdAt)}</td>
                       <td className="px-4 py-3"><span className={`text-xs px-2 py-1 rounded-full font-medium ${s.cls}`}>{s.label}</span></td>

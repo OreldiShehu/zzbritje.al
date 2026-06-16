@@ -114,7 +114,7 @@ function buildContractHTML({ businessName, ownerName, signedAt, commissionRate, 
   </body></html>`;
 }
 
-export function downloadContract({ businessName, ownerName, signedAt, commissionRate = 0, markupRate = 9 }) {
+export function downloadContract({ businessName, ownerName, signedAt, commissionRate = 0, markupRate = 15 }) {
   const html = buildContractHTML({
     businessName: businessName || 'N/A',
     ownerName: ownerName || 'N/A',
@@ -190,8 +190,8 @@ export default function ContractModal({ businessName, ownerName, onAccept, onDec
             <h3 className="font-bold text-gray-900 mb-1">2. Tarifa e Platformës</h3>
             <ul className="list-disc list-inside space-y-1">
               <li><strong>Biznesi nuk paguan asnjë komision.</strong> Ju merrni çmimin tuaj bazë të plotë.</li>
-              <li>Platforma shton automatikisht <strong>9% markup</strong> mbi çmimin tuaj bazë; ky markup paguhet ekskluzivisht nga klienti dhe i takon platformës.</li>
-              <li>Klienti paguan: çmimi juaj bazë + 9% markup platformës.</li>
+              <li>Platforma shton automatikisht <strong>15% markup</strong> mbi çmimin tuaj bazë; ky markup paguhet ekskluzivisht nga klienti dhe i takon platformës.</li>
+              <li>Klienti paguan: çmimi juaj bazë + 15% markup platformës.</li>
               <li><strong>Plani Falas:</strong> deri në 2 deals aktive dhe 10 kupon/deal — pa kosto mujore.</li>
               <li><strong>Plani Pro (1,500 ALL/muaj):</strong> deals dhe kupon të pakufizuara — markup 9% vazhdon të aplikohet.</li>
               <li>Platforma mund të ndryshojë tarifat me njoftim 30-ditor paraprak.</li>

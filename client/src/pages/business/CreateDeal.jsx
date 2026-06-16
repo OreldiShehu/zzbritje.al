@@ -132,7 +132,7 @@ export default function CreateDeal() {
     setStep((s) => s + 1);
   };
 
-  const MARKUP_RATE = 0.09;
+  const MARKUP_RATE = 0.15;
   const businessPrice = Number(values.businessPrice) || 0;
   const customerPrice = businessPrice ? Math.round(businessPrice * (1 + MARKUP_RATE)) : 0;
   const platformMarkup = customerPrice - businessPrice;
@@ -293,7 +293,7 @@ export default function CreateDeal() {
                     </label>
                     <input type="number" {...register('businessPrice', { required: true, min: 1, valueAsNumber: true })}
                       className={`input-field ${errors.businessPrice ? 'input-error' : ''}`} placeholder="4500" />
-                    <p className="text-xs text-gray-400 mt-1">Çmimi që dëshironi — platforma shton 9% markup</p>
+                    <p className="text-xs text-gray-400 mt-1">Çmimi që dëshironi — platforma shton 15% markup</p>
                   </div>
                 </div>
 
@@ -304,7 +304,7 @@ export default function CreateDeal() {
                       <div className="bg-white rounded-lg p-3 border border-brand-100">
                         <p className="text-xs text-gray-500 mb-1">Klienti paguan</p>
                         <p className="font-black text-lg text-gray-900">{formatCurrency(customerPrice)}</p>
-                        <p className="text-xs text-gray-400">({formatCurrency(businessPrice)} + 9% markup)</p>
+                        <p className="text-xs text-gray-400">({formatCurrency(businessPrice)} + 15% markup)</p>
                       </div>
                       <div className="bg-white rounded-lg p-3 border border-green-200">
                         <p className="text-xs text-gray-500 mb-1">Ju fitoni</p>
@@ -314,7 +314,7 @@ export default function CreateDeal() {
                       <div className="bg-white rounded-lg p-3 border border-amber-200">
                         <p className="text-xs text-gray-500 mb-1">Platforma merr</p>
                         <p className="font-black text-lg text-amber-700">{formatCurrency(platformTotal)}</p>
-                        <p className="text-xs text-gray-400">9% nga klienti</p>
+                        <p className="text-xs text-gray-400">15% nga klienti</p>
                       </div>
                     </div>
                     {savings > 0 && (

@@ -473,7 +473,7 @@ exports.getBusinessFinances = catchAsync(async (req, res, next) => {
     dealMap[dealId] = {
       dealId,
       dealTitle: s.dealTitle,
-      commissionRate: 0.09, // 9% markup from customer (business pays 0%)
+      commissionRate: 0.15, // 15% markup from customer (business pays 0%)
       soldCount: t.soldCount,
       activeCount: s.activeCount,
       redeemedCount: s.redeemedCount,
@@ -541,7 +541,7 @@ exports.markCollected = catchAsync(async (req, res, next) => {
 
 exports.backfillTransactionMarkup = catchAsync(async (req, res) => {
   // Fix old transactions where businessAmount = total (no markup split was applied)
-  // Sets platformMarkup = round(total × 9/109) and businessAmount = total - platformMarkup
+  // Sets platformMarkup = round(total × 15/115) and businessAmount = total - platformMarkup
   const transactions = await Transaction.find({
     paymentStatus: 'completed',
     total: { $gt: 0 },
@@ -549,7 +549,7 @@ exports.backfillTransactionMarkup = catchAsync(async (req, res) => {
   }).lean();
 
   const ops = transactions.map((tx) => {
-    const markup = Math.round(tx.total * 9 / 109);
+    const markup = Math.round(tx.total * 15 / 115);
     const businessAmount = tx.total - markup;
     return {
       updateOne: {
@@ -563,12 +563,12 @@ exports.backfillTransactionMarkup = catchAsync(async (req, res) => {
 
   await createAuditLog({
     actor: req.user, action: 'backfill_transaction_markup', resource: 'Transaction', req,
-    description: `Set 9% platformMarkup on ${result.modifiedCount} old transactions (total - businessAmount = 0)`,
+    description: `Set 15% platformMarkup on ${result.modifiedCount} old transactions (total - businessAmount = 0)`,
   });
 
   res.status(200).json({
     success: true,
-    message: `${result.modifiedCount} transaksione u përditësuan me ndarjen e saktë 9% markup.`,
+    message: `${result.modifiedCount} transaksione u përditësuan me ndarjen e saktë 15% markup.`,
     data: { transactionsUpdated: result.modifiedCount },
   });
 });
@@ -617,8 +617,8 @@ exports.resetCommissionRates = catchAsync(async (req, res) => {
     [{ $set: {
       commissionRate: 0,
       commissionAmount: 0,
-      platformMarkup: { $round: [{ $multiply: ['$businessPrice', 0.09] }, 0] },
-      discountedPrice: { $add: ['$businessPrice', { $round: [{ $multiply: ['$businessPrice', 0.09] }, 0] }] },
+      platformMarkup: { $round: [{ $multiply: ['$businessPrice', 0.15] }, 0] },
+      discountedPrice: { $add: ['$businessPrice', { $round: [{ $multiply: ['$businessPrice', 0.15] }, 0] }] },
     }}]
   );
   await createAuditLog({

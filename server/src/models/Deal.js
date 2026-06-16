@@ -123,7 +123,7 @@ dealSchema.index({ averageRating: -1 });
 dealSchema.index({ createdAt: -1 });
 dealSchema.index({ title: 'text', description: 'text', tags: 'text' });
 
-const PLATFORM_MARKUP_RATE = 0.09; // 9% added on top of businessPrice (paid by customer, business pays 0%)
+const PLATFORM_MARKUP_RATE = 0.15; // 15% added on top of businessPrice (paid by customer, business pays 0%)
 
 dealSchema.pre('save', function (next) {
   if (this.isModified('title') || !this.slug) {

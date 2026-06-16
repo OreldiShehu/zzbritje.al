@@ -38,7 +38,7 @@ async function createVoucherPurchase({ dealId, userId, quantity, paymentMethod, 
   // Customer pays: discountedPrice (businessPrice + 7% markup)
   // Platform keeps: platformMarkup (7% of businessPrice)
   // Business gets: businessPrice in full (0% commission)
-  const businessPrice = deal.businessPrice || Math.round(deal.discountedPrice / 1.09);
+  const businessPrice = deal.businessPrice || Math.round(deal.discountedPrice / 1.15);
   const customerPrice = deal.discountedPrice;
   const platformMarkup = deal.platformMarkup || 0;
   const commissionAmount = 0;
