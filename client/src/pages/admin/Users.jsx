@@ -43,7 +43,7 @@ export default function AdminUsers() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-100">{t('admin_ui.manage_users')}</h1>
-          <p className="text-gray-500 text-sm">{t('admin_ui.users_total', { count: (data?.pagination?.total || 0).toLocaleString() })}</p>
+          <p className="text-gray-500 text-sm">{(data?.pagination?.total || 0).toLocaleString()} përdorues gjithsej</p>
         </div>
       </div>
 
@@ -52,12 +52,12 @@ export default function AdminUsers() {
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input type="text" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            placeholder={t('admin_ui.search_users')} className="w-full bg-gray-700 border border-gray-600 rounded-xl pl-9 pr-3 py-2.5 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-brand-500" />
+            placeholder="Kërko me emër ose email..." className="w-full bg-gray-700 border border-gray-600 rounded-xl pl-9 pr-3 py-2.5 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-brand-500" />
         </div>
         <select value={role} onChange={(e) => { setRole(e.target.value); setPage(1); }}
           className="bg-gray-700 border border-gray-600 rounded-xl px-3 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-brand-500">
-          <option value="">{t('admin_ui.all_roles')}</option>
-          {['customer', 'business', 'admin', 'superadmin'].map((r) => <option key={r} value={r}>{r}</option>)}
+          <option value="">Të gjitha rolet</option>
+          {[{ v: 'customer', l: 'Klient' }, { v: 'business', l: 'Biznes' }, { v: 'admin', l: 'Admin' }, { v: 'superadmin', l: 'Superadmin' }].map(({ v, l }) => <option key={v} value={v}>{l}</option>)}
         </select>
       </div>
 

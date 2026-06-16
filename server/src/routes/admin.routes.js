@@ -41,6 +41,7 @@ router.get('/finances/:id', adminController.getBusinessFinances);
 router.patch('/businesses/:id/collect', adminController.markCollected);
 router.post('/reset-commission-rates', adminController.resetCommissionRates);
 router.post('/backfill-deal-prices', adminController.backfillDealPrices);
+router.post('/backfill-transactions', adminController.backfillTransactionMarkup);
 
 // Featured
 router.patch('/feature/:type/:id', adminController.toggleFeatured);

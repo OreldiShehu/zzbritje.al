@@ -208,7 +208,13 @@ export default function AdminFinances() {
 
   const backfillMutation = useMutation({
     mutationFn: () => api.post('/admin/backfill-deal-prices'),
-    onSuccess: (res) => toast.success(res.data.message),
+    onSuccess: (res) => { toast.success(res.data.message); queryClient.invalidateQueries({ queryKey: ['admin-commission-tracker'] }); },
+    onError: (err) => toast.error(err.response?.data?.message || 'Gabim'),
+  });
+
+  const backfillTxMutation = useMutation({
+    mutationFn: () => api.post('/admin/backfill-transactions'),
+    onSuccess: (res) => { toast.success(res.data.message); queryClient.invalidateQueries({ queryKey: ['admin-commission-tracker'] }); },
     onError: (err) => toast.error(err.response?.data?.message || 'Gabim'),
   });
 
@@ -224,11 +230,18 @@ export default function AdminFinances() {
         </div>
         <div className="flex gap-2">
           <button
+            onClick={() => { if (window.confirm('Korrekto 9% markup-in për të GJITHA transaksionet e vjetra? Kjo rregullon shifrat 0 L.')) backfillTxMutation.mutate(); }}
+            disabled={backfillTxMutation.isPending}
+            className="flex items-center gap-2 text-xs bg-green-50 hover:bg-green-100 text-green-700 font-semibold px-3 py-2 rounded-xl transition-colors border border-green-200">
+            {backfillTxMutation.isPending ? <Loader size={14} className="animate-spin" /> : <Banknote size={14} />}
+            Fix Transaksionet (9%)
+          </button>
+          <button
             onClick={() => { if (window.confirm('Rikalkulo çmimet (9% markup) për të gjithë deal-et?')) backfillMutation.mutate(); }}
             disabled={backfillMutation.isPending}
             className="flex items-center gap-2 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-3 py-2 rounded-xl transition-colors">
             {backfillMutation.isPending ? <Loader size={14} className="animate-spin" /> : <Banknote size={14} />}
-            Fix 9% Markup
+            Fix Deal Çmimet
           </button>
           <button
             onClick={() => { if (window.confirm('Vendosni të gjithë bizneset: 0% komision, 9% markup?')) resetRatesMutation.mutate(); }}

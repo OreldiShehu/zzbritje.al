@@ -6,10 +6,10 @@ import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 
 const navItems = [
-  { to: '/dashboard', icon: Ticket, label: 'Kupona-t e Mia', end: true },
-  { to: '/dashboard/notifications', icon: Bell, label: 'Njoftime' },
-  { to: '/dashboard/referrals', icon: Gift, label: 'Ftoni Miq' },
-  { to: '/dashboard/profile', icon: User, label: 'Profili' },
+  { to: '/dashboard', icon: Ticket, label: 'Kupona-t e Mia', bottomLabel: 'Kupona', end: true },
+  { to: '/dashboard/notifications', icon: Bell, label: 'Njoftime', bottomLabel: 'Njoftime' },
+  { to: '/dashboard/referrals', icon: Gift, label: 'Ftoni Miq', bottomLabel: 'Fto Miq' },
+  { to: '/dashboard/profile', icon: User, label: 'Profili', bottomLabel: 'Profili' },
 ];
 
 export default function DashboardLayout() {
@@ -120,8 +120,29 @@ export default function DashboardLayout() {
         </header>
 
         <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-          <Outlet />
+          <div className="pb-20 lg:pb-0">
+            <Outlet />
+          </div>
         </main>
+
+        {/* Bottom navigation — mobile only */}
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex z-30">
+          {navItems.map(({ to, icon: Icon, bottomLabel, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                `flex-1 flex flex-col items-center justify-center py-2 min-h-[56px] gap-0.5 transition-colors ${
+                  isActive ? 'text-brand-600' : 'text-gray-400'
+                }`
+              }
+            >
+              <Icon size={22} />
+              <span className="text-[10px] font-medium leading-tight">{bottomLabel}</span>
+            </NavLink>
+          ))}
+        </nav>
       </div>
     </div>
   );

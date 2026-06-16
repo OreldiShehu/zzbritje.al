@@ -56,11 +56,11 @@ export default function AdminDeals() {
   };
 
   const STATUS_FILTERS = [
-    { v: '', l: t('admin_ui.all_statuses') },
-    { v: 'pending_review', l: t('admin_ui.status_review') },
-    { v: 'active', l: t('admin_ui.status_verified') },
-    { v: 'rejected', l: t('admin_ui.status_rejected') },
-    { v: 'expired', l: t('deal.status_expired') },
+    { v: '', l: 'Të gjitha' },
+    { v: 'pending_review', l: 'Në shqyrtim' },
+    { v: 'active', l: 'Aktive' },
+    { v: 'rejected', l: 'Refuzuar' },
+    { v: 'expired', l: 'Skaduar' },
   ];
 
   return (
@@ -68,7 +68,7 @@ export default function AdminDeals() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-100">{t('admin.deals')}</h1>
-          <p className="text-gray-500 text-sm">{t('admin_ui.deals_total', { count: data?.pagination?.total || 0 })}</p>
+          <p className="text-gray-500 text-sm">{data?.pagination?.total || 0} deals gjithsej</p>
         </div>
       </div>
 
@@ -76,7 +76,7 @@ export default function AdminDeals() {
       <div className="bg-gray-800 rounded-2xl p-4 mb-5 border border-gray-700 flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('common.search')}
+          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Kërko deal..."
             className="w-full bg-gray-700 border border-gray-600 rounded-xl pl-9 pr-3 py-2.5 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-brand-500" />
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide flex-nowrap">

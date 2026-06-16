@@ -217,3 +217,18 @@
 .StripeElement {
   @apply input-field;
 }
+
+/* Prevent iOS Safari from auto-zooming on input focus (requires font-size >= 16px) */
+@media (max-width: 767px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="search"],
+  input[type="url"],
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

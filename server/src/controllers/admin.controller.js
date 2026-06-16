@@ -32,13 +32,13 @@ exports.getDashboardStats = catchAsync(async (req, res) => {
     Deal.countDocuments(),
     Deal.countDocuments({ status: 'active' }),
     Voucher.countDocuments(),
-    Transaction.aggregate([{ $match: { paymentStatus: 'completed' } }, { $group: { _id: null, total: { $sum: { $add: ['$commissionAmount', { $ifNull: ['$platformMarkup', 0] }] } } } }]),
+    Transaction.aggregate([{ $match: { paymentStatus: 'completed' } }, { $group: { _id: null, total: { $sum: { $max: [{ $subtract: [{ $ifNull: ['$total', 0] }, { $ifNull: ['$businessAmount', 0] }] }, 0] } } } }]),
     Transaction.find({ createdAt: { $gte: sevenDaysAgo }, paymentStatus: 'completed' })
       .populate('user', 'firstName lastName').populate('deal', 'title').sort({ createdAt: -1 }).limit(10),
     SupportTicket.countDocuments({ status: { $in: ['open', 'in_progress'] } }),
     Transaction.aggregate([
       { $match: { createdAt: { $gte: thirtyDaysAgo }, paymentStatus: 'completed' } },
-      { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, revenue: { $sum: { $add: ['$commissionAmount', { $ifNull: ['$platformMarkup', 0] }] } }, transactions: { $sum: 1 } } },
+      { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, revenue: { $sum: { $max: [{ $subtract: [{ $ifNull: ['$total', 0] }, { $ifNull: ['$businessAmount', 0] }] }, 0] } }, transactions: { $sum: 1 } } },
       { $sort: { _id: 1 } },
     ]),
     User.aggregate([
@@ -372,7 +372,7 @@ exports.getCommissionTracker = catchAsync(async (req, res) => {
     {
       $group: {
         _id: '$business',
-        commissionFromSales: { $sum: { $add: ['$commissionAmount', { $ifNull: ['$platformMarkup', 0] }] } },
+        commissionFromSales: { $sum: { $max: [{ $subtract: [{ $ifNull: ['$total', 0] }, { $ifNull: ['$businessAmount', 0] }] }, 0] } },
         totalRevenue: { $sum: '$total' },
         vouchersSold: { $sum: '$quantity' },
       },
@@ -429,7 +429,7 @@ exports.getBusinessFinances = catchAsync(async (req, res, next) => {
     {
       $group: {
         _id: null,
-        commissionFromSales: { $sum: { $add: ['$commissionAmount', { $ifNull: ['$platformMarkup', 0] }] } },
+        commissionFromSales: { $sum: { $max: [{ $subtract: [{ $ifNull: ['$total', 0] }, { $ifNull: ['$businessAmount', 0] }] }, 0] } },
         totalRevenue: { $sum: '$total' },
         vouchersSold: { $sum: '$quantity' },
       },
@@ -445,7 +445,7 @@ exports.getBusinessFinances = catchAsync(async (req, res, next) => {
     {
       $group: {
         _id: '$deal',
-        totalCommission: { $sum: { $add: ['$commissionAmount', { $ifNull: ['$platformMarkup', 0] }] } },
+        totalCommission: { $sum: { $max: [{ $subtract: [{ $ifNull: ['$total', 0] }, { $ifNull: ['$businessAmount', 0] }] }, 0] } },
         totalPaidPrice: { $sum: '$total' },
         soldCount: { $sum: '$quantity' },
         commissionRate: { $first: '$commissionRate' },
@@ -514,7 +514,7 @@ exports.markCollected = catchAsync(async (req, res, next) => {
   // Calculate outstanding from Transaction data — total = 5% commission + 5% markup
   const txAgg = await Transaction.aggregate([
     { $match: { business: business._id, paymentStatus: 'completed' } },
-    { $group: { _id: null, commissionFromSales: { $sum: { $add: ['$commissionAmount', { $ifNull: ['$platformMarkup', 0] }] } } } },
+    { $group: { _id: null, commissionFromSales: { $sum: { $max: [{ $subtract: [{ $ifNull: ['$total', 0] }, { $ifNull: ['$businessAmount', 0] }] }, 0] } } } },
   ]);
   const commissionFromSales = txAgg[0]?.commissionFromSales || 0;
   const alreadyCollected = business.platformCommissionPaid || 0;
@@ -536,6 +536,40 @@ exports.markCollected = catchAsync(async (req, res, next) => {
     success: true,
     message: `Komisioni prej ${Math.round(amount)} ALL u shënua si i mbledhur.`,
     data: { collected: amount, totalCollected: business.platformCommissionPaid },
+  });
+});
+
+exports.backfillTransactionMarkup = catchAsync(async (req, res) => {
+  // Fix old transactions where businessAmount = total (no markup split was applied)
+  // Sets platformMarkup = round(total × 9/109) and businessAmount = total - platformMarkup
+  const transactions = await Transaction.find({
+    paymentStatus: 'completed',
+    total: { $gt: 0 },
+    $expr: { $gte: ['$businessAmount', { $multiply: ['$total', 0.97] }] },
+  }).lean();
+
+  const ops = transactions.map((tx) => {
+    const markup = Math.round(tx.total * 9 / 109);
+    const businessAmount = tx.total - markup;
+    return {
+      updateOne: {
+        filter: { _id: tx._id },
+        update: { $set: { platformMarkup: markup, businessAmount } },
+      },
+    };
+  });
+
+  const result = ops.length > 0 ? await Transaction.bulkWrite(ops) : { modifiedCount: 0 };
+
+  await createAuditLog({
+    actor: req.user, action: 'backfill_transaction_markup', resource: 'Transaction', req,
+    description: `Set 9% platformMarkup on ${result.modifiedCount} old transactions (total - businessAmount = 0)`,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: `${result.modifiedCount} transaksione u përditësuan me ndarjen e saktë 9% markup.`,
+    data: { transactionsUpdated: result.modifiedCount },
   });
 });
 

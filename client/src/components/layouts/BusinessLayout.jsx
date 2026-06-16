@@ -13,11 +13,11 @@ const WA_ADMIN = '355692866668';
 const FREE_DEAL_LIMIT = 2;
 
 const navItems = [
-  { to: '/business-dashboard', icon: LayoutDashboard, label: 'HOME', end: true },
-  { to: '/business-dashboard/deals', icon: Tag, label: 'Deal-et' },
-  { to: '/business-dashboard/analytics', icon: BarChart2, label: 'Analitikë' },
-  { to: '/business-dashboard/scanner', icon: QrCode, label: 'Skaner QR' },
-  { to: '/business-dashboard/profile', icon: Store, label: 'Profili Biznesit' },
+  { to: '/business-dashboard', icon: LayoutDashboard, label: 'HOME', bottomLabel: 'Kryefaqja', end: true },
+  { to: '/business-dashboard/deals', icon: Tag, label: 'Deal-et', bottomLabel: 'Deal-et' },
+  { to: '/business-dashboard/analytics', icon: BarChart2, label: 'Analitikë', bottomLabel: 'Statistika' },
+  { to: '/business-dashboard/scanner', icon: QrCode, label: 'Skaner QR', bottomLabel: 'Skaner' },
+  { to: '/business-dashboard/profile', icon: Store, label: 'Profili Biznesit', bottomLabel: 'Profili' },
 ];
 
 export default function BusinessLayout() {
@@ -160,7 +160,30 @@ export default function BusinessLayout() {
           )}
         </AnimatePresence>
 
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto"><Outlet /></main>
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+          <div className="pb-20 lg:pb-0">
+            <Outlet />
+          </div>
+        </main>
+
+        {/* Bottom navigation — mobile only */}
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex z-30">
+          {navItems.map(({ to, icon: Icon, bottomLabel, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                `flex-1 flex flex-col items-center justify-center py-2 min-h-[56px] gap-0.5 transition-colors ${
+                  isActive ? 'text-brand-600' : 'text-gray-400'
+                }`
+              }
+            >
+              <Icon size={22} />
+              <span className="text-[10px] font-medium leading-tight">{bottomLabel}</span>
+            </NavLink>
+          ))}
+        </nav>
       </div>
     </div>
   );

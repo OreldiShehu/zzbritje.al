@@ -9,14 +9,17 @@ import { Link } from 'react-router-dom';
 
 function KpiCard({ icon: Icon, label, value, sub, change, color, bg, to }) {
   const content = (
-    <motion.div whileHover={{ y: -2 }} className="stat-card cursor-pointer">
-      <div className={`w-12 h-12 ${bg} rounded-xl flex items-center justify-center flex-shrink-0`}><Icon size={22} className={color} /></div>
-      <div className="flex-1">
-        <p className="text-2xl font-black text-gray-200">{value}</p>
-        <p className="text-sm text-gray-400">{label}</p>
-        {sub && <p className="text-xs text-gray-500 mt-0.5">{sub}</p>}
+    <motion.div whileHover={{ y: -2 }}
+      className="card cursor-pointer p-3 sm:p-6 flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4 text-center sm:text-left">
+      <div className={`w-10 h-10 sm:w-12 sm:h-12 ${bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
+        <Icon size={18} className={color} />
       </div>
-      {change != null && <div className={`text-xs font-bold px-2 py-1 rounded-full ${change >= 0 ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400'}`}>{change >= 0 ? '+' : ''}{change}%</div>}
+      <div className="flex-1 min-w-0">
+        <p className="text-xl sm:text-2xl font-black text-gray-200 leading-tight">{value}</p>
+        <p className="text-xs sm:text-sm text-gray-400 leading-tight mt-0.5">{label}</p>
+        {sub && <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">{sub}</p>}
+      </div>
+      {change != null && <div className={`text-xs font-bold px-2 py-1 rounded-full flex-shrink-0 ${change >= 0 ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400'}`}>{change >= 0 ? '+' : ''}{change}%</div>}
     </motion.div>
   );
   return to ? <Link to={to}>{content}</Link> : content;
@@ -85,13 +88,13 @@ export default function AdminDashboard() {
 
       {/* Commission Tracker */}
       <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h3 className="font-bold text-gray-100 flex items-center gap-2"><Banknote size={18} className="text-green-400" /> Markup i Platformës</h3>
-            <p className="text-xs text-gray-500 mt-0.5">9% markup nga çdo kupon i shitur (paguar nga klienti)</p>
+        <div className="flex items-start justify-between mb-5 flex-wrap gap-3">
+          <div className="min-w-0">
+            <h3 className="font-bold text-gray-100 flex items-center gap-2"><Banknote size={18} className="text-green-400 flex-shrink-0" /> Markup i Platformës</h3>
+            <p className="text-xs text-gray-500 mt-0.5">9% markup nga çdo kupon i shitur</p>
           </div>
           {commissionData?.totals && (
-            <div className="text-right">
+            <div className="text-right flex-shrink-0">
               <p className="text-xl font-black text-green-400">{formatCurrency(commissionData.totals.commissionPending)}</p>
               <p className="text-xs text-gray-500">markup total në pritje</p>
             </div>

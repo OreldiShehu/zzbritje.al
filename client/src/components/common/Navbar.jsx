@@ -236,6 +236,9 @@ export default function Navbar() {
                 </>
               )}
 
+              <Link to="/search" className="md:hidden p-2 rounded-lg hover:bg-gray-100" onClick={() => setMobileOpen(false)}>
+                <Search size={20} className="text-gray-700" />
+              </Link>
               <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-lg hover:bg-gray-100">
                 {mobileOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
@@ -251,6 +254,20 @@ export default function Navbar() {
               className="bg-white border-t border-gray-100 overflow-hidden"
             >
               <div className="container-custom py-4">
+                {/* Mobile search bar */}
+                <form onSubmit={(e) => { handleSearch(e); setMobileOpen(false); }} className="mb-4">
+                  <div className="relative">
+                    <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Kërko deal..."
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    />
+                  </div>
+                </form>
+
                 {isAuthenticated ? (
                   <div className="space-y-1">
                     <div className="flex items-center gap-3 px-3 py-3 bg-brand-50 rounded-xl mb-2">
