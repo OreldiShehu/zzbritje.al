@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Ticket, Bell, ArrowRight, QrCode, MapPin, Phone, Calendar, Info } from 'lucide-react';
+import { Ticket, Bell, ArrowRight, QrCode, MapPin, Phone, Calendar, Info, Download } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../api/axios';
 import { formatCurrency, formatDate, getImageUrl } from '../../utils/formatters';
@@ -9,6 +9,20 @@ import { formatCurrency, formatDate, getImageUrl } from '../../utils/formatters'
 function VoucherCard({ v }) {
   const isActive = v.status === 'active';
   const isRedeemed = v.status === 'redeemed';
+  const { user } = useAuthStore();
+
+  const handleDownload = () => {
+    const customerName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '';
+    const customerPhone = user?.phone || '';
+    const dealImg = v.deal?.images?.[0]?.url || '';
+    const qrImg = v.qrCodeImage ? `<img src="${v.qrCodeImage}" width="140" height="140" style="border-radius:8px;" />` : `<p style="font-family:monospace;font-size:20px;font-weight:700;letter-spacing:3px;color:#1a3f8a;">${v.code}</p>`;
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Kupon ${v.code}</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#f3f4f6;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}.v{background:#fff;border-radius:20px;overflow:hidden;width:380px;box-shadow:0 8px 32px rgba(0,0,0,.15)}.header{background:linear-gradient(135deg,#1a3f8a,#2563eb);padding:24px;text-align:center;color:#fff}.logo{font-size:28px;font-weight:900;letter-spacing:-1px;margin-bottom:4px}.logo span{color:#93c5fd}.badge{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 14px;font-size:12px;display:inline-block;margin-top:4px}.img{width:100%;height:160px;object-fit:cover}.body{padding:20px}.title{font-size:17px;font-weight:700;color:#111;margin-bottom:4px}.biz{font-size:13px;color:#6b7280;margin-bottom:16px}.row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:13px}.label{color:#9ca3af}.val{font-weight:600;color:#111}.val.green{color:#16a34a}.code-box{background:#f8fafc;border:2px dashed #e2e8f0;border-radius:12px;padding:12px;text-align:center;margin:16px 0}.qr{display:flex;justify-content:center;margin:12px 0}.footer{background:#f8fafc;padding:12px 20px;text-align:center;font-size:11px;color:#9ca3af;border-top:1px solid #e5e7eb}@media print{body{background:#fff;padding:0}@page{margin:10mm}.v{box-shadow:none}}</style></head><body><div class="v"><div class="header"><div class="logo">Zbritje<span>.al</span></div><div class="badge">Kupon Zyrtar</div></div>${dealImg ? `<img class="img" src="${dealImg}" alt="" />` : ''}<div class="body"><div class="title">${v.deal?.title || ''}</div><div class="biz">${v.business?.name || ''}</div>${customerName ? `<div class="row"><span class="label">Emri</span><span class="val">${customerName}</span></div>` : ''}${customerPhone ? `<div class="row"><span class="label">Telefoni</span><span class="val">${customerPhone}</span></div>` : ''}<div class="row"><span class="label">Paguani pranë biznesit</span><span class="val green">${formatCurrency(v.paidPrice)}</span></div><div class="row"><span class="label">Skadon më</span><span class="val">${formatDate(v.expiresAt)}</span></div><div class="code-box"><div style="font-family:monospace;font-size:18px;font-weight:700;letter-spacing:2px;color:#1a3f8a">${v.code}</div><div style="font-size:11px;color:#9ca3af;margin-top:4px">Kodi i Kuponit</div></div><div class="qr">${qrImg}</div></div><div class="footer">Kupon zyrtar i Zbritje.al · Mos e ndani me të tjerë</div></div><script>window.onload=()=>{window.print();}</script></body></html>`;
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, '_blank');
+    if (win) win.onload = () => URL.revokeObjectURL(url);
+    else URL.revokeObjectURL(url);
+  };
 
   return (
     <div className={`rounded-2xl border overflow-hidden ${isActive ? 'border-brand-200 bg-white' : 'border-gray-200 bg-gray-50'}`}>
@@ -78,6 +92,16 @@ function VoucherCard({ v }) {
           </div>
         )}
       </div>
+
+      {/* Download button */}
+      {isActive && (
+        <div className="px-4 pb-3">
+          <button onClick={handleDownload}
+            className="flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 font-medium">
+            <Download size={13} />Shkarko Kuponin
+          </button>
+        </div>
+      )}
 
       {/* Redemption instructions */}
       {isActive && (

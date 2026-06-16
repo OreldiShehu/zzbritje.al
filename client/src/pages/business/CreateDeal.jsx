@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -28,13 +28,36 @@ export default function CreateDeal() {
     staleTime: 10 * 60 * 1000,
   });
 
+  const { data: business } = useQuery({
+    queryKey: ['my-business'],
+    queryFn: () => api.get('/businesses/my').then((r) => r.data.data),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const isFreePlan = business?.plan === 'free';
+
+  const { data: activeDealsData } = useQuery({
+    queryKey: ['business', 'active-deals-count'],
+    queryFn: () => api.get('/deals/business/my?status=active&limit=1').then((r) => r.data),
+    enabled: !!business && isFreePlan,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const activeDealsCount = activeDealsData?.pagination?.total || 0;
+
+  useEffect(() => {
+    if (business && isFreePlan && activeDealsCount >= 2) {
+      setPlanLimitError('Keni arritur limitin e planit falas (2 deals aktive). Kaloni në Pro për deals dhe kupon të pakufizuara.');
+    }
+  }, [business, isFreePlan, activeDealsCount]);
+
   const { register, handleSubmit, watch, control, trigger, formState: { errors } } = useForm({
     defaultValues: {
       dealType: 'percentage_discount',
       currency: 'ALL',
       city: 'Tiranë',
       maxPerCustomer: 1,
-      totalVouchers: 100,
+      totalVouchers: 10,
     },
   });
 
@@ -84,13 +107,29 @@ export default function CreateDeal() {
   };
 
   const nextStep = async () => {
+    const isFixedDiscount = values.dealType === 'fixed_discount';
     const fieldsPerStep = [
       ['title', 'description', 'dealType', 'category', 'city', 'startDate', 'endDate'],
-      ['originalPrice', 'businessPrice'],
+      isFixedDiscount ? ['businessPrice'] : ['originalPrice', 'businessPrice'],
       [],
     ];
     const valid = await trigger(fieldsPerStep[step]);
-    if (valid) setStep((s) => s + 1);
+    if (!valid) return;
+
+    if (step === 1) {
+      // A5: Price comparison — customer must pay less than original price
+      if (!isFixedDiscount && values.originalPrice && customerPrice >= values.originalPrice) {
+        toast.error('Çmimi i klientit duhet të jetë më i ulët se çmimi origjinal. Rishikoni çmimet.');
+        return;
+      }
+      // A4: Free plan — max 10 vouchers per deal
+      if (isFreePlan && (values.totalVouchers || 0) > 10) {
+        toast.error('Plani Falas lejon maksimumi 10 kupon për deal. Uleni numrin ose kaloni në Pro.');
+        return;
+      }
+    }
+
+    setStep((s) => s + 1);
   };
 
   const MARKUP_RATE = 0.09;
@@ -163,7 +202,10 @@ export default function CreateDeal() {
         ))}
       </div>
 
-      <form onSubmit={handleSubmit((d) => createMutation.mutate(d))}>
+      <form onSubmit={handleSubmit((d) => {
+        if (d.dealType === 'fixed_discount') d.originalPrice = d.businessPrice;
+        createMutation.mutate(d);
+      })}>
         {/* Step 0: Basic Info */}
         {step === 0 && (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-5">
@@ -233,15 +275,22 @@ export default function CreateDeal() {
             <div className="card p-6">
               <h3 className="font-bold text-gray-900 mb-5">Çmimi & Zbritja</h3>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className={`grid ${values.dealType !== 'fixed_discount' ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
+                  {values.dealType !== 'fixed_discount' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Çmimi Origjinal (ALL) *</label>
+                      <input type="number" {...register('originalPrice', { required: values.dealType !== 'fixed_discount', min: 1, valueAsNumber: true })}
+                        className={`input-field ${errors.originalPrice ? 'input-error' : ''}`} placeholder="9000" />
+                      <p className="text-xs text-gray-400 mt-1">Çmimi i plotë pa zbritje</p>
+                      {values.originalPrice && customerPrice >= values.originalPrice && (
+                        <p className="text-red-500 text-xs mt-1">⚠ Klienti paguan {customerPrice} L — duhet të jetë nën çmimin origjinal</p>
+                      )}
+                    </div>
+                  )}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Çmimi Origjinal (ALL) *</label>
-                    <input type="number" {...register('originalPrice', { required: true, min: 1, valueAsNumber: true })}
-                      className={`input-field ${errors.originalPrice ? 'input-error' : ''}`} placeholder="9000" />
-                    <p className="text-xs text-gray-400 mt-1">Çmimi i plotë pa zbritje</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Çmimi juaj i Deal-it (ALL) *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      {values.dealType === 'fixed_discount' ? 'Çmimi i Deal-it (ALL) *' : 'Çmimi juaj i Deal-it (ALL) *'}
+                    </label>
                     <input type="number" {...register('businessPrice', { required: true, min: 1, valueAsNumber: true })}
                       className={`input-field ${errors.businessPrice ? 'input-error' : ''}`} placeholder="4500" />
                     <p className="text-xs text-gray-400 mt-1">Çmimi që dëshironi — platforma shton 9% markup</p>
@@ -278,8 +327,11 @@ export default function CreateDeal() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Total Voucher</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Numri i Kuponëve</label>
                     <input type="number" {...register('totalVouchers', { min: 1, valueAsNumber: true })} className="input-field" />
+                    {isFreePlan && (values.totalVouchers || 0) > 10 && (
+                      <p className="text-amber-600 text-xs mt-1">⚠ Plani Falas lejon maks. 10 kupon. Uleni ose kalonin Pro.</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">Max. per Klient</label>
@@ -355,12 +407,12 @@ export default function CreateDeal() {
                 {[
                   { label: 'Titulli', value: values.title },
                   { label: 'Qyteti', value: values.city },
-                  { label: 'Çmimi Origjinal', value: formatCurrency(values.originalPrice || 0) },
+                  ...(values.dealType !== 'fixed_discount' ? [{ label: 'Çmimi Origjinal', value: formatCurrency(values.originalPrice || 0) }] : []),
                   { label: 'Çmimi juaj i Deal-it', value: formatCurrency(businessPrice || 0) },
                   { label: 'Klienti paguan', value: formatCurrency(customerPrice) },
                   { label: 'Ju fitoni / kupon', value: formatCurrency(businessEarning) },
-                  { label: 'Zbritja (klientit)', value: `${savings}%` },
-                  { label: 'Total Kupon', value: values.totalVouchers },
+                  ...(values.dealType !== 'fixed_discount' ? [{ label: 'Zbritja (klientit)', value: `${savings}%` }] : []),
+                  { label: 'Numri i Kuponëve', value: values.totalVouchers },
                   { label: 'Max./Klient', value: values.maxPerCustomer },
                   { label: 'Imazhe', value: `${imagePreviews.length} të ngarkuara` },
                 ].map(({ label, value }) => (

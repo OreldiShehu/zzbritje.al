@@ -43,7 +43,7 @@ function TopRatedRow({ deal, rank }) {
           <img src={getImageUrl(deal.business.logo, 200)} alt="" className="w-full h-full object-contain p-1" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-brand-50">
-            <span className="text-sm font-black text-brand-300">-{Math.round(deal.discountPercentage)}%</span>
+            <span className="text-sm font-black text-brand-300">{deal.dealType === 'fixed_discount' ? 'Fikse' : `-${Math.round(deal.discountPercentage)}%`}</span>
           </div>
         )}
       </div>
@@ -59,7 +59,7 @@ function TopRatedRow({ deal, rank }) {
       </div>
       <div className="text-right flex-shrink-0">
         <p className="text-base font-black text-brand-700">{formatCurrency(deal.discountedPrice)}</p>
-        <p className="text-xs text-red-500 font-semibold">-{Math.round(deal.discountPercentage)}%</p>
+        <p className="text-xs text-red-500 font-semibold">{deal.dealType === 'fixed_discount' ? 'Fikse' : `-${Math.round(deal.discountPercentage)}%`}</p>
       </div>
     </Link>
   );

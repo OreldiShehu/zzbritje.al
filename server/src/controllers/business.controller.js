@@ -63,8 +63,9 @@ exports.createBusiness = catchAsync(async (req, res, next) => {
         `• Klienti paguan direkt tek ju kur paraqet kuponin\n\n` +
         `💰 Tarifa e platformës:\n` +
         `• Platforma shton 9% markup mbi çmimin tuaj bazë — paguhet nga klienti\n` +
-        `• Ju merrni çmimin tuaj bazë të plotë, pa asnjë zbritje\n` +
-        `• Nuk ka kosto fikse apo abonime mujore\n\n` +
+        `• Ju merrni çmimin tuaj bazë të plotë, pa asnjë komision\n` +
+        `• Plani Falas: 2 deals aktive + 10 kupon/deal, pa kosto mujore\n` +
+        `• Plani Pro (1,500 ALL/muaj): deals dhe kupon të pakufizuara\n\n` +
         `✅ Hapat e ardhshëm:\n` +
         `1. Plotësoni profilin e biznesit tuaj (logo, adresë, telefon)\n` +
         `2. Krijoni dealin tuaj të parë nga seksioni "Deal-et"\n` +
@@ -212,7 +213,7 @@ exports.getBusinessStats = catchAsync(async (req, res, next) => {
     ]),
     Transaction.aggregate([
       { $match: { business: business._id, paymentStatus: 'completed' } },
-      { $group: { _id: null, businessNet: { $sum: '$businessAmount' }, totalCollected: { $sum: '$subtotal' }, commissionPaid: { $sum: '$commissionAmount' }, markupAmount: { $sum: '$platformMarkup' }, vouchersSold: { $sum: '$quantity' } } },
+      { $group: { _id: null, businessNet: { $sum: '$businessAmount' }, totalCollected: { $sum: '$subtotal' }, commissionPaid: { $sum: '$commissionAmount' }, vouchersSold: { $sum: '$quantity' } } },
     ]),
     Transaction.aggregate([
       { $match: { business: business._id, paymentStatus: 'completed', createdAt: { $gte: startOfMonth } } },
@@ -243,7 +244,7 @@ exports.getBusinessStats = catchAsync(async (req, res, next) => {
         businessNet: allTime.businessNet || 0,
         totalCollected: allTime.totalCollected || 0,
         commissionPaid: allTime.commissionPaid || 0,
-        markupAmount: allTime.markupAmount || 0,
+        markupAmount: Math.max(0, (allTime.totalCollected || 0) - (allTime.businessNet || 0)),
         platformFee: (allTime.markupAmount || 0) + (allTime.commissionPaid || 0),
         vouchersSold: allTime.vouchersSold || 0,
         thisMonth: thisMonthNet,

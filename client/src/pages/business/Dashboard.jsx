@@ -171,7 +171,7 @@ export default function BusinessDashboard() {
             </div>
             <Link to="/business-dashboard/deals/create"
               className="bg-white text-brand-600 font-bold px-5 py-3 rounded-xl hover:bg-brand-50 transition-all flex items-center gap-2 shadow-lg">
-              <Plus size={18} />{t('business.create_deal_btn')}
+              <Plus size={18} />Krijo Deal
             </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">

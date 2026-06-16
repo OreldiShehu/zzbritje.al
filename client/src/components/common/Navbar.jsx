@@ -83,6 +83,30 @@ export default function Navbar() {
     setLangOpen(false);
   };
 
+  const getRoleLinks = () => {
+    if (user?.role === 'admin' || user?.role === 'superadmin') {
+      return [
+        { to: '/admin', icon: Shield, label: 'Paneli Admin' },
+        { to: '/dashboard/notifications', icon: Bell, label: 'Njoftime', badge: unreadCount },
+      ];
+    }
+    if (user?.role === 'business') {
+      return [
+        { to: '/business-dashboard', icon: LayoutDashboard, label: 'Paneli im' },
+        { to: '/business-dashboard/deals', icon: Store, label: 'Deal-et e mia' },
+        { to: '/business-dashboard/profile', icon: User, label: 'Profili i biznesit' },
+        { to: '/dashboard/notifications', icon: Bell, label: 'Njoftime', badge: unreadCount },
+      ];
+    }
+    return [
+      { to: '/dashboard', icon: LayoutDashboard, label: t('nav.dashboard') },
+      { to: '/dashboard/vouchers', icon: Ticket, label: t('nav.my_vouchers') },
+      { to: '/dashboard/favorites', icon: Heart, label: t('nav.favorites', 'Të preferuarat') },
+      { to: '/dashboard/notifications', icon: Bell, label: t('nav.notifications', 'Njoftime'), badge: unreadCount },
+      { to: '/dashboard/wallet', icon: Wallet, label: t('nav.wallet') },
+    ];
+  };
+
   return (
     <>
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-md' : 'bg-white/95 backdrop-blur-sm shadow-sm'}`}>
@@ -155,21 +179,54 @@ export default function Navbar() {
 
               {isAuthenticated ? (
                 <>
-                  <NavLink to="/dashboard/favorites" className="hidden sm:flex p-2 text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
-                    <Heart size={20} />
-                  </NavLink>
-                  <NavLink to="/dashboard/notifications" className="relative hidden sm:flex p-2 text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
-                    <Bell size={20} />
-                    {unreadCount > 0 && (
-                      <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                        {unreadCount > 9 ? '9+' : unreadCount}
-                      </span>
-                    )}
-                  </NavLink>
-                  <div className="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-xs font-black">
-                      {(user?.firstName?.[0] || '').toUpperCase()}{(user?.lastName?.[0] || '').toUpperCase()}
-                    </span>
+                  {/* Desktop dropdown */}
+                  <div ref={profileRef} className="hidden sm:block relative">
+                    <button
+                      onClick={() => setProfileOpen(!profileOpen)}
+                      className="flex items-center gap-1 p-1 rounded-xl hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center">
+                        <span className="text-white text-xs font-black">
+                          {(user?.firstName?.[0] || '').toUpperCase()}{(user?.lastName?.[0] || '').toUpperCase()}
+                        </span>
+                      </div>
+                      <ChevronDown size={13} className={`text-gray-400 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    <AnimatePresence>
+                      {profileOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50"
+                        >
+                          <div className="px-4 py-2.5 border-b border-gray-100 mb-1">
+                            <p className="font-semibold text-gray-900 text-sm truncate">{user?.firstName} {user?.lastName}</p>
+                            <p className="text-xs text-brand-600 capitalize">
+                              {user?.role === 'customer' ? 'Klient' : user?.role === 'business' ? 'Biznes' : 'Admin'}
+                            </p>
+                          </div>
+                          {getRoleLinks().map(({ to, icon: Icon, label, badge }) => (
+                            <NavLink key={to} to={to} onClick={() => setProfileOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 text-gray-700 text-sm transition-colors">
+                              <Icon size={16} className="text-gray-400 flex-shrink-0" />
+                              <span className="flex-1">{label}</span>
+                              {badge > 0 && (
+                                <span className="w-5 h-5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                                  {badge > 9 ? '9+' : badge}
+                                </span>
+                              )}
+                            </NavLink>
+                          ))}
+                          <div className="border-t border-gray-100 mt-1 pt-1">
+                            <button onClick={handleLogout}
+                              className="flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-red-600 w-full text-sm transition-colors">
+                              <LogOut size={16} className="flex-shrink-0" />
+                              {t('nav.logout')}
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </>
               ) : (
@@ -209,13 +266,7 @@ export default function Navbar() {
                         </p>
                       </div>
                     </div>
-                    {[
-                      { to: getDashboardLink(), icon: LayoutDashboard, label: t('nav.dashboard') },
-                      { to: '/dashboard/vouchers', icon: Ticket, label: t('nav.my_vouchers') },
-                      { to: '/dashboard/favorites', icon: Heart, label: t('nav.favorites', 'Të preferuarat') },
-                      { to: '/dashboard/notifications', icon: Bell, label: t('nav.notifications', 'Njoftime'), badge: unreadCount },
-                      { to: '/dashboard/wallet', icon: Wallet, label: `${t('nav.wallet')}: ${user?.walletBalance?.toLocaleString() || 0} L` },
-                    ].map(({ to, icon: Icon, label, badge }) => (
+                    {getRoleLinks().map(({ to, icon: Icon, label, badge }) => (
                       <NavLink key={to} to={to} onClick={() => setMobileOpen(false)}
                         className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors text-sm font-medium">
                         <Icon size={18} className="text-gray-400 flex-shrink-0" />

@@ -49,7 +49,7 @@ function StarRating({ rating, reviews }) {
         ))}
       </div>
       <span className="font-semibold text-gray-900">{rating?.toFixed(1) || '—'}</span>
-      {reviews > 0 && <span className="text-gray-400 text-sm">{t('deal.reviews_count', { count: reviews })}</span>}
+      {reviews > 0 && <span className="text-gray-400 text-sm">({reviews} {reviews === 1 ? 'vlerësim' : 'vlerësime'})</span>}
     </div>
   );
 }
@@ -136,7 +136,7 @@ export default function DealDetails() {
   const images = deal.images?.length > 0 ? deal.images : [{ url: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800' }];
   const soldPercent = Math.min(100, Math.round((deal.soldVouchers / deal.totalVouchers) * 100));
 
-  const statusLabel = deal.status === 'active' ? t('deal.status_active') : deal.status === 'sold_out' ? t('deal.status_sold_out') : t('deal.status_expired');
+  const statusLabel = deal.status === 'active' ? 'Aktive' : deal.status === 'sold_out' ? 'Shitur' : 'Skaduar';
 
   const handleBuyNow = () => {
     if (!isAuthenticated) { toast.error(t('deal.login_to_buy')); navigate('/login?redirect=' + encodeURIComponent(`/deals/${slug}`)); return; }
@@ -241,7 +241,7 @@ export default function DealDetails() {
                   </>
                 )}
                 <div className="absolute top-3 left-3 flex gap-2">
-                  <span className="badge bg-red-500 text-white font-bold text-sm">-{Math.round(deal.discountPercentage)}%</span>
+                  <span className="badge bg-red-500 text-white font-bold text-sm">{deal.dealType === 'fixed_discount' ? 'Fikse' : `-${Math.round(deal.discountPercentage)}%`}</span>
                   {deal.dealType === 'flash' && <span className="badge bg-orange-500 text-white flex items-center gap-1"><Zap size={10} />{t('deal.flash')}</span>}
                 </div>
                 <div className="absolute top-3 right-3 flex gap-2">
@@ -273,7 +273,7 @@ export default function DealDetails() {
                   <h1 className="text-2xl md:text-3xl font-bold text-gray-900 font-display leading-snug">{deal.title}</h1>
                 </div>
                 <div className="flex items-center gap-1 text-xs text-gray-400">
-                  <Eye size={14} />{deal.views?.toLocaleString()} {t('deal.views')}
+                  <Eye size={14} />{deal.views?.toLocaleString()} shikime
                 </div>
               </div>
 
@@ -286,21 +286,21 @@ export default function DealDetails() {
 
             {/* Business Info */}
             <div className="card p-6">
-              <h3 className="font-bold text-gray-900 text-lg mb-4">{t('deal.about_business')}</h3>
+              <h3 className="font-bold text-gray-900 text-lg mb-4">Rreth Biznesit</h3>
               <div className="flex items-start gap-4">
                 <img
                   src={deal.business?.logo ? getImageUrl(deal.business.logo, 80) : `https://ui-avatars.com/api/?name=${deal.business?.name}&background=1a3f8a&color=fff&size=60`}
                   alt={deal.business?.name}
-                  className="w-16 h-16 rounded-2xl object-cover"
+                  className="w-16 h-16 rounded-2xl object-cover flex-shrink-0"
                 />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h4 className="font-bold text-gray-900">{deal.business?.name}</h4>
                     {deal.business?.verificationStatus === 'verified' && (
-                      <CheckCircle size={18} className="text-brand-600" />
+                      <CheckCircle size={18} className="text-brand-600 flex-shrink-0" />
                     )}
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-500">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
                     <div className="flex items-center gap-1"><MapPin size={14} />{[deal.business?.address, deal.business?.city].filter(Boolean).join(', ')}</div>
                     {deal.business?.averageRating > 0 && (
                       <div className="flex items-center gap-1"><Star size={14} className="text-amber-400" fill="currentColor" />{deal.business.averageRating.toFixed(1)}</div>
@@ -308,7 +308,7 @@ export default function DealDetails() {
                   </div>
                   <div className="flex flex-wrap gap-3 mt-3">
                     {deal.business?.phone && <a href={`tel:${deal.business.phone}`} className="flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700"><Phone size={14} />{deal.business.phone}</a>}
-                    {deal.business?.website && <a href={deal.business.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700"><Globe size={14} />Website</a>}
+                    {deal.business?.website && <a href={deal.business.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700"><Globe size={14} />{deal.business.website.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}</a>}
                     {deal.business?.socialLinks?.instagram && <a href={`https://instagram.com/${deal.business.socialLinks.instagram}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm text-pink-600 hover:text-pink-700"><Instagram size={14} />@{deal.business.socialLinks.instagram}</a>}
                     {(deal.business?.address || deal.business?.city) && (
                       <a
@@ -322,8 +322,8 @@ export default function DealDetails() {
                     )}
                   </div>
                 </div>
-                <Link to={`/business/${deal.business?.slug}`} className="btn-secondary text-xs py-2 px-3">{t('common.view')} →</Link>
               </div>
+              <Link to={`/business/${deal.business?.slug}`} className="btn-secondary text-xs py-2 px-4 mt-4 inline-flex whitespace-nowrap">Shiko Biznesin →</Link>
             </div>
 
             {/* One per table */}
@@ -458,8 +458,8 @@ export default function DealDetails() {
                 <div className="py-4 border-t border-b border-gray-100 mb-4">
                   <div className="flex items-baseline gap-3 mb-1">
                     <span className="text-3xl font-black text-brand-700 font-display">{formatCurrency(deal.discountedPrice)}</span>
-                    <span className="text-lg text-gray-400 line-through">{formatCurrency(deal.originalPrice)}</span>
-                    <span className="badge bg-red-500 text-white font-bold">-{Math.round(deal.discountPercentage)}%</span>
+                    {deal.dealType !== 'fixed_discount' && <span className="text-lg text-gray-400 line-through">{formatCurrency(deal.originalPrice)}</span>}
+                    <span className="badge bg-red-500 text-white font-bold">{deal.dealType === 'fixed_discount' ? 'Fikse' : `-${Math.round(deal.discountPercentage)}%`}</span>
                   </div>
                   <p className="text-green-600 font-medium text-sm">✓ {t('deal.save')} {formatCurrency(deal.savingsAmount)}</p>
                 </div>
@@ -528,7 +528,7 @@ export default function DealDetails() {
                 </div>
                 <div className="mt-3 flex items-center justify-between">
                   <div className="flex items-center gap-1 text-sm"><Star size={14} className="text-amber-400" fill="currentColor" /><span className="font-medium">{deal.business?.averageRating?.toFixed(1) || '—'}</span><span className="text-gray-400">({deal.business?.totalReviews || 0})</span></div>
-                  <Link to={`/business/${deal.business?.slug}`} className="text-xs text-brand-600 hover:text-brand-700 font-medium">{t('common.view')} →</Link>
+                  <Link to={`/business/${deal.business?.slug}`} className="text-xs text-brand-600 hover:text-brand-700 font-medium whitespace-nowrap">Shiko →</Link>
                 </div>
               </div>
             </div>

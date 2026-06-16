@@ -13,6 +13,10 @@ import { useNavigate } from 'react-router-dom';
 
 const MapPicker = lazy(() => import('../../components/common/MapPicker'));
 
+const DAYS_EN = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const DAYS_SQ = ['E Hënë', 'E Martë', 'E Mërkurë', 'E Enjte', 'E Premte', 'E Shtunë', 'E Diel'];
+const DEFAULT_HOURS = DAYS_EN.map((day) => ({ day, open: '09:00', close: '17:00', isClosed: true }));
+
 export default function BusinessProfile() {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -23,6 +27,7 @@ export default function BusinessProfile() {
   const [logoPreview, setLogoPreview] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
+  const [hours, setHours] = useState(DEFAULT_HOURS);
   const [showContract, setShowContract] = useState(false);
   const [pendingFormData, setPendingFormData] = useState(null);
 
@@ -58,6 +63,14 @@ export default function BusinessProfile() {
       setCoverPreview(business.coverImage);
       const coords = business.location?.coordinates;
       if (coords?.length === 2) setEditMapPos([coords[1], coords[0]]); // GeoJSON is [lng, lat]
+      if (business.businessHours?.length > 0) {
+        setHours(DAYS_EN.map((day) => {
+          const existing = business.businessHours.find((h) => h.day === day);
+          return existing
+            ? { day, open: existing.open || '09:00', close: existing.close || '17:00', isClosed: existing.isClosed ?? false }
+            : { day, open: '09:00', close: '17:00', isClosed: true };
+        }));
+      }
     }
   }, [business, reset]);
 
@@ -75,6 +88,12 @@ export default function BusinessProfile() {
     mutationFn: (fd) => api.post('/businesses/my/documents', fd, { headers: { 'Content-Type': 'multipart/form-data' } }),
     onSuccess: () => { toast.success('Dokumenti u ngarkua!'); qc.invalidateQueries(['business', 'my']); },
     onError: () => toast.error(t('common.error')),
+  });
+
+  const hoursMutation = useMutation({
+    mutationFn: (hoursData) => api.patch('/businesses/my', { businessHours: hoursData }),
+    onSuccess: () => { qc.invalidateQueries(['business', 'my']); toast.success('Oraret u ruajtën me sukses!'); },
+    onError: () => toast.error('Ndodhi një gabim. Provo përsëri.'),
   });
 
   const onSubmit = (data) => {
@@ -284,7 +303,7 @@ export default function BusinessProfile() {
 
       {/* Tabs */}
       <div className="flex gap-3 mb-6 border-b border-gray-200">
-        {[{ id: 'info', label: t('business.info_tab') }, { id: 'images', label: t('business.images_tab') }].map(({ id, label }) => (
+        {[{ id: 'info', label: t('business.info_tab') }, { id: 'images', label: t('business.images_tab') }, { id: 'hours', label: 'Oraret' }].map(({ id, label }) => (
           <button key={id} onClick={() => setActiveTab(id)}
             className={`pb-3 px-1 text-sm font-medium border-b-2 transition-all ${activeTab === id ? 'border-brand-600 text-brand-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
             {label}
@@ -354,6 +373,54 @@ export default function BusinessProfile() {
             </button>
           </div>
         </form>
+      )}
+
+      {activeTab === 'hours' && (
+        <div className="card p-6">
+          <div className="flex items-center gap-2 mb-2">
+            <Clock size={18} className="text-brand-600" />
+            <h3 className="font-bold text-gray-900">Oraret e Punës</h3>
+          </div>
+          <p className="text-sm text-gray-500 mb-5">Vendosni orarin e çdo dite. Klientët do ta shohin në profilin tuaj publik.</p>
+          <div className="space-y-3">
+            {hours.map((h, i) => (
+              <div key={h.day} className="flex items-center gap-3 py-2 border-b border-gray-100 last:border-0">
+                <span className="w-24 text-sm font-medium text-gray-700 flex-shrink-0">{DAYS_SQ[i]}</span>
+                <label className="flex items-center gap-1.5 cursor-pointer select-none flex-shrink-0">
+                  <div
+                    onClick={() => setHours((prev) => prev.map((d, idx) => idx === i ? { ...d, isClosed: !d.isClosed } : d))}
+                    className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer ${!h.isClosed ? 'bg-brand-600' : 'bg-gray-200'}`}
+                  >
+                    <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${!h.isClosed ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  </div>
+                  <span className={`text-xs font-medium ${!h.isClosed ? 'text-brand-600' : 'text-gray-400'}`}>{!h.isClosed ? 'Hapur' : 'Mbyllur'}</span>
+                </label>
+                {!h.isClosed && (
+                  <div className="flex items-center gap-2 flex-1">
+                    <input
+                      type="time" value={h.open}
+                      onChange={(e) => setHours((prev) => prev.map((d, idx) => idx === i ? { ...d, open: e.target.value } : d))}
+                      className="border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-brand-500 w-28"
+                    />
+                    <span className="text-gray-400 text-sm">–</span>
+                    <input
+                      type="time" value={h.close}
+                      onChange={(e) => setHours((prev) => prev.map((d, idx) => idx === i ? { ...d, close: e.target.value } : d))}
+                      className="border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-brand-500 w-28"
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={() => hoursMutation.mutate(hours)}
+            disabled={hoursMutation.isPending}
+            className="btn-primary flex items-center gap-2 mt-6"
+          >
+            {hoursMutation.isPending ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Duke ruajtur...</> : <><Save size={16} />Ruaj Oraret</>}
+          </button>
+        </div>
       )}
 
       {activeTab === 'images' && (

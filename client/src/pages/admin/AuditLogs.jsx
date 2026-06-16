@@ -5,10 +5,10 @@ import api from '../../api/axios';
 import { formatDate } from '../../utils/formatters';
 
 const SEVERITY_MAP = {
-  low: { label: 'Low', cls: 'bg-gray-700 text-gray-400' },
-  medium: { label: 'Medium', cls: 'bg-blue-900/50 text-blue-400' },
-  high: { label: 'High', cls: 'bg-amber-900/50 text-amber-400' },
-  critical: { label: 'Critical', cls: 'bg-red-900/50 text-red-400' },
+  low: { label: 'E ulët', cls: 'bg-gray-700 text-gray-400' },
+  medium: { label: 'Mesatare', cls: 'bg-blue-900/50 text-blue-400' },
+  high: { label: 'E lartë', cls: 'bg-amber-900/50 text-amber-400' },
+  critical: { label: 'Kritike', cls: 'bg-red-900/50 text-red-400' },
 };
 
 export default function AdminAuditLogs() {
@@ -52,11 +52,19 @@ export default function AdminAuditLogs() {
         <div className="space-y-2">{Array.from({ length: 10 }).map((_, i) => <div key={i} className="h-14 bg-gray-800 skeleton rounded-xl" />)}</div>
       ) : (
         <div className="bg-gray-800 rounded-2xl border border-gray-700 overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[520px]">
             <thead>
               <tr className="border-b border-gray-700">
-                {['Koha', 'Aktori', 'Veprimi', 'Burimi', 'IP', 'Niveli'].map((h) => (
-                  <th key={h} className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">{h}</th>
+                {[
+                  { h: 'Koha', cls: '' },
+                  { h: 'Aktori', cls: '' },
+                  { h: 'Veprimi', cls: '' },
+                  { h: 'Burimi', cls: 'hidden md:table-cell' },
+                  { h: 'IP', cls: 'hidden md:table-cell' },
+                  { h: 'Niveli', cls: '' },
+                ].map(({ h, cls }) => (
+                  <th key={h} className={`text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3 ${cls}`}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -68,21 +76,22 @@ export default function AdminAuditLogs() {
                     <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{formatDate(log.createdAt)}</td>
                     <td className="px-4 py-3">
                       <div>
-                        <p className="text-sm text-gray-200">{log.actor?.firstName} {log.actor?.lastName}</p>
+                        <p className="text-sm text-gray-200 whitespace-nowrap">{log.actor?.firstName} {log.actor?.lastName}</p>
                         <p className="text-xs text-gray-600 capitalize">{log.actor?.role}</p>
                       </div>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-brand-400">{log.action}</td>
-                    <td className="px-4 py-3 text-xs text-gray-400">{log.resource?.type} {log.endpoint && <span className="text-gray-600">· {log.endpoint}</span>}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-gray-500">{log.ipAddress}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-brand-400 max-w-[140px] truncate">{log.action}</td>
+                    <td className="hidden md:table-cell px-4 py-3 text-xs text-gray-400">{log.resource?.type} {log.endpoint && <span className="text-gray-600">· {log.endpoint}</span>}</td>
+                    <td className="hidden md:table-cell px-4 py-3 font-mono text-xs text-gray-500">{log.ipAddress}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${sv.cls}`}>{sv.label}</span>
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap ${sv.cls}`}>{sv.label}</span>
                     </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
+          </div>
           {data?.pagination?.pages > 1 && (
             <div className="flex justify-center gap-2 py-4 border-t border-gray-700">
               <button onClick={() => setPage((p) => p - 1)} disabled={!data.pagination.hasPrev} className="px-4 py-2 rounded-xl border border-gray-600 text-sm text-gray-300 disabled:opacity-40">← Para</button>

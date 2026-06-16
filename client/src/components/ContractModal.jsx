@@ -5,6 +5,7 @@ const CONTRACT_VERSION = 'v1.0';
 const PLATFORM_NIPT = 'L91234567C';
 
 function buildContractHTML({ businessName, ownerName, signedAt, commissionRate, markupRate }) {
+  const markupPct = markupRate <= 1 ? Math.round(markupRate * 100) : Math.round(markupRate);
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Kontratë — ${businessName}</title><style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Times New Roman',Times,serif;background:#fff;color:#111;padding:40px;max-width:800px;margin:0 auto;font-size:13px;line-height:1.8}
@@ -49,10 +50,11 @@ function buildContractHTML({ businessName, ownerName, signedAt, commissionRate, 
 
   <h2>2. Tarifa e Platformës</h2>
   <ul>
-    <li><strong>Biznesi nuk paguan asnjë komision.</strong> Tarifa e platformës është <strong>${markupRate}% markup</strong> i shtuar mbi çmimin bazë të biznesit dhe paguhet ekskluzivisht nga klienti.</li>
-    <li>Klienti paguan: çmimi juaj bazë + ${markupRate}% markup platformës.</li>
-    <li>Biznesi merr: çmimin e tij bazë të plotë, pa asnjë zbritje.</li>
-    <li>Nuk ka kosto fikse, abonime mujore, apo tarifa regjistrimi.</li>
+    <li><strong>Biznesi nuk paguan asnjë komision.</strong> Tarifa e platformës është <strong>${markupPct}% markup</strong> i shtuar mbi çmimin bazë të biznesit dhe paguhet ekskluzivisht nga klienti.</li>
+    <li>Klienti paguan: çmimi juaj bazë + ${markupPct}% markup platformës.</li>
+    <li>Biznesi merr: çmimin e tij bazë të plotë, pa asnjë zbritje komision.</li>
+    <li><strong>Plani Falas:</strong> deri në 2 deals aktive dhe 10 kupon/deal — pa kosto mujore.</li>
+    <li><strong>Plani Pro (1,500 ALL/muaj):</strong> deals dhe kupon të pakufizuara — markup ${markupPct}% vazhdon të aplikohet.</li>
     <li>Platforma ka të drejtë të ndryshojë tarifat me njoftim paraprak prej 30 ditësh.</li>
   </ul>
 
@@ -190,7 +192,8 @@ export default function ContractModal({ businessName, ownerName, onAccept, onDec
               <li><strong>Biznesi nuk paguan asnjë komision.</strong> Ju merrni çmimin tuaj bazë të plotë.</li>
               <li>Platforma shton automatikisht <strong>9% markup</strong> mbi çmimin tuaj bazë; ky markup paguhet ekskluzivisht nga klienti dhe i takon platformës.</li>
               <li>Klienti paguan: çmimi juaj bazë + 9% markup platformës.</li>
-              <li>Nuk ka kosto fikse, abonime mujore, apo tarifa regjistrimi.</li>
+              <li><strong>Plani Falas:</strong> deri në 2 deals aktive dhe 10 kupon/deal — pa kosto mujore.</li>
+              <li><strong>Plani Pro (1,500 ALL/muaj):</strong> deals dhe kupon të pakufizuara — markup 9% vazhdon të aplikohet.</li>
               <li>Platforma mund të ndryshojë tarifat me njoftim 30-ditor paraprak.</li>
             </ul>
           </section>

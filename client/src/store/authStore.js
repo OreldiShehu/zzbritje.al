@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import api from '../api/axios';
+import queryClient from '../lib/queryClient';
 
 export const useAuthStore = create(
   persist(
@@ -23,6 +24,7 @@ export const useAuthStore = create(
         try { await api.post('/auth/logout'); } catch {}
         delete api.defaults.headers.common['Authorization'];
         set({ user: null, accessToken: null, isAuthenticated: false });
+        queryClient.clear();
       },
 
       refreshAuth: async () => {

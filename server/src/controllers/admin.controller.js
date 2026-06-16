@@ -32,13 +32,13 @@ exports.getDashboardStats = catchAsync(async (req, res) => {
     Deal.countDocuments(),
     Deal.countDocuments({ status: 'active' }),
     Voucher.countDocuments(),
-    Transaction.aggregate([{ $match: { paymentStatus: 'completed' } }, { $group: { _id: null, total: { $sum: '$commissionAmount' } } }]),
+    Transaction.aggregate([{ $match: { paymentStatus: 'completed' } }, { $group: { _id: null, total: { $sum: { $add: ['$commissionAmount', { $ifNull: ['$platformMarkup', 0] }] } } } }]),
     Transaction.find({ createdAt: { $gte: sevenDaysAgo }, paymentStatus: 'completed' })
       .populate('user', 'firstName lastName').populate('deal', 'title').sort({ createdAt: -1 }).limit(10),
     SupportTicket.countDocuments({ status: { $in: ['open', 'in_progress'] } }),
     Transaction.aggregate([
       { $match: { createdAt: { $gte: thirtyDaysAgo }, paymentStatus: 'completed' } },
-      { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, revenue: { $sum: '$commissionAmount' }, transactions: { $sum: 1 } } },
+      { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, revenue: { $sum: { $add: ['$commissionAmount', { $ifNull: ['$platformMarkup', 0] }] } }, transactions: { $sum: 1 } } },
       { $sort: { _id: 1 } },
     ]),
     User.aggregate([

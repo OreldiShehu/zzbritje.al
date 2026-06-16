@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit, Trash2, Tag, ChevronRight, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Tag, ChevronRight, X, Sparkles } from 'lucide-react';
 import api from '../../api/axios';
 import toast from 'react-hot-toast';
 
@@ -82,6 +82,12 @@ export default function AdminCategories() {
     onError: (err) => toast.error(err.response?.data?.message || 'Nuk mund ta fshij — ka deal-e aktive.'),
   });
 
+  const seedMutation = useMutation({
+    mutationFn: () => api.post('/admin/categories/seed-defaults'),
+    onSuccess: (res) => { qc.invalidateQueries(['categories']); toast.success(res.data.message || '20 kategori u shtuan!'); },
+    onError: () => toast.error('Ndodhi një gabim.'),
+  });
+
   const rootCategories = (categories || []).filter((c) => !c.parent);
   const getChildren = (parentId) => (categories || []).filter((c) => c.parent === parentId || c.parent?._id === parentId);
 
@@ -92,9 +98,20 @@ export default function AdminCategories() {
           <h1 className="text-2xl font-bold text-gray-100">Kategoritë</h1>
           <p className="text-gray-500 text-sm">{categories?.length || 0} kategori gjithsej</p>
         </div>
-        <button onClick={() => setModal({ type: 'create' })} className="bg-brand-600 hover:bg-brand-700 text-white font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 transition-colors text-sm">
-          <Plus size={16} />Krijo Kategori
-        </button>
+        <div className="flex gap-2">
+          {(categories?.length || 0) === 0 && (
+            <button
+              onClick={() => { if (window.confirm('Shto 20 kategoritë standarde shqip?')) seedMutation.mutate(); }}
+              disabled={seedMutation.isPending}
+              className="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 transition-colors text-sm"
+            >
+              <Sparkles size={16} />{seedMutation.isPending ? 'Duke shtuar...' : 'Shto 20 Kategori'}
+            </button>
+          )}
+          <button onClick={() => setModal({ type: 'create' })} className="bg-brand-600 hover:bg-brand-700 text-white font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 transition-colors text-sm">
+            <Plus size={16} />Krijo Kategori
+          </button>
+        </div>
       </div>
 
       {isLoading ? (

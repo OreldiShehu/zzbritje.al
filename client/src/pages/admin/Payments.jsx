@@ -45,7 +45,7 @@ export default function AdminPayments() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         {[
           { label: 'Të Ardhura Totale', value: formatCurrency(summary.total || 0), icon: DollarSign, color: 'text-green-400', bg: 'bg-green-900/20' },
           { label: 'Markup Platformës (9%)', value: formatCurrency(summary.commission || 0), icon: DollarSign, color: 'text-brand-400', bg: 'bg-brand-900/20' },
@@ -97,7 +97,7 @@ export default function AdminPayments() {
                       <td className="px-4 py-3 text-sm text-gray-300">{tx.user?.firstName} {tx.user?.lastName}</td>
                       <td className="px-4 py-3 text-sm text-gray-400 max-w-[120px] truncate">{tx.deal?.title}</td>
                       <td className="px-4 py-3 font-bold text-gray-100">{formatCurrency(tx.total || 0)}</td>
-                      <td className="px-4 py-3 text-sm text-green-400">{formatCurrency(tx.commissionAmount || 0)}</td>
+                      <td className="px-4 py-3 text-sm text-green-400">{formatCurrency(tx.platformMarkup || 0)}</td>
                       <td className="px-4 py-3 text-xs text-gray-500 capitalize">{tx.paymentMethod || '—'}</td>
                       <td className="px-4 py-3 text-xs text-gray-500">{formatDate(tx.createdAt)}</td>
                       <td className="px-4 py-3"><span className={`text-xs px-2 py-1 rounded-full font-medium ${s.cls}`}>{s.label}</span></td>

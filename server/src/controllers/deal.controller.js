@@ -118,6 +118,17 @@ exports.createDeal = catchAsync(async (req, res, next) => {
     return next(new AppError(`PLAN_LIMIT_VOUCHERS:Plani falas lejon maksimumi ${voucherLimit} vouchers për deal. Kaloni në Pro për vouchers të pakufizuara.`, 400));
   }
 
+  // Server-side price sanity: customerPrice must be below originalPrice for non-fixed deals
+  const dealTypeSafe = req.body.dealType;
+  const origPrice = parseFloat(req.body.originalPrice);
+  const bizPrice = parseFloat(req.body.businessPrice);
+  if (dealTypeSafe !== 'fixed_discount' && origPrice > 0 && bizPrice > 0) {
+    const customerPriceSafe = Math.round(bizPrice * 1.09);
+    if (customerPriceSafe >= origPrice) {
+      return next(new AppError('Çmimi i klientit (çmimi juaj + 9%) nuk mund të jetë më i lartë se çmimi origjinal. Rishikoni çmimet.', 400));
+    }
+  }
+
   const images = (req.files || [])
     .filter((f) => f.path)
     .map((f, i) => ({ url: f.path, publicId: f.filename || '', isMain: i === 0 }));

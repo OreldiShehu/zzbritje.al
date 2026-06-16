@@ -75,7 +75,7 @@ export default function DealCard({ deal, featured = false }) {
             </div>
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-brand-50 via-blue-50 to-purple-50">
-              <p className="text-5xl font-black text-brand-200 leading-none">-{Math.round(deal.discountPercentage)}%</p>
+              <p className="text-5xl font-black text-brand-200 leading-none">{deal.dealType === 'fixed_discount' ? 'Fikse' : `-${Math.round(deal.discountPercentage)}%`}</p>
               <p className="text-brand-400 text-xs font-semibold mt-2 uppercase tracking-wide">{deal.category?.name || deal.city || 'Ofertë'}</p>
             </div>
           )}

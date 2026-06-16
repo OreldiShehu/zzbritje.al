@@ -50,6 +50,10 @@ export default function AdminDeals() {
     expired: 'bg-gray-700 text-gray-400',
     sold_out: 'bg-purple-900/50 text-purple-400',
   };
+  const STATUS_LABEL = {
+    active: 'Aktive', pending_review: 'Në shqyrtim', rejected: 'Refuzuar',
+    expired: 'Skaduar', sold_out: 'Shitur',
+  };
 
   const STATUS_FILTERS = [
     { v: '', l: t('admin_ui.all_statuses') },
@@ -75,10 +79,10 @@ export default function AdminDeals() {
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('common.search')}
             className="w-full bg-gray-700 border border-gray-600 rounded-xl pl-9 pr-3 py-2.5 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-brand-500" />
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide flex-nowrap">
           {STATUS_FILTERS.map(({ v, l }) => (
             <button key={v} onClick={() => { setStatus(v); setPage(1); }}
-              className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${status === v ? 'bg-brand-600 text-white' : 'border border-gray-600 text-gray-300 hover:bg-gray-700'}`}>{l}</button>
+              className={`flex-shrink-0 whitespace-nowrap px-3 py-2 rounded-xl text-sm font-medium transition-all ${status === v ? 'bg-brand-600 text-white' : 'border border-gray-600 text-gray-300 hover:bg-gray-700'}`}>{l}</button>
           ))}
         </div>
       </div>
@@ -94,8 +98,8 @@ export default function AdminDeals() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h3 className="font-semibold text-gray-100 truncate">{deal.title}</h3>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_BADGE[deal.status] || 'bg-gray-700 text-gray-400'}`}>{deal.status}</span>
-                    {deal.isFeatured && <span className="text-xs bg-amber-900/50 text-amber-400 px-2 py-0.5 rounded-full">⭐ Featured</span>}
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${STATUS_BADGE[deal.status] || 'bg-gray-700 text-gray-400'}`}>{STATUS_LABEL[deal.status] || deal.status}</span>
+                    {deal.isFeatured && <span className="text-xs bg-amber-900/50 text-amber-400 px-2 py-0.5 rounded-full">⭐ E veçantë</span>}
                   </div>
                   <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
                     <span>{deal.business?.businessName}</span>

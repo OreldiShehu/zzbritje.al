@@ -126,7 +126,7 @@ export default function BusinessDeals() {
                     <span className="text-brand-600 font-bold">{formatCurrency(deal.discountedPrice)}</span>
                     <span className="text-gray-400 line-through text-xs ml-2">{formatCurrency(deal.originalPrice)}</span>
                   </div>
-                  <span className="text-xs bg-red-50 text-red-600 font-bold px-2 py-0.5 rounded-full">-{deal.discountPercentage}%</span>
+                  <span className="text-xs bg-red-50 text-red-600 font-bold px-2 py-0.5 rounded-full">{deal.dealType === 'fixed_discount' ? 'Fikse' : `-${deal.discountPercentage}%`}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-gray-400 mb-4">
                   <span><Eye size={12} className="inline mr-1" />{deal.views || 0} shikime</span>
