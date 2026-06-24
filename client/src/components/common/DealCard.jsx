@@ -84,10 +84,12 @@ export default function DealCard({ deal, featured = false }) {
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
             {deal.dealType === 'fixed_discount' ? (
               <span className="badge bg-red-500 text-white font-bold text-sm shadow-sm">Fikse</span>
-            ) : (
+            ) : deal.discountPercentage > 0 ? (
               <span className="badge bg-red-500 text-white font-bold text-sm shadow-sm">
                 -{Math.round(deal.discountPercentage)}%
               </span>
+            ) : (
+              <span className="badge bg-blue-500 text-white font-bold text-sm shadow-sm">Ofertë</span>
             )}
             {deal.dealType === 'flash' && (
               <span className="badge bg-orange-500 text-white flex items-center gap-1"><Zap size={10} /> {t('deal.flash')}</span>
@@ -187,9 +189,13 @@ export default function DealCard({ deal, featured = false }) {
           )}
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-xs text-gray-400 line-through">{formatCurrency(deal.originalPrice)}</p>
+              {deal.originalPrice > deal.discountedPrice && (
+                <p className="text-xs text-gray-400 line-through">{formatCurrency(deal.originalPrice)}</p>
+              )}
               <p className="text-xl font-black text-brand-700">{formatCurrency(deal.discountedPrice)}</p>
-              <p className="text-xs text-green-600 font-medium">{t('deal.save')} {formatCurrency(deal.savingsAmount)}</p>
+              {deal.originalPrice > deal.discountedPrice && deal.savingsAmount > 0 && (
+                <p className="text-xs text-green-600 font-medium">{t('deal.save')} {formatCurrency(deal.savingsAmount)}</p>
+              )}
             </div>
             <div className="flex items-center gap-1 text-xs text-gray-400">
               <ShoppingCart size={12} />

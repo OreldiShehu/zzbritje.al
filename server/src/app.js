@@ -59,7 +59,7 @@ app.use(cors({
     // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
     // Allow any vercel.app subdomain (covers preview + production deploys)
-    if (origin.endsWith('.vercel.app') || allowedOrigins.includes(origin)) {
+    if (origin.endsWith('.vercel.app') || origin.endsWith('.zbritje.site') || origin === 'https://zbritje.site' || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     callback(new Error('Not allowed by CORS'));
