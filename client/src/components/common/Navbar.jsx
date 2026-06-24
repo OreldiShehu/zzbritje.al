@@ -119,7 +119,6 @@ export default function Navbar() {
                 alt="Zbritje.al"
                 className="h-8 sm:h-9 w-auto object-contain"
               />
-              <span className="font-black text-lg text-gray-900 font-display tracking-tight">Zbritje<span className="text-brand-600">.al</span></span>
             </Link>
 
             {/* Search */}
