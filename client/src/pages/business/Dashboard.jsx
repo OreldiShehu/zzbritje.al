@@ -9,7 +9,7 @@ import {
   AlertCircle, CheckCircle, Clock, Banknote, Building2, Info, Crown,
 } from 'lucide-react';
 
-const WA_NUMBER = '355692866668';
+const WA_NUMBER = '447444842624';
 const WA_MSG = encodeURIComponent('Përshëndetje, dua të kaloj në planin Pro (1,500 ALL/muaj) për biznesin tim në Zbritje.al');
 const WA_URL = `https://wa.me/${WA_NUMBER}?text=${WA_MSG}`;
 import { useTranslation } from 'react-i18next';

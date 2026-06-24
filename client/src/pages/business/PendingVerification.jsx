@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Clock, CheckCircle, MessageCircle, Store } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const WA_NUMBER = '355692866668';
+const WA_NUMBER = '447444842624';
 const WA_MSG = encodeURIComponent('Përshëndetje, sapo regjistrova biznesin tim në Zbritje.al dhe dua të informoj ekipin tuaj. Ju lutem shqyrtojeni sa më shpejt. Faleminderit!');
 
 const STEPS = [

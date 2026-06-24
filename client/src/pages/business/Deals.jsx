@@ -7,7 +7,7 @@ import api from '../../api/axios';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import toast from 'react-hot-toast';
 
-const WA_ADMIN = '355692866668';
+const WA_ADMIN = '447444842624';
 const FREE_DEAL_LIMIT = 2;
 
 const STATUS_BADGE = {

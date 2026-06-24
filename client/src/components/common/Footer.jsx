@@ -43,8 +43,8 @@ export default function Footer() {
             <a href="mailto:zbritje.al2026@gmail.com" className="flex items-center gap-2 hover:text-white transition-colors">
               <Mail size={15} className="text-brand-400" /> zbritje.al2026@gmail.com
             </a>
-            <a href="tel:+355692866668" className="flex items-center gap-2 hover:text-white transition-colors">
-              <Phone size={15} className="text-brand-400" /> +355 69 2866668
+            <a href="tel:+447444842624" className="flex items-center gap-2 hover:text-white transition-colors">
+              <Phone size={15} className="text-brand-400" /> +44 7444 842624
             </a>
             <span className="flex items-center gap-2">
               <MapPin size={15} className="text-brand-400" />Tiranë

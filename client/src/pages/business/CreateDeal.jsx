@@ -9,7 +9,7 @@ import { DEAL_TYPES, CITIES } from '../../utils/constants';
 import { formatCurrency } from '../../utils/formatters';
 import toast from 'react-hot-toast';
 
-const WA_NUMBER = '355692866668';
+const WA_NUMBER = '447444842624';
 const WA_MSG = encodeURIComponent('Përshëndetje, dua të kaloj në planin Pro (1,500 ALL/muaj) për biznesin tim në Zbritje.al');
 const WA_URL = `https://wa.me/${WA_NUMBER}?text=${WA_MSG}`;
 
