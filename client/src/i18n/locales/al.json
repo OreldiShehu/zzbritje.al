@@ -89,7 +89,7 @@
     "how_cta": "Filloni të Kurseni Tani →",
     "how_steps": [
       { "title": "Kërko & Zbulo", "desc": "Shfletoni qindra oferta nga bizneset më të mira në qytetin tuaj. Filtroni sipas kategorisë, çmimit dhe zbritjes." },
-      { "title": "Blej me Siguri", "desc": "Blini kuponin me pagesa të sigurta. Pranojmë kartë bankare. Garanci kthimi 14 ditë." },
+      { "title": "Blej me Siguri", "desc": "Blini kuponin me pagesa të sigurta. Pranojmë cash. Garanci kthimi 3 ditë." },
       { "title": "Merr QR Code", "desc": "Merrni kuponin me kod unik dhe QR Code direkt në email dhe dashboard tuaj personal." },
       { "title": "Shijoje & Kurseje", "desc": "Paraqitni QR Code-in te biznesi dhe shijojeni shërbimin me çmimin e zbritur. Kaq e thjeshtë!" }
     ],
@@ -450,6 +450,6 @@
     "report": "Raport Problem",
     "cities_title": "Oferta sipas Qytetit",
     "copyright": "Të gjitha të drejtat të rezervuara",
-    "made_in": "Bërë në 🇦🇱 Shqipëri"
+    
   }
 }

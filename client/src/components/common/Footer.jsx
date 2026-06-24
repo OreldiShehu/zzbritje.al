@@ -40,14 +40,14 @@ export default function Footer() {
           </p>
           {/* Contact */}
           <div className="flex flex-col items-center gap-2 text-sm mb-5">
-            <a href="mailto:info@zbritje.al" className="flex items-center gap-2 hover:text-white transition-colors">
-              <Mail size={15} className="text-brand-400" /> info@zbritje.al
+            <a href="mailto:zbritje.al2026@gmail.com" className="flex items-center gap-2 hover:text-white transition-colors">
+              <Mail size={15} className="text-brand-400" /> zbritje.al2026@gmail.com
             </a>
-            <a href="tel:+355696000000" className="flex items-center gap-2 hover:text-white transition-colors">
-              <Phone size={15} className="text-brand-400" /> +355 69 600 0000
+            <a href="tel:+355692866668" className="flex items-center gap-2 hover:text-white transition-colors">
+              <Phone size={15} className="text-brand-400" /> +355 69 2866668
             </a>
             <span className="flex items-center gap-2">
-              <MapPin size={15} className="text-brand-400" /> Rruga e Kavajës, Tiranë
+              <MapPin size={15} className="text-brand-400" />Tiranë
             </span>
           </div>
           {/* Social */}
@@ -95,7 +95,6 @@ export default function Footer() {
         <div className="container-custom py-5 flex flex-col items-center gap-2 text-xs text-gray-500 text-center">
           <p>© {new Date().getFullYear()} Zbritje.al — {t('footer.copyright')}</p>
           <span className="flex items-center gap-1.5">
-            <Zap size={12} className="text-brand-500" />{t('footer.made_in')}
           </span>
         </div>
       </div>

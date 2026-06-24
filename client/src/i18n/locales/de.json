@@ -89,7 +89,7 @@
     "how_cta": "Jetzt Anfangen zu Sparen →",
     "how_steps": [
       { "title": "Suchen & Entdecken", "desc": "Durchsuchen Sie hunderte Angebote von den besten Unternehmen in Ihrer Stadt." },
-      { "title": "Sicher Kaufen", "desc": "Kaufen Sie den Gutschein mit sicheren Zahlungen. 14-Tage-Rückgabegarantie." },
+      { "title": "Sicher Kaufen", "desc": "Kaufen Sie den Gutschein mit sicheren Zahlungen. 3-Tage-Rückgabegarantie." },
       { "title": "QR-Code Erhalten", "desc": "Erhalten Sie Ihren Gutschein mit einzigartigem Code und QR-Code per E-Mail." },
       { "title": "Genießen & Sparen", "desc": "Zeigen Sie den QR-Code im Unternehmen und genießen Sie den Service zum Sonderpreis." }
     ],
@@ -137,7 +137,7 @@
     "related": "Ähnliche Angebote",
     "login_to_buy": "Bitte melden Sie sich an, um zu kaufen!",
     "quantity": "Menge:",
-    "trust_return": "14-Tage-Rückgabegarantie",
+    "trust_return": "3-Tage-Rückgabegarantie",
     "trust_secure": "Sichere Zahlung 256-Bit-SSL",
     "trust_buyers": "Personen haben dies gekauft",
     "status_active": "Aktiv",
