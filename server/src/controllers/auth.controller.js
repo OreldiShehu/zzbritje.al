@@ -56,8 +56,7 @@ exports.register = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   try {
-    const emailData = templates.welcome(user);
-    emailData.html = emailData.html.replace('${user._verifyToken}', verifyToken);
+    const emailData = templates.welcome(user, verifyToken);
     await sendEmail({ to: user.email, ...emailData });
   } catch (err) {
     user.emailVerificationToken = undefined;
@@ -174,8 +173,7 @@ exports.resendVerificationEmail = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   try {
-    const emailData = templates.welcome(user);
-    emailData.html = emailData.html.replace('${user._verifyToken}', verifyToken);
+    const emailData = templates.welcome(user, verifyToken);
     await sendEmail({ to: user.email, ...emailData });
   } catch (err) {
     console.error('Resend verification email failed:', err?.message || err);

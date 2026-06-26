@@ -49,14 +49,14 @@ const footer = `
 `;
 
 const header = (title = 'Zbritje.al', subtitle = "Albania's #1 Discount Marketplace") => `
-  <div style="background:linear-gradient(135deg,#0f172a 0%,#16a34a 100%);padding:40px;text-align:center;">
+  <div style="background:#0f172a;padding:40px;text-align:center;">
     <h1 style="color:white;margin:0 0 6px;font-size:34px;font-weight:900;letter-spacing:1px;">${title}</h1>
-    <p style="color:rgba(255,255,255,0.8);font-size:14px;margin:0;">${subtitle}</p>
+    <p style="color:rgba(255,255,255,0.6);font-size:14px;margin:0;">${subtitle}</p>
   </div>
 `;
 
 const templates = {
-  welcome: (user) => ({
+  welcome: (user, verifyToken) => ({
     subject: `Mirë se vini ne Zbritje.al, ${user.firstName}! Llogaria juaj eshte gati`,
     html: `
       <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
@@ -68,11 +68,10 @@ const templates = {
             Llogaria juaj eshte krijuar me sukses dhe tani keni qasje te plote ne te gjitha funksionalitetet tona.
           </p>
           <p style="color:#374151;line-height:1.7;font-size:15px;margin:0 0 24px;">
-            Per te aktivizuar llogarine tuaj dhe per te perfituar <strong style="color:#16a34a;">200 ALL bonus</strong> ne portofolin tuaj, ju lutemi verifikoni adresën tuaj te email-it duke klikuar butonin me poshte:
           </p>
           <div style="text-align:center;margin:32px 0;">
-            <a href="${process.env.FRONTEND_URL}/verify-email/${user._verifyToken}"
-               style="background:#16a34a;color:white;padding:16px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;display:inline-block;letter-spacing:0.5px;">
+            <a href="${process.env.FRONTEND_URL}/verify-email/${verifyToken}"
+               style="background:#0f172a;color:white;padding:16px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;display:inline-block;letter-spacing:0.5px;">
               Verifiko Email-in Tim
             </a>
           </div>
@@ -83,9 +82,8 @@ const templates = {
             <p style="color:#166534;font-weight:700;margin:0 0 10px;font-size:15px;">Cfare mund te beni tani:</p>
             <ul style="color:#374151;margin:0;padding-left:20px;line-height:2;font-size:14px;">
               <li>Shfletoni <strong>qindra oferta</strong> nga bizneset me te mira</li>
-              <li>Blini kupona me <strong>zbritje deri 70%</strong> dhe kurseni cdo dite</li>
+              <li>Blini kupona me <strong>zbritje deri 90%</strong> dhe kurseni cdo dite</li>
               <li>Shkarkoni QR Code-in dhe perdoreni direkt te biznesi</li>
-              <li>Fitoni <strong>pike besnikerie</strong> per cdo blerje</li>
               <li>Referoni miqte dhe fitoni <strong>shperblime shtese</strong></li>
             </ul>
           </div>
@@ -114,7 +112,7 @@ const templates = {
           </p>
           <div style="text-align:center;margin:32px 0;">
             <a href="${process.env.FRONTEND_URL}/verify-email/${token}"
-               style="background:#16a34a;color:white;padding:16px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;display:inline-block;">
+               style="background:#0f172a;color:white;padding:16px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;display:inline-block;">
               Verifiko Email-in
             </a>
           </div>
@@ -151,7 +149,7 @@ const templates = {
           </p>
           <div style="text-align:center;margin:32px 0;">
             <a href="${process.env.FRONTEND_URL}/reset-password/${token}"
-               style="background:#16a34a;color:white;padding:16px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;display:inline-block;">
+               style="background:#0f172a;color:white;padding:16px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;display:inline-block;">
               Rivendos Fjalekalimin
             </a>
           </div>
@@ -192,7 +190,7 @@ const templates = {
             <p style="color:#374151;font-weight:700;margin:0 0 14px;font-size:15px;">Detajet e Blerjes:</p>
             <table style="width:100%;border-collapse:collapse;font-size:14px;">
               <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #e5e7eb;">Oferta</td><td style="padding:8px 0;color:#111827;font-weight:600;text-align:right;border-bottom:1px solid #e5e7eb;">${deal.title}</td></tr>
-              <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #e5e7eb;">Cmimi i Paguar</td><td style="padding:8px 0;color:#16a34a;font-weight:700;text-align:right;border-bottom:1px solid #e5e7eb;">${voucher.paidPrice} ALL</td></tr>
+              <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #e5e7eb;">Cmimi i Paguar</td><td style="padding:8px 0;color:#16a34a;font-weight:700;text-align:right;border-bottom:1px solid #e5e7eb;">${Math.ceil((voucher.paidPrice || 0) / 100) * 100} L</td></tr>
               <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #e5e7eb;">Data e Blerjes</td><td style="padding:8px 0;color:#111827;font-weight:600;text-align:right;border-bottom:1px solid #e5e7eb;">${new Date().toLocaleDateString('sq-AL')}</td></tr>
               <tr><td style="padding:8px 0;color:#6b7280;">Skadon me</td><td style="padding:8px 0;color:#ef4444;font-weight:600;text-align:right;">${new Date(voucher.expiresAt).toLocaleDateString('sq-AL')}</td></tr>
             </table>
@@ -204,7 +202,7 @@ const templates = {
           </div>
           <div style="text-align:center;margin:0 0 24px;">
             <a href="${process.env.FRONTEND_URL}/dashboard/vouchers"
-               style="background:#16a34a;color:white;padding:16px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block;">
+               style="background:#0f172a;color:white;padding:16px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block;">
               Shiko Kuponin &amp; QR Code
             </a>
           </div>
@@ -241,7 +239,7 @@ const templates = {
           </div>
           <div style="text-align:center;margin:32px 0;">
             <a href="${process.env.FRONTEND_URL}/deals/${deal.slug}"
-               style="background:#16a34a;color:white;padding:16px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block;margin:0 8px 8px 0;">
+               style="background:#0f172a;color:white;padding:16px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block;margin:0 8px 8px 0;">
               Shiko Oferten Live
             </a>
             <a href="${process.env.FRONTEND_URL}/business-dashboard"
